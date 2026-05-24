@@ -6,18 +6,12 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/looplj/axonhub/internal/tracing"
+	"github.com/looplj/axonhub/internal/requestlog"
 )
 
-// WithLoggingTracing save the trace ID and request ID to the request context.
-// So the logger can log the trace ID and request ID in the next logs.
-func WithLoggingTracing(config tracing.Config) gin.HandlerFunc {
-	// Use the configured trace header name, or default to "AH-Trace-Id"
-	traceHeader := config.TraceHeader
-	if traceHeader == "" {
-		traceHeader = "AH-Trace-Id"
-	}
-
+// WithRequestLogging saves the request ID and operation name to the request context.
+// The logger can include those fields in subsequent logs.
+func WithRequestLogging(config requestlog.Config) gin.HandlerFunc {
 	// Use the configured request header name, or default to "AH-Request-Id"
 	requestHeader := config.RequestHeader
 	if requestHeader == "" {
@@ -25,24 +19,17 @@ func WithLoggingTracing(config tracing.Config) gin.HandlerFunc {
 	}
 
 	return func(c *gin.Context) {
-		// Use the trace header from the request first.
-		traceID := c.GetHeader(traceHeader)
-		if traceID == "" {
-			traceID = tracing.GenerateTraceID()
-		}
-
 		// Generate request ID for each request
-		requestID := tracing.GenerateRequestID()
+		requestID := requestlog.GenerateRequestID()
 
 		// Set request ID header in response
 		c.Header(requestHeader, requestID)
 
-		ctx := tracing.WithTraceID(c.Request.Context(), traceID)
-		ctx = tracing.WithRequestID(ctx, requestID)
+		ctx := requestlog.WithRequestID(c.Request.Context(), requestID)
 
 		if !strings.HasSuffix(c.FullPath(), "/graphql") {
 			operationName := fmt.Sprintf("%s %s", c.Request.Method, c.FullPath())
-			ctx = tracing.WithOperationName(ctx, operationName)
+			ctx = requestlog.WithOperationName(ctx, operationName)
 		}
 
 		c.Request = c.Request.WithContext(ctx)

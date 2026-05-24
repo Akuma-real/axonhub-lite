@@ -26,16 +26,6 @@ Multi-turn conversation tests using `previous_response_id`:
 - **TestResponsesConversationWithInstructions** - Conversation with system instructions
 - **TestResponsesConversationContextChain** - Long conversation chains
 
-### trace_multiple_requests/
-Multiple Responses API calls within a single trace:
-- **TestSingleTraceMultipleCalls** - Sequential calls with context chaining
-- **TestSingleTraceContextPreservation** - Long-term information recall
-
-### thread_multiple_traces/
-Multiple independent traces within a single thread:
-- **TestSingleThreadMultipleTraces** - Multiple traces, same thread ID
-- **TestSingleThreadTraceIsolation** - Cross-trace context isolation verification
-
 ### Root Directory
 Comprehensive parameter and feature tests:
 - **TestResponsesSimpleQA** - Basic QA
@@ -103,8 +93,6 @@ These tests rely on the same environment configuration as other OpenAI integrati
 - `TEST_AXONHUB_API_KEY` – AxonHub API key used by the OpenAI-compatible endpoints (required)
 - `TEST_OPENAI_BASE_URL` – Base URL for the OpenAI-compatible API (defaults to `http://localhost:8090/v1`)
 - `TEST_MODEL` – Default model ID used for testing (defaults to `deepseek-chat`)
-- `TEST_TRACE_ID` – Optional trace ID for request tracing
-- `TEST_THREAD_ID` – Optional thread ID for request grouping
 
 If required configuration is missing, the tests will be skipped rather than fail.
 

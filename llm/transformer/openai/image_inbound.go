@@ -485,7 +485,7 @@ func parseMultipartRequest(httpReq *httpclient.Request) (*imageFormData, error) 
 
 // buildMultipartJSONBody builds a JSON representation of a multipart/form-data request
 // suitable for logging. Binary image/mask data is encoded as base64 data URLs
-// so they can be displayed in the trace UI.
+// so they can be displayed in request records.
 func buildMultipartJSONBody(fields map[string]string, images []multipartFile, mask *multipartFile) ([]byte, error) {
 	body := make(map[string]any, len(fields)+2)
 

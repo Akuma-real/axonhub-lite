@@ -42,14 +42,6 @@ test-conversation: setup
 	@echo "Running conversation tests..."
 	go test --count=1 -v ./conversation
 
-test-trace: setup
-	@echo "Running trace tests..."
-	go test -v ./trace_multiple_requests
-
-test-thread: setup
-	@echo "Running thread tests..."
-	go test --count=1 -v ./tread_multiple_traces
-
 # Run tests with specific verbosity
 test-verbose: setup
 	@echo "Running tests with verbose output..."
@@ -103,8 +95,6 @@ help:
 	@echo "  test-tools      - Run tool calling tests only"
 	@echo "  test-streaming  - Run streaming tests only"
 	@echo "  test-conversation - Run conversation tests only"
-	@echo "  test-trace      - Run trace tests only"
-	@echo "  test-thread     - Run thread tests only"
 	@echo "  test-verbose    - Run tests with verbose output"
 	@echo "  clean           - Clean test artifacts"
 	@echo "  lint            - Run linter"

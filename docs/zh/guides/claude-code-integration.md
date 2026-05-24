@@ -7,7 +7,7 @@ AxonHub 可以作为 Anthropic 接口的直接替代方案，使 Claude Code 能
 
 ### 关键点
 - AxonHub 支持多种 AI 协议/格式转换。你可以配置多个上游渠道（provider/channel），对外提供统一的 Anthropic 兼容接口，供 Claude Code 使用。
-- 你可以开启 Claude Code trace 聚合，将 Claude Code 同一次会话中的请求自动归并到同一条 Trace（见"配置 Claude Code"）。
+- AxonHub 会在请求页面和用量日志中记录 Claude Code 请求。
 
 ### 前置要求
 - 可访问的 AxonHub 实例。
@@ -24,18 +24,7 @@ AxonHub 可以作为 Anthropic 接口的直接替代方案，使 Claude Code 能
    # export ANTHROPIC_BASE_URL="http://localhost:8090"
    ```
 2. 启动 Claude Code，程序会自动读取上述变量并将所有 Anthropic 请求代理到 AxonHub。
-3. （可选）触发一次对话并在 AxonHub 的 Traces 页面确认流量已成功记录。
-
-#### Trace 聚合（重要）
-若希望将 Claude Code 同一次会话的请求聚合到同一条 Trace，可在 `config.yml` 中开启：
-
-```yaml
-server:
-  trace:
-    claude_code_trace_enabled: true
-```
-
-**提示**：开启此功能后，AxonHub 会将同一个 Trace 的请求优先转发到同一个上游渠道，从而大幅提高提供商端的缓存命中率（例如 Anthropic 的 Prompt Caching）。
+3. （可选）触发一次对话并在 AxonHub 的请求页面确认流量已成功记录。
 
 #### 提示
 - 请务必保密 API Key，可写入 shell profile 或使用密钥管理工具。
@@ -137,7 +126,6 @@ AxonHub 还可以将您的 Claude Code 订阅作为后端提供商，允许非 C
 ---
 
 ### 相关文档
-- [追踪指南](tracing.md)
 - [OpenAI API 文档](../api-reference/openai-api.md)
 - [Codex 集成指南](codex-integration.md)
 - [渠道管理指南](channel-management.md)

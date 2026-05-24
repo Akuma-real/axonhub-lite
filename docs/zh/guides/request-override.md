@@ -18,7 +18,7 @@ AxonHub 使用 Go 模板 (Go templates) 进行动态值渲染。你可以在模�
 | `.Model` | 当前请求中的模型名称（可能经过了模型映射）。 | `{{.Model}}` |
 | `.ReasoningEffort` | `reasoning_effort` 的值 (none, low, medium, high)。 | `{{.ReasoningEffort}}` |
 | `.Metadata` | 请求中传递的自定义元数据 Map。 | `{{index .Metadata "user_id"}}` |
-| `.RequestHeader` | 过滤后的客户端入站请求头。支持规范写法/小写查找，并返回第一个值。 | `{{index .RequestHeader "X-Trace-Id"}}` |
+| `.RequestHeader` | 过滤后的客户端入站请求头。支持规范写法/小写查找，并返回第一个值。 | `{{index .RequestHeader "X-Client-Request-Id"}}` |
 
 ## 重写操作类型
 
@@ -95,8 +95,8 @@ AxonHub 支持以下重写操作：
   },
   {
     "op": "set",
-    "path": "trace_id",
-    "value": "{{index .RequestHeader \"x-trace-id\"}}"
+    "path": "client_request_id",
+    "value": "{{index .RequestHeader \"x-client-request-id\"}}"
   }
 ]
 ```
@@ -266,8 +266,8 @@ AxonHub 支持以下重写操作：
   },
   {
     "op": "set",
-    "path": "X-Trace-Id",
-    "value": "{{index .RequestHeader \"x-trace-id\"}}"
+    "path": "X-Client-Request-Id",
+    "value": "{{index .RequestHeader \"x-client-request-id\"}}"
   },
   {
     "op": "delete",
@@ -321,7 +321,7 @@ AxonHub 支持以下重写操作：
 
 ### 3. 在请求头中注入元数据
 
-将内部追踪 ID 传递给提供商以便调试：
+向提供商传递自定义调试元数据：
 
 ```json
 [

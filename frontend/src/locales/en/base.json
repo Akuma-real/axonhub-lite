@@ -11,8 +11,6 @@
   "sidebar.items.users": "Users",
   "sidebar.items.roles": "Roles",
   "sidebar.items.requests": "Requests",
-  "sidebar.items.traces": "Traces",
-  "sidebar.items.threads": "Threads",
   "sidebar.items.usageLogs": "Usage Logs",
   "sidebar.items.apiKeys": "API Keys",
   "sidebar.items.playground": "Playground",

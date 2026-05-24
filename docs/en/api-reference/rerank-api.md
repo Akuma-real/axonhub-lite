@@ -197,8 +197,6 @@ func main() {
     )
     httpReq.Header.Set("Authorization", "Bearer your-axonhub-api-key")
     httpReq.Header.Set("Content-Type", "application/json")
-    httpReq.Header.Set("AH-Trace-Id", "trace-example-123")
-    httpReq.Header.Set("AH-Thread-Id", "thread-example-abc")
 
     client := &http.Client{}
     resp, err := client.Do(httpReq)
@@ -221,7 +219,6 @@ func main() {
 
 ## Best Practices
 
-1. **Use Tracing Headers**: Include `AH-Trace-Id` and `AH-Thread-Id` headers for better observability
-2. **Limit Results**: Use `top_n` to limit results and improve performance
-3. **Return Documents**: Set `return_documents: true` only when you need the document text in the response
-4. **Model Selection**: Choose the appropriate reranker model for your use case and language
+1. **Limit Results**: Use `top_n` to limit results and improve performance
+2. **Return Documents**: Set `return_documents: true` only when you need the document text in the response
+3. **Model Selection**: Choose the appropriate reranker model for your use case and language

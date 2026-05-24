@@ -34,7 +34,7 @@ graph TB
         end
 
         subgraph "可观测性"
-            M[追踪]
+            M[请求记录]
             N[指标]
             O[日志记录]
         end
@@ -174,11 +174,11 @@ graph TB
 
 ### 可观测性
 
-#### 追踪
-- **目的**：跟踪请求在系统中的流动
+#### 请求记录
+- **目的**：记录请求在系统中的处理结果
 - **特性**：
-  - 使用 OpenTelemetry 的分布式追踪
-  - 请求关联
+  - 请求记录
+  - 请求 ID 关联
   - 性能监控
   - 错误跟踪
 
@@ -195,7 +195,7 @@ graph TB
 - **特性**：
   - 结构化日志记录
   - 日志聚合
-  - 审计追踪
+  - 审计日志
   - 调试信息
 
 ## 数据流
@@ -347,4 +347,3 @@ graph TB
 - [Anthropic API](../api-reference/anthropic-api.md)
 - [Gemini API](../api-reference/gemini-api.md)
 - [部署指南](../deployment/configuration.md)
-- [追踪指南](../guides/tracing.md)

@@ -68,7 +68,7 @@ func (m *performanceRecording) OnOutboundRawRequest(ctx context.Context, request
 	perf.RequestCompleted = false
 	perf.Stream = streamFlag
 
-	// Get the API key used for this request from context (set by TraceStickyKeyProvider)
+	// Get the API key used for this request from context when the provider exposes it.
 	if apiKey, ok := contexts.GetChannelAPIKey(ctx); ok {
 		perf.APIKey = apiKey
 	}

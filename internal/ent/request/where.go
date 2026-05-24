@@ -70,11 +70,6 @@ func APIKeyID(v int) predicate.Request {
 	return predicate.Request(sql.FieldEQ(FieldAPIKeyID, v))
 }
 
-// TraceID applies equality check predicate on the "trace_id" field. It's identical to TraceIDEQ.
-func TraceID(v int) predicate.Request {
-	return predicate.Request(sql.FieldEQ(FieldTraceID, v))
-}
-
 // ModelID applies equality check predicate on the "model_id" field. It's identical to ModelIDEQ.
 func ModelID(v string) predicate.Request {
 	return predicate.Request(sql.FieldEQ(FieldModelID, v))
@@ -233,36 +228,6 @@ func APIKeyIDIsNil() predicate.Request {
 // APIKeyIDNotNil applies the NotNil predicate on the "api_key_id" field.
 func APIKeyIDNotNil() predicate.Request {
 	return predicate.Request(sql.FieldNotNull(FieldAPIKeyID))
-}
-
-// TraceIDEQ applies the EQ predicate on the "trace_id" field.
-func TraceIDEQ(v int) predicate.Request {
-	return predicate.Request(sql.FieldEQ(FieldTraceID, v))
-}
-
-// TraceIDNEQ applies the NEQ predicate on the "trace_id" field.
-func TraceIDNEQ(v int) predicate.Request {
-	return predicate.Request(sql.FieldNEQ(FieldTraceID, v))
-}
-
-// TraceIDIn applies the In predicate on the "trace_id" field.
-func TraceIDIn(vs ...int) predicate.Request {
-	return predicate.Request(sql.FieldIn(FieldTraceID, vs...))
-}
-
-// TraceIDNotIn applies the NotIn predicate on the "trace_id" field.
-func TraceIDNotIn(vs ...int) predicate.Request {
-	return predicate.Request(sql.FieldNotIn(FieldTraceID, vs...))
-}
-
-// TraceIDIsNil applies the IsNil predicate on the "trace_id" field.
-func TraceIDIsNil() predicate.Request {
-	return predicate.Request(sql.FieldIsNull(FieldTraceID))
-}
-
-// TraceIDNotNil applies the NotNil predicate on the "trace_id" field.
-func TraceIDNotNil() predicate.Request {
-	return predicate.Request(sql.FieldNotNull(FieldTraceID))
 }
 
 // SourceEQ applies the EQ predicate on the "source" field.
@@ -885,29 +850,6 @@ func HasAPIKey() predicate.Request {
 func HasAPIKeyWith(preds ...predicate.APIKey) predicate.Request {
 	return predicate.Request(func(s *sql.Selector) {
 		step := newAPIKeyStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
-// HasTrace applies the HasEdge predicate on the "trace" edge.
-func HasTrace() predicate.Request {
-	return predicate.Request(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, TraceTable, TraceColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasTraceWith applies the HasEdge predicate on the "trace" edge with a given conditions (other predicates).
-func HasTraceWith(preds ...predicate.Trace) predicate.Request {
-	return predicate.Request(func(s *sql.Selector) {
-		step := newTraceStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

@@ -27,8 +27,6 @@ import (
 	"github.com/looplj/axonhub/internal/ent/request"
 	"github.com/looplj/axonhub/internal/ent/requestexecution"
 	"github.com/looplj/axonhub/internal/ent/system"
-	"github.com/looplj/axonhub/internal/ent/thread"
-	"github.com/looplj/axonhub/internal/ent/trace"
 	"github.com/looplj/axonhub/internal/ent/usagelog"
 	"github.com/looplj/axonhub/internal/ent/user"
 	"github.com/looplj/axonhub/internal/pkg/xerrors"
@@ -49,8 +47,6 @@ type Dependencies struct {
 	SystemService                  *biz.SystemService
 	ChannelService                 *biz.ChannelService
 	RequestService                 *biz.RequestService
-	TraceService                   *biz.TraceService
-	ThreadService                  *biz.ThreadService
 	UsageLogService                *biz.UsageLogService
 	ChannelOverrideTemplateService *biz.ChannelOverrideTemplateService
 	ModelService                   *biz.ModelService
@@ -79,8 +75,6 @@ func NewGraphqlHandlers(deps Dependencies) *GraphqlHandler {
 			deps.SystemService,
 			deps.ChannelService,
 			deps.RequestService,
-			deps.TraceService,
-			deps.ThreadService,
 			deps.UsageLogService,
 			deps.ChannelOverrideTemplateService,
 			deps.ModelService,
@@ -161,8 +155,6 @@ var guidTypeToNodeType = map[string]string{
 	ent.TypeRequestExecution:        requestexecution.Table,
 	ent.TypeSystem:                  system.Table,
 	ent.TypeUsageLog:                usagelog.Table,
-	ent.TypeThread:                  thread.Table,
-	ent.TypeTrace:                   trace.Table,
 }
 
 func getNilableChannel(ctx context.Context, client *ent.Client, channelID int) (*ent.Channel, error) {

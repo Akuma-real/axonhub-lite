@@ -91,7 +91,7 @@ func TestOverrideParametersWithRequestHeaderTemplate(t *testing.T) {
 		Model: "gpt-4",
 		RawRequest: &httpclient.Request{
 			Headers: http.Header{
-				"X-Trace-Id":       []string{"trace-123"},
+				"X-Debug-Id":       []string{"debug-123"},
 				"X-Multi-Value":    []string{"first", "second"},
 				"Authorization":    []string{"Bearer secret"},
 				"Api-Key":          []string{"secret-api-key"},
@@ -106,8 +106,8 @@ func TestOverrideParametersWithRequestHeaderTemplate(t *testing.T) {
 			Name: "request-header-template-test",
 			Settings: &objects.ChannelSettings{
 				OverrideParameters: `{
-					"trace_id_lower": "{{index .RequestHeader \"x-trace-id\"}}",
-					"trace_id_canonical": "{{index .RequestHeader \"X-Trace-Id\"}}",
+					"debug_id_lower": "{{index .RequestHeader \"x-debug-id\"}}",
+					"debug_id_canonical": "{{index .RequestHeader \"X-Debug-Id\"}}",
 					"multi_value": "{{index .RequestHeader \"x-multi-value\"}}",
 					"authorization": "{{index .RequestHeader \"authorization\"}}",
 					"api_key": "{{index .RequestHeader \"api-key\"}}",
@@ -133,8 +133,8 @@ func TestOverrideParametersWithRequestHeaderTemplate(t *testing.T) {
 	require.NoError(t, err)
 
 	bodyStr := string(processedRequest.Body)
-	require.Equal(t, "trace-123", gjson.Get(bodyStr, "trace_id_lower").String())
-	require.Equal(t, "trace-123", gjson.Get(bodyStr, "trace_id_canonical").String())
+	require.Equal(t, "debug-123", gjson.Get(bodyStr, "debug_id_lower").String())
+	require.Equal(t, "debug-123", gjson.Get(bodyStr, "debug_id_canonical").String())
 	require.Equal(t, "first", gjson.Get(bodyStr, "multi_value").String())
 	require.Empty(t, gjson.Get(bodyStr, "authorization").String())
 	require.Empty(t, gjson.Get(bodyStr, "api_key").String())
@@ -151,7 +151,7 @@ func TestOverrideParametersWithRequestHeaderTemplate_LowercaseSensitiveHeaders(t
 				"authorization":  []string{"Bearer secret"},
 				"api-key":        []string{"secret-api-key"},
 				"x-goog-api-key": []string{"goog-secret"},
-				"x-trace-id":     []string{"trace-lowercase"},
+				"x-debug-id":     []string{"debug-lowercase"},
 			},
 		},
 	}
@@ -162,7 +162,7 @@ func TestOverrideParametersWithRequestHeaderTemplate_LowercaseSensitiveHeaders(t
 			Name: "request-header-lowercase-sensitive-test",
 			Settings: &objects.ChannelSettings{
 				OverrideParameters: `{
-					"trace_id": "{{index .RequestHeader \"x-trace-id\"}}",
+					"debug_id": "{{index .RequestHeader \"x-debug-id\"}}",
 					"authorization": "{{index .RequestHeader \"authorization\"}}",
 					"api_key": "{{index .RequestHeader \"api-key\"}}",
 					"x_goog_api_key": "{{index .RequestHeader \"x-goog-api-key\"}}"
@@ -187,7 +187,7 @@ func TestOverrideParametersWithRequestHeaderTemplate_LowercaseSensitiveHeaders(t
 	require.NoError(t, err)
 
 	bodyStr := string(processedRequest.Body)
-	require.Equal(t, "trace-lowercase", gjson.Get(bodyStr, "trace_id").String())
+	require.Equal(t, "debug-lowercase", gjson.Get(bodyStr, "debug_id").String())
 	require.Empty(t, gjson.Get(bodyStr, "authorization").String())
 	require.Empty(t, gjson.Get(bodyStr, "api_key").String())
 	require.Empty(t, gjson.Get(bodyStr, "x_goog_api_key").String())
@@ -362,7 +362,7 @@ func TestOverrideHeadersKeepJSONLikeString(t *testing.T) {
 
 	llmRequest := &llm.Request{Model: "gpt-4"}
 
-	expectedValue := `{"session_id":"843634473","camelCase":"AbC","xTraceId":"XyZ-001"}`
+	expectedValue := `{"session_id":"843634473","camelCase":"AbC","xDebugId":"XyZ-001"}`
 
 	channel := &biz.Channel{
 		Channel: &ent.Channel{
@@ -404,7 +404,7 @@ func TestOverrideParametersWithRequestHeaderTemplate_NoRawRequest(t *testing.T) 
 			Name: "body-request-header-no-raw-request-test",
 			Settings: &objects.ChannelSettings{
 				BodyOverrideOperations: []objects.OverrideOperation{
-					{Op: objects.OverrideOpSet, Path: "missing_header", Value: `{{index .RequestHeader "x-trace-id"}}`},
+					{Op: objects.OverrideOpSet, Path: "missing_header", Value: `{{index .RequestHeader "x-debug-id"}}`},
 					{Op: objects.OverrideOpSet, Path: "model_value", Value: `{{.Model}}`},
 				},
 			},
@@ -438,7 +438,7 @@ func TestOverrideHeadersWithRequestHeaderTemplate(t *testing.T) {
 		Model: "gpt-4.1",
 		RawRequest: &httpclient.Request{
 			Headers: http.Header{
-				"X-Trace-Id": []string{"trace-123"},
+				"X-Debug-Id": []string{"debug-123"},
 				"X-Api-Key":  []string{"secret-key"},
 			},
 		},
@@ -450,7 +450,7 @@ func TestOverrideHeadersWithRequestHeaderTemplate(t *testing.T) {
 			Name: "header-request-header-template-test",
 			Settings: &objects.ChannelSettings{
 				HeaderOverrideOperations: []objects.OverrideOperation{
-					{Op: objects.OverrideOpSet, Path: "X-Upstream-Trace", Value: `{{index .RequestHeader "X-Trace-Id"}}`},
+					{Op: objects.OverrideOpSet, Path: "X-Upstream-Debug", Value: `{{index .RequestHeader "X-Debug-Id"}}`},
 					{Op: objects.OverrideOpSet, Path: "X-Filtered-Api-Key", Value: `{{index .RequestHeader "x-api-key"}}`},
 				},
 			},
@@ -471,7 +471,7 @@ func TestOverrideHeadersWithRequestHeaderTemplate(t *testing.T) {
 
 	processedRequest, err := headerMiddleware.OnOutboundRawRequest(ctx, rawRequest)
 	require.NoError(t, err)
-	require.Equal(t, "trace-123", processedRequest.Headers.Get("X-Upstream-Trace"))
+	require.Equal(t, "debug-123", processedRequest.Headers.Get("X-Upstream-Debug"))
 	require.Equal(t, "", processedRequest.Headers.Get("X-Filtered-Api-Key"))
 }
 

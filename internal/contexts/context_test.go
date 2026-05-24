@@ -135,53 +135,6 @@ func TestGetUser(t *testing.T) {
 	}
 }
 
-func TestWithTraceID(t *testing.T) {
-	ctx := t.Context()
-	traceID := "trace-12345-abcdef"
-
-	// Test storing trace ID
-	newCtx := WithTraceID(ctx, traceID)
-	if newCtx == ctx {
-		t.Error("WithTraceID should return a new context")
-	}
-
-	// Test retrieving trace ID
-	retrievedTraceID, ok := GetTraceID(newCtx)
-	if !ok {
-		t.Error("GetTraceID should return true for existing trace ID")
-	}
-
-	if retrievedTraceID != traceID {
-		t.Errorf("expected trace ID %s, got %s", traceID, retrievedTraceID)
-	}
-}
-
-func TestGetTraceID(t *testing.T) {
-	ctx := t.Context()
-
-	// Test retrieving trace ID from empty context
-	traceID, ok := GetTraceID(ctx)
-	if ok {
-		t.Error("GetTraceID should return false for empty context")
-	}
-
-	if traceID != "" {
-		t.Error("GetTraceID should return empty string for empty context")
-	}
-
-	// Test retrieving trace ID from context with other values
-	ctxWithOtherValue := context.WithValue(ctx, "other_key", "other_value")
-
-	traceID, ok = GetTraceID(ctxWithOtherValue)
-	if ok {
-		t.Error("GetTraceID should return false for context without trace ID")
-	}
-
-	if traceID != "" {
-		t.Error("GetTraceID should return empty string for context without trace ID")
-	}
-}
-
 func TestWithRequestID(t *testing.T) {
 	ctx := t.Context()
 	requestID := "req-12345-abcdef"
@@ -353,7 +306,6 @@ func TestContextContainerMultipleValues(t *testing.T) {
 	// Test storing multiple different values
 	ctx = WithAPIKey(ctx, &ent.APIKey{ID: 1, Key: "test-key"})
 	ctx = WithUser(ctx, &ent.User{ID: 123, Email: "test@example.com"})
-	ctx = WithTraceID(ctx, "trace-123")
 	ctx = WithRequestID(ctx, "req-456")
 	ctx = WithOperationName(ctx, "test.operation")
 	ctx = WithSource(ctx, request.SourcePlayground)
@@ -367,11 +319,6 @@ func TestContextContainerMultipleValues(t *testing.T) {
 	user, ok := GetUser(ctx)
 	if !ok || user.ID != 123 {
 		t.Error("User should be stored and retrievable")
-	}
-
-	traceID, ok := GetTraceID(ctx)
-	if !ok || traceID != "trace-123" {
-		t.Error("Trace ID should be stored and retrievable")
 	}
 
 	requestID, ok := GetRequestID(ctx)
@@ -406,13 +353,13 @@ func TestContextContainerOverwrite(t *testing.T) {
 		t.Error("API key should be the overwritten value")
 	}
 
-	// Test overwriting trace ID
-	ctx = WithTraceID(ctx, "trace-1")
-	ctx = WithTraceID(ctx, "trace-2")
+	// Test overwriting request ID
+	ctx = WithRequestID(ctx, "req-1")
+	ctx = WithRequestID(ctx, "req-2")
 
-	traceID, ok := GetTraceID(ctx)
-	if !ok || traceID != "trace-2" {
-		t.Error("Trace ID should be the overwritten value")
+	requestID, ok := GetRequestID(ctx)
+	if !ok || requestID != "req-2" {
+		t.Error("Request ID should be the overwritten value")
 	}
 }
 
@@ -421,11 +368,11 @@ func TestContextContainerIsolation(t *testing.T) {
 
 	// Create a context with values
 	ctx1 := WithAPIKey(ctx, &ent.APIKey{ID: 1, Key: "key-1"})
-	ctx1 = WithTraceID(ctx1, "trace-1")
+	ctx1 = WithRequestID(ctx1, "req-1")
 
 	// Create another context with different values
 	ctx2 := WithAPIKey(ctx, &ent.APIKey{ID: 2, Key: "key-2"})
-	ctx2 = WithTraceID(ctx2, "trace-2")
+	ctx2 = WithRequestID(ctx2, "req-2")
 
 	// Test that the two contexts are isolated from each other
 	apiKey1, ok1 := GetAPIKey(ctx1)
@@ -439,15 +386,15 @@ func TestContextContainerIsolation(t *testing.T) {
 		t.Error("API keys should be different")
 	}
 
-	traceID1, ok1 := GetTraceID(ctx1)
-	traceID2, ok2 := GetTraceID(ctx2)
+	requestID1, ok1 := GetRequestID(ctx1)
+	requestID2, ok2 := GetRequestID(ctx2)
 
 	if !ok1 || !ok2 {
-		t.Error("Both contexts should have trace IDs")
+		t.Error("Both contexts should have request IDs")
 	}
 
-	if traceID1 == traceID2 {
-		t.Error("Trace IDs should be different")
+	if requestID1 == requestID2 {
+		t.Error("Request IDs should be different")
 	}
 }
 

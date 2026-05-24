@@ -222,7 +222,7 @@ When one quota pool is exhausted, AxonHub can automatically fail over to the oth
 
 ### Monitoring
 
-Track these metrics in AxonHub traces:
+Track these metrics in AxonHub request records and usage logs:
 
 - **Endpoint failures**: Frequency of 429/5xx errors per endpoint
 - **Cooldown events**: How often endpoints enter cooldown
@@ -323,7 +323,6 @@ No background cleanup is performed; entries are removed when accessed after TTL 
 - [Claude Code Integration Guide](claude-code-integration.md)
 - [Channel Management Guide](channel-management.md)
 - [Model Profiles](../../../README.md#model-profiles)
-- [Tracing Guide](tracing.md)
 - [OpenAI API](../api-reference/openai-api.md)
 - [Anthropic API](../api-reference/anthropic-api.md)
 - [Gemini API](../api-reference/gemini-api.md)
@@ -348,4 +347,4 @@ A: The request will fail with 404 Not Found, triggering endpoint fallback. If al
 A: Not currently, but you can configure only one endpoint per channel to effectively disable fallback for that channel.
 
 **Q: How do I know which endpoint served my request?**  
-A: Check the AxonHub trace logs. Successful fallback attempts log: "antigravity request succeeded with fallback endpoint".
+A: Check the AxonHub request logs. Successful fallback attempts log: "antigravity request succeeded with fallback endpoint".

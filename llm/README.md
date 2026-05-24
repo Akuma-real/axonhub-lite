@@ -297,7 +297,7 @@ type Middleware interface {
 - 健康检查和负载均衡
 
 ### 3. 可观测性
-- 完整的请求链路追踪
+- 请求记录和用量日志
 - 详细的执行日志
 - 实时使用统计
 
@@ -514,7 +514,7 @@ func (t *OutboundTransformer) TransformResponse(ctx context.Context, response *h
 
 ### 业务逻辑
 - `internal/server/biz/channel_llm.go` - 渠道管理和 Transformer 创建
-- `internal/server/biz/trace.go` - 追踪和 Transformer 管理
+- `internal/server/biz/request.go` - 请求记录和状态管理
 - `internal/ent/channel/` - 渠道数据模型和类型定义
 
 ### 工具

@@ -40,10 +40,16 @@ input OverrideOperationInput {
   splat: Boolean
 }
 
+enum CodexCompactMode {
+  emulated
+  native
+}
+
 type TransformOptions {
   forceArrayInstructions: Boolean!
   forceArrayInputs: Boolean!
   replaceDeveloperRoleWithSystem: Boolean!
+  codexCompactMode: CodexCompactMode
 }
 
 type SyncChannelModelsPayload {
@@ -55,6 +61,7 @@ input TransformOptionsInput {
   forceArrayInstructions: Boolean
   forceArrayInputs: Boolean
   replaceDeveloperRoleWithSystem: Boolean
+  codexCompactMode: CodexCompactMode
 }
 
 enum ProxyType {
@@ -452,28 +459,6 @@ type ChannelTypeCount {
   count: Int!
 }
 
-type UsageMetadata {
-  totalInputTokens: Int!
-  totalOutputTokens: Int!
-  totalTokens: Int!
-  totalCachedTokens: Int!
-  totalCachedWriteTokens: Int!
-  totalCost: Decimal!
-}
-
-extend type Trace {
-  rootSegment: Segment
-  rawRootSegment: JSONRawMessage
-  firstUserQuery: String @goField(forceResolver: true)
-  firstText: String @goField(forceResolver: true)
-  usageMetadata: UsageMetadata @goField(forceResolver: true)
-}
-
-extend type Thread {
-  firstUserQuery: String @goField(forceResolver: true)
-  usageMetadata: UsageMetadata @goField(forceResolver: true)
-}
-
 extend type Channel {
   """
   Built-in endpoints resolved dynamically from the channel type.
@@ -524,82 +509,6 @@ type ChannelLimiterStats {
   Configured QueueSize (0 means soft mode — no waiting queue, only counts).
   """
   queueSize: Int!
-}
-
-type Segment {
-  id: ID!
-  parentId: ID
-  model: String!
-  children: [Segment!]
-  requestSpans: [Span!]
-  responseSpans: [Span!]
-  metadata: RequestMetadata
-  startTime: Time!
-  endTime: Time!
-  duration: Int!
-}
-
-type RequestMetadata {
-  itemCount: Int
-  inputTokens: Int
-  outputTokens: Int
-  totalTokens: Int
-  cachedTokens: Int
-}
-
-type Span {
-  id: String!
-  type: String!
-  startTime: Time!
-  endTime: Time!
-  value: SpanValue
-}
-
-type SpanValue {
-  userQuery: SpanUserQuery
-  userImageUrl: SpanUserImageURL
-  text: SpanText
-  thinking: SpanThinking
-  imageUrl: SpanImageURL
-  toolUse: SpanToolUse
-  toolResult: SpanToolResult
-  systemInstruction: SpanSystemInstruction
-}
-
-type SpanUserQuery {
-  text: String
-}
-
-type SpanUserImageURL {
-  url: String
-}
-
-type SpanThinking {
-  thinking: String
-}
-
-type SpanText {
-  text: String
-}
-
-type SpanImageURL {
-  url: String
-}
-
-type SpanToolUse {
-  id: String
-  name: String!
-  arguments: String
-}
-
-type SpanToolResult {
-  toolCallID: String
-  isError: Boolean
-  text: String
-}
-
-type SpanSystemInstruction {
-  instruction: String
 }
 
 # Channel Override Template Types

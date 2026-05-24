@@ -77,8 +77,6 @@ check-env:
 		echo "✓ TEST_AXONHUB_API_KEY is set"; \
 	fi
 	@echo "TEST_GEMINI_BASE_URL: $${TEST_GEMINI_BASE_URL:-http://localhost:8090/gemini}"
-	@echo "TEST_TRACE_ID: $${TEST_TRACE_ID:-test-trace-123}"
-	@echo "TEST_THREAD_ID: $${TEST_THREAD_ID:-test-thread-456}"
 	@echo "TEST_MODEL: $${TEST_MODEL:-gemini-1.5-flash}"
 
 # Quick validation (fast tests only)
@@ -118,8 +116,6 @@ env-reminder:
 	@echo "Make sure you have set the following environment variables:"
 	@echo "  export TEST_AXONHUB_API_KEY='your-axonhub-api-key'"
 	@echo "  export TEST_GEMINI_BASE_URL='http://localhost:8090/gemini'  # Optional"
-	@echo "  export TEST_TRACE_ID='test-trace-123'                       # Optional"
-	@echo "  export TEST_THREAD_ID='test-thread-456'                     # Optional"
 	@echo "  export TEST_MODEL='gemini-1.5-flash'                        # Optional"
 	@echo ""
 	@echo "You can also create a .env file in the test directory."

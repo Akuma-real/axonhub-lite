@@ -24,8 +24,6 @@ const (
 	FieldUpdatedAt = "updated_at"
 	// FieldAPIKeyID holds the string denoting the api_key_id field in the database.
 	FieldAPIKeyID = "api_key_id"
-	// FieldTraceID holds the string denoting the trace_id field in the database.
-	FieldTraceID = "trace_id"
 	// FieldSource holds the string denoting the source field in the database.
 	FieldSource = "source"
 	// FieldModelID holds the string denoting the model_id field in the database.
@@ -60,8 +58,6 @@ const (
 	FieldMetricsReasoningDurationMs = "metrics_reasoning_duration_ms"
 	// EdgeAPIKey holds the string denoting the api_key edge name in mutations.
 	EdgeAPIKey = "api_key"
-	// EdgeTrace holds the string denoting the trace edge name in mutations.
-	EdgeTrace = "trace"
 	// EdgeExecutions holds the string denoting the executions edge name in mutations.
 	EdgeExecutions = "executions"
 	// EdgeChannel holds the string denoting the channel edge name in mutations.
@@ -77,13 +73,6 @@ const (
 	APIKeyInverseTable = "api_keys"
 	// APIKeyColumn is the table column denoting the api_key relation/edge.
 	APIKeyColumn = "api_key_id"
-	// TraceTable is the table that holds the trace relation/edge.
-	TraceTable = "requests"
-	// TraceInverseTable is the table name for the Trace entity.
-	// It exists in this package in order to avoid circular dependency with the "trace" package.
-	TraceInverseTable = "traces"
-	// TraceColumn is the table column denoting the trace relation/edge.
-	TraceColumn = "trace_id"
 	// ExecutionsTable is the table that holds the executions relation/edge.
 	ExecutionsTable = "request_executions"
 	// ExecutionsInverseTable is the table name for the RequestExecution entity.
@@ -113,7 +102,6 @@ var Columns = []string{
 	FieldCreatedAt,
 	FieldUpdatedAt,
 	FieldAPIKeyID,
-	FieldTraceID,
 	FieldSource,
 	FieldModelID,
 	FieldReasoningEffort,
@@ -242,11 +230,6 @@ func ByAPIKeyID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldAPIKeyID, opts...).ToFunc()
 }
 
-// ByTraceID orders the results by the trace_id field.
-func ByTraceID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldTraceID, opts...).ToFunc()
-}
-
 // BySource orders the results by the source field.
 func BySource(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldSource, opts...).ToFunc()
@@ -314,13 +297,6 @@ func ByAPIKeyField(field string, opts ...sql.OrderTermOption) OrderOption {
 	}
 }
 
-// ByTraceField orders the results by trace field.
-func ByTraceField(field string, opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newTraceStep(), sql.OrderByField(field, opts...))
-	}
-}
-
 // ByExecutionsCount orders the results by executions count.
 func ByExecutionsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -360,13 +336,6 @@ func newAPIKeyStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(APIKeyInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, true, APIKeyTable, APIKeyColumn),
-	)
-}
-func newTraceStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(TraceInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, TraceTable, TraceColumn),
 	)
 }
 func newExecutionsStep() *sqlgraph.Step {

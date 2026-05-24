@@ -7,7 +7,7 @@ AxonHub can act as a drop-in replacement for OpenAI endpoints, letting Codex con
 
 ### Key Points
 - AxonHub performs AI protocol/format transformation. You can configure multiple upstream channels (providers) and expose a single OpenAI-compatible interface for Codex.
-- You can aggregate Codex requests from the same conversation by enabling `server.trace.codex_trace_enabled` (uses `Session_id`) or adding extra headers via `server.trace.extra_trace_headers`.
+- AxonHub records Codex requests in the Requests page and usage logs.
 
 ### Prerequisites
 - AxonHub instance reachable from your development machine.
@@ -34,29 +34,9 @@ AxonHub can act as a drop-in replacement for OpenAI endpoints, letting Codex con
    ```
 3. Restart Codex to apply the configuration.
 
-#### Trace aggregation by conversation (important)
-Enable the built-in Codex trace extraction to reuse the `Session_id` header as the trace ID:
-
-```yaml
-server:
-  trace:
-    codex_trace_enabled: true
-```
-
-If Codex sends a different stable conversation identifier header (for example `Conversation_id`), you can configure AxonHub to use it as a fallback trace header in `config.yml`:
-
-```yaml
-server:
-  trace:
-    extra_trace_headers:
-      - Conversation_id
-```
-
-**Note**: Enabling this also ensures that requests from the same trace are prioritized to be sent to the same upstream channel, significantly improving provider-side cache hit rates (e.g., Anthropic Prompt Caching).
-
 #### Testing
 - Send a sample prompt; AxonHub's request logs should show a `/v1/chat/completions` call.
-- Enable tracing in AxonHub to inspect prompts, responses, and latency.
+- Open the AxonHub Requests page to inspect prompts, responses, and latency.
 
 ### Working with Model Profiles
 AxonHub model profiles remap incoming model names to provider-specific equivalents:
@@ -139,6 +119,5 @@ You can manually trigger a quota refresh by clicking the refresh icon in the quo
    - Secondary window usage (if configured)
 
 ### Related Documentation
-- [Tracing Guide](tracing.md)
 - [OpenAI API](../api-reference/openai-api.md)
 - README sections on [Usage Guide](../../../README.md#usage-guide)

@@ -19,8 +19,6 @@ import { Route as errors401RouteImport } from './routes/(errors)/401'
 import { Route as authSignInRouteImport } from './routes/(auth)/sign-in'
 import { Route as authInitializationRouteImport } from './routes/(auth)/initialization'
 import { Route as AuthenticatedSettingsRouteRouteImport } from './routes/_authenticated/settings/route'
-import { Route as AuthenticatedTracesIndexRouteImport } from './routes/_authenticated/traces/index'
-import { Route as AuthenticatedThreadsIndexRouteImport } from './routes/_authenticated/threads/index'
 import { Route as AuthenticatedSystemIndexRouteImport } from './routes/_authenticated/system/index'
 import { Route as AuthenticatedSettingsIndexRouteImport } from './routes/_authenticated/settings/index'
 import { Route as AuthenticatedRequestsIndexRouteImport } from './routes/_authenticated/requests/index'
@@ -28,8 +26,6 @@ import { Route as AuthenticatedPlaygroundIndexRouteImport } from './routes/_auth
 import { Route as AuthenticatedModelsIndexRouteImport } from './routes/_authenticated/models/index'
 import { Route as AuthenticatedChannelsIndexRouteImport } from './routes/_authenticated/channels/index'
 import { Route as AuthenticatedApiKeysIndexRouteImport } from './routes/_authenticated/api-keys/index'
-import { Route as AuthenticatedTracesTraceIdRouteImport } from './routes/_authenticated/traces/$traceId'
-import { Route as AuthenticatedThreadsThreadIdRouteImport } from './routes/_authenticated/threads/$threadId'
 import { Route as AuthenticatedSettingsProfileRouteImport } from './routes/_authenticated/settings/profile'
 import { Route as AuthenticatedSettingsNotificationsRouteImport } from './routes/_authenticated/settings/notifications'
 import { Route as AuthenticatedSettingsDisplayRouteImport } from './routes/_authenticated/settings/display'
@@ -87,18 +83,6 @@ const AuthenticatedSettingsRouteRoute =
     path: '/settings',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedTracesIndexRoute =
-  AuthenticatedTracesIndexRouteImport.update({
-    id: '/traces/',
-    path: '/traces/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedThreadsIndexRoute =
-  AuthenticatedThreadsIndexRouteImport.update({
-    id: '/threads/',
-    path: '/threads/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
 const AuthenticatedSystemIndexRoute =
   AuthenticatedSystemIndexRouteImport.update({
     id: '/system/',
@@ -139,18 +123,6 @@ const AuthenticatedApiKeysIndexRoute =
   AuthenticatedApiKeysIndexRouteImport.update({
     id: '/api-keys/',
     path: '/api-keys/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedTracesTraceIdRoute =
-  AuthenticatedTracesTraceIdRouteImport.update({
-    id: '/traces/$traceId',
-    path: '/traces/$traceId',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedThreadsThreadIdRoute =
-  AuthenticatedThreadsThreadIdRouteImport.update({
-    id: '/threads/$threadId',
-    path: '/threads/$threadId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedSettingsProfileRoute =
@@ -206,8 +178,6 @@ export interface FileRoutesByFullPath {
   '/settings/display': typeof AuthenticatedSettingsDisplayRoute
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
   '/settings/profile': typeof AuthenticatedSettingsProfileRoute
-  '/threads/$threadId': typeof AuthenticatedThreadsThreadIdRoute
-  '/traces/$traceId': typeof AuthenticatedTracesTraceIdRoute
   '/api-keys/': typeof AuthenticatedApiKeysIndexRoute
   '/channels/': typeof AuthenticatedChannelsIndexRoute
   '/models/': typeof AuthenticatedModelsIndexRoute
@@ -215,8 +185,6 @@ export interface FileRoutesByFullPath {
   '/requests/': typeof AuthenticatedRequestsIndexRoute
   '/settings/': typeof AuthenticatedSettingsIndexRoute
   '/system/': typeof AuthenticatedSystemIndexRoute
-  '/threads/': typeof AuthenticatedThreadsIndexRoute
-  '/traces/': typeof AuthenticatedTracesIndexRoute
 }
 export interface FileRoutesByTo {
   '/initialization': typeof authInitializationRoute
@@ -233,8 +201,6 @@ export interface FileRoutesByTo {
   '/settings/display': typeof AuthenticatedSettingsDisplayRoute
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
   '/settings/profile': typeof AuthenticatedSettingsProfileRoute
-  '/threads/$threadId': typeof AuthenticatedThreadsThreadIdRoute
-  '/traces/$traceId': typeof AuthenticatedTracesTraceIdRoute
   '/api-keys': typeof AuthenticatedApiKeysIndexRoute
   '/channels': typeof AuthenticatedChannelsIndexRoute
   '/models': typeof AuthenticatedModelsIndexRoute
@@ -242,8 +208,6 @@ export interface FileRoutesByTo {
   '/requests': typeof AuthenticatedRequestsIndexRoute
   '/settings': typeof AuthenticatedSettingsIndexRoute
   '/system': typeof AuthenticatedSystemIndexRoute
-  '/threads': typeof AuthenticatedThreadsIndexRoute
-  '/traces': typeof AuthenticatedTracesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -263,8 +227,6 @@ export interface FileRoutesById {
   '/_authenticated/settings/display': typeof AuthenticatedSettingsDisplayRoute
   '/_authenticated/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
   '/_authenticated/settings/profile': typeof AuthenticatedSettingsProfileRoute
-  '/_authenticated/threads/$threadId': typeof AuthenticatedThreadsThreadIdRoute
-  '/_authenticated/traces/$traceId': typeof AuthenticatedTracesTraceIdRoute
   '/_authenticated/api-keys/': typeof AuthenticatedApiKeysIndexRoute
   '/_authenticated/channels/': typeof AuthenticatedChannelsIndexRoute
   '/_authenticated/models/': typeof AuthenticatedModelsIndexRoute
@@ -272,8 +234,6 @@ export interface FileRoutesById {
   '/_authenticated/requests/': typeof AuthenticatedRequestsIndexRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexRoute
   '/_authenticated/system/': typeof AuthenticatedSystemIndexRoute
-  '/_authenticated/threads/': typeof AuthenticatedThreadsIndexRoute
-  '/_authenticated/traces/': typeof AuthenticatedTracesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -293,8 +253,6 @@ export interface FileRouteTypes {
     | '/settings/display'
     | '/settings/notifications'
     | '/settings/profile'
-    | '/threads/$threadId'
-    | '/traces/$traceId'
     | '/api-keys/'
     | '/channels/'
     | '/models/'
@@ -302,8 +260,6 @@ export interface FileRouteTypes {
     | '/requests/'
     | '/settings/'
     | '/system/'
-    | '/threads/'
-    | '/traces/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/initialization'
@@ -320,8 +276,6 @@ export interface FileRouteTypes {
     | '/settings/display'
     | '/settings/notifications'
     | '/settings/profile'
-    | '/threads/$threadId'
-    | '/traces/$traceId'
     | '/api-keys'
     | '/channels'
     | '/models'
@@ -329,8 +283,6 @@ export interface FileRouteTypes {
     | '/requests'
     | '/settings'
     | '/system'
-    | '/threads'
-    | '/traces'
   id:
     | '__root__'
     | '/_authenticated'
@@ -349,8 +301,6 @@ export interface FileRouteTypes {
     | '/_authenticated/settings/display'
     | '/_authenticated/settings/notifications'
     | '/_authenticated/settings/profile'
-    | '/_authenticated/threads/$threadId'
-    | '/_authenticated/traces/$traceId'
     | '/_authenticated/api-keys/'
     | '/_authenticated/channels/'
     | '/_authenticated/models/'
@@ -358,8 +308,6 @@ export interface FileRouteTypes {
     | '/_authenticated/requests/'
     | '/_authenticated/settings/'
     | '/_authenticated/system/'
-    | '/_authenticated/threads/'
-    | '/_authenticated/traces/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -445,20 +393,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsRouteRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/traces/': {
-      id: '/_authenticated/traces/'
-      path: '/traces'
-      fullPath: '/traces/'
-      preLoaderRoute: typeof AuthenticatedTracesIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/threads/': {
-      id: '/_authenticated/threads/'
-      path: '/threads'
-      fullPath: '/threads/'
-      preLoaderRoute: typeof AuthenticatedThreadsIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/system/': {
       id: '/_authenticated/system/'
       path: '/system'
@@ -506,20 +440,6 @@ declare module '@tanstack/react-router' {
       path: '/api-keys'
       fullPath: '/api-keys/'
       preLoaderRoute: typeof AuthenticatedApiKeysIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/traces/$traceId': {
-      id: '/_authenticated/traces/$traceId'
-      path: '/traces/$traceId'
-      fullPath: '/traces/$traceId'
-      preLoaderRoute: typeof AuthenticatedTracesTraceIdRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/threads/$threadId': {
-      id: '/_authenticated/threads/$threadId'
-      path: '/threads/$threadId'
-      fullPath: '/threads/$threadId'
-      preLoaderRoute: typeof AuthenticatedThreadsThreadIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/settings/profile': {
@@ -595,16 +515,12 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedDashboardChannelSuccessRatesRoute: typeof AuthenticatedDashboardChannelSuccessRatesRoute
   AuthenticatedRequestsRequestIdRoute: typeof AuthenticatedRequestsRequestIdRoute
-  AuthenticatedThreadsThreadIdRoute: typeof AuthenticatedThreadsThreadIdRoute
-  AuthenticatedTracesTraceIdRoute: typeof AuthenticatedTracesTraceIdRoute
   AuthenticatedApiKeysIndexRoute: typeof AuthenticatedApiKeysIndexRoute
   AuthenticatedChannelsIndexRoute: typeof AuthenticatedChannelsIndexRoute
   AuthenticatedModelsIndexRoute: typeof AuthenticatedModelsIndexRoute
   AuthenticatedPlaygroundIndexRoute: typeof AuthenticatedPlaygroundIndexRoute
   AuthenticatedRequestsIndexRoute: typeof AuthenticatedRequestsIndexRoute
   AuthenticatedSystemIndexRoute: typeof AuthenticatedSystemIndexRoute
-  AuthenticatedThreadsIndexRoute: typeof AuthenticatedThreadsIndexRoute
-  AuthenticatedTracesIndexRoute: typeof AuthenticatedTracesIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -613,16 +529,12 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardChannelSuccessRatesRoute:
     AuthenticatedDashboardChannelSuccessRatesRoute,
   AuthenticatedRequestsRequestIdRoute: AuthenticatedRequestsRequestIdRoute,
-  AuthenticatedThreadsThreadIdRoute: AuthenticatedThreadsThreadIdRoute,
-  AuthenticatedTracesTraceIdRoute: AuthenticatedTracesTraceIdRoute,
   AuthenticatedApiKeysIndexRoute: AuthenticatedApiKeysIndexRoute,
   AuthenticatedChannelsIndexRoute: AuthenticatedChannelsIndexRoute,
   AuthenticatedModelsIndexRoute: AuthenticatedModelsIndexRoute,
   AuthenticatedPlaygroundIndexRoute: AuthenticatedPlaygroundIndexRoute,
   AuthenticatedRequestsIndexRoute: AuthenticatedRequestsIndexRoute,
   AuthenticatedSystemIndexRoute: AuthenticatedSystemIndexRoute,
-  AuthenticatedThreadsIndexRoute: AuthenticatedThreadsIndexRoute,
-  AuthenticatedTracesIndexRoute: AuthenticatedTracesIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

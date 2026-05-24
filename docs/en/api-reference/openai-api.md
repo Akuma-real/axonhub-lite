@@ -39,9 +39,7 @@ completion, err := client.Chat.Completions.New(ctx, openai.ChatCompletionNewPara
         openai.UserMessage("Hello, Claude!"),
     },
     Model: openai.ChatModel("claude-3-5-sonnet"),
-},
-    option.WithHeader("AH-Trace-Id", "trace-example-123"),
-    option.WithHeader("AH-Thread-Id", "thread-example-abc"))
+})
 if err != nil {
     // Handle error appropriately
     panic(err)
@@ -93,9 +91,7 @@ params := responses.ResponseNewParams{
     },
 }
 
-response, err := client.Responses.New(ctx, params,
-        option.WithHeader("AH-Trace-Id", "trace-example-123"),
-        option.WithHeader("AH-Thread-Id", "thread-example-abc"))
+response, err := client.Responses.New(ctx, params)
 if err != nil {
     panic(err)
 }
@@ -130,9 +126,7 @@ params := responses.ResponseNewParams{
     },
 }
 
-stream := client.Responses.NewStreaming(ctx, params,
-        option.WithHeader("AH-Trace-Id", "trace-example-123"),
-        option.WithHeader("AH-Thread-Id", "thread-example-abc"))
+stream := client.Responses.NewStreaming(ctx, params)
 
 var fullContent strings.Builder
 for stream.Next() {
@@ -286,8 +280,6 @@ func main() {
     embedding, err := client.Embeddings.New(context.TODO(), openai.EmbeddingNewParams{
         Input: openai.Union[string](openai.String("Hello, world!")),
         Model: openai.String("text-embedding-3-small"),
-        option.WithHeader("AH-Trace-Id", "trace-example-123"),
-        option.WithHeader("AH-Thread-Id", "thread-example-abc"),
     })
     if err != nil {
         log.Fatal(err)
@@ -553,11 +545,10 @@ AxonHub supports **function tools** (custom function calling) through the OpenAI
 
 ## Best Practices
 
-1. **Use Tracing Headers**: Include `AH-Trace-Id` and `AH-Thread-Id` headers for better observability
-2. **Model Selection**: Specify the target model explicitly in your requests
-3. **Error Handling**: Implement proper error handling for API responses
-4. **Streaming**: Use streaming for better user experience with long responses
-5. **Use Function Tools**: For tool calling, use generic function tools instead of provider-specific tools
+1. **Model Selection**: Specify the target model explicitly in your requests
+2. **Error Handling**: Implement proper error handling for API responses
+3. **Streaming**: Use streaming for better user experience with long responses
+4. **Use Function Tools**: For tool calling, use generic function tools instead of provider-specific tools
 
 ## Migration Guide
 

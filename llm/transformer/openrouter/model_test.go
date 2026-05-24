@@ -97,7 +97,7 @@ func TestResponse_ToOpenAIResponse(t *testing.T) {
 									Type: "function",
 									Function: llm.FunctionCall{
 										Name:      "Read",
-										Arguments: "{\"file_path\": \"/axonhub/internal/server/middleware/trace_test.go\"}",
+										Arguments: "{\"file_path\": \"/axonhub/internal/server/middleware/logging_test.go\"}",
 									},
 								},
 							},

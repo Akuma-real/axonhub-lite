@@ -23,8 +23,6 @@ import (
 	"github.com/looplj/axonhub/internal/ent/request"
 	"github.com/looplj/axonhub/internal/ent/requestexecution"
 	"github.com/looplj/axonhub/internal/ent/system"
-	"github.com/looplj/axonhub/internal/ent/thread"
-	"github.com/looplj/axonhub/internal/ent/trace"
 	"github.com/looplj/axonhub/internal/ent/usagelog"
 	"github.com/looplj/axonhub/internal/ent/user"
 	"github.com/looplj/axonhub/internal/objects"
@@ -50,8 +48,6 @@ const (
 	TypeRequest                  = "Request"
 	TypeRequestExecution         = "RequestExecution"
 	TypeSystem                   = "System"
-	TypeThread                   = "Thread"
-	TypeTrace                    = "Trace"
 	TypeUsageLog                 = "UsageLog"
 	TypeUser                     = "User"
 )
@@ -8596,8 +8592,6 @@ type RequestMutation struct {
 	clearedFields                     map[string]struct{}
 	api_key                           *int
 	clearedapi_key                    bool
-	trace                             *int
-	clearedtrace                      bool
 	executions                        map[int]struct{}
 	removedexecutions                 map[int]struct{}
 	clearedexecutions                 bool
@@ -8828,55 +8822,6 @@ func (m *RequestMutation) APIKeyIDCleared() bool {
 func (m *RequestMutation) ResetAPIKeyID() {
 	m.api_key = nil
 	delete(m.clearedFields, request.FieldAPIKeyID)
-}
-
-// SetTraceID sets the "trace_id" field.
-func (m *RequestMutation) SetTraceID(i int) {
-	m.trace = &i
-}
-
-// TraceID returns the value of the "trace_id" field in the mutation.
-func (m *RequestMutation) TraceID() (r int, exists bool) {
-	v := m.trace
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldTraceID returns the old "trace_id" field's value of the Request entity.
-// If the Request object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *RequestMutation) OldTraceID(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldTraceID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldTraceID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldTraceID: %w", err)
-	}
-	return oldValue.TraceID, nil
-}
-
-// ClearTraceID clears the value of the "trace_id" field.
-func (m *RequestMutation) ClearTraceID() {
-	m.trace = nil
-	m.clearedFields[request.FieldTraceID] = struct{}{}
-}
-
-// TraceIDCleared returns if the "trace_id" field was cleared in this mutation.
-func (m *RequestMutation) TraceIDCleared() bool {
-	_, ok := m.clearedFields[request.FieldTraceID]
-	return ok
-}
-
-// ResetTraceID resets all changes to the "trace_id" field.
-func (m *RequestMutation) ResetTraceID() {
-	m.trace = nil
-	delete(m.clearedFields, request.FieldTraceID)
 }
 
 // SetSource sets the "source" field.
@@ -9725,33 +9670,6 @@ func (m *RequestMutation) ResetAPIKey() {
 	m.clearedapi_key = false
 }
 
-// ClearTrace clears the "trace" edge to the Trace entity.
-func (m *RequestMutation) ClearTrace() {
-	m.clearedtrace = true
-	m.clearedFields[request.FieldTraceID] = struct{}{}
-}
-
-// TraceCleared reports if the "trace" edge to the Trace entity was cleared.
-func (m *RequestMutation) TraceCleared() bool {
-	return m.TraceIDCleared() || m.clearedtrace
-}
-
-// TraceIDs returns the "trace" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// TraceID instead. It exists only for internal usage by the builders.
-func (m *RequestMutation) TraceIDs() (ids []int) {
-	if id := m.trace; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetTrace resets all changes to the "trace" edge.
-func (m *RequestMutation) ResetTrace() {
-	m.trace = nil
-	m.clearedtrace = false
-}
-
 // AddExecutionIDs adds the "executions" edge to the RequestExecution entity by ids.
 func (m *RequestMutation) AddExecutionIDs(ids ...int) {
 	if m.executions == nil {
@@ -9921,7 +9839,7 @@ func (m *RequestMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *RequestMutation) Fields() []string {
-	fields := make([]string, 0, 20)
+	fields := make([]string, 0, 19)
 	if m.created_at != nil {
 		fields = append(fields, request.FieldCreatedAt)
 	}
@@ -9930,9 +9848,6 @@ func (m *RequestMutation) Fields() []string {
 	}
 	if m.api_key != nil {
 		fields = append(fields, request.FieldAPIKeyID)
-	}
-	if m.trace != nil {
-		fields = append(fields, request.FieldTraceID)
 	}
 	if m.source != nil {
 		fields = append(fields, request.FieldSource)
@@ -9996,8 +9911,6 @@ func (m *RequestMutation) Field(name string) (ent.Value, bool) {
 		return m.UpdatedAt()
 	case request.FieldAPIKeyID:
 		return m.APIKeyID()
-	case request.FieldTraceID:
-		return m.TraceID()
 	case request.FieldSource:
 		return m.Source()
 	case request.FieldModelID:
@@ -10045,8 +9958,6 @@ func (m *RequestMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldUpdatedAt(ctx)
 	case request.FieldAPIKeyID:
 		return m.OldAPIKeyID(ctx)
-	case request.FieldTraceID:
-		return m.OldTraceID(ctx)
 	case request.FieldSource:
 		return m.OldSource(ctx)
 	case request.FieldModelID:
@@ -10108,13 +10019,6 @@ func (m *RequestMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetAPIKeyID(v)
-		return nil
-	case request.FieldTraceID:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetTraceID(v)
 		return nil
 	case request.FieldSource:
 		v, ok := value.(request.Source)
@@ -10300,9 +10204,6 @@ func (m *RequestMutation) ClearedFields() []string {
 	if m.FieldCleared(request.FieldAPIKeyID) {
 		fields = append(fields, request.FieldAPIKeyID)
 	}
-	if m.FieldCleared(request.FieldTraceID) {
-		fields = append(fields, request.FieldTraceID)
-	}
 	if m.FieldCleared(request.FieldReasoningEffort) {
 		fields = append(fields, request.FieldReasoningEffort)
 	}
@@ -10347,9 +10248,6 @@ func (m *RequestMutation) ClearField(name string) error {
 	case request.FieldAPIKeyID:
 		m.ClearAPIKeyID()
 		return nil
-	case request.FieldTraceID:
-		m.ClearTraceID()
-		return nil
 	case request.FieldReasoningEffort:
 		m.ClearReasoningEffort()
 		return nil
@@ -10393,9 +10291,6 @@ func (m *RequestMutation) ResetField(name string) error {
 		return nil
 	case request.FieldAPIKeyID:
 		m.ResetAPIKeyID()
-		return nil
-	case request.FieldTraceID:
-		m.ResetTraceID()
 		return nil
 	case request.FieldSource:
 		m.ResetSource()
@@ -10451,12 +10346,9 @@ func (m *RequestMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *RequestMutation) AddedEdges() []string {
-	edges := make([]string, 0, 5)
+	edges := make([]string, 0, 4)
 	if m.api_key != nil {
 		edges = append(edges, request.EdgeAPIKey)
-	}
-	if m.trace != nil {
-		edges = append(edges, request.EdgeTrace)
 	}
 	if m.executions != nil {
 		edges = append(edges, request.EdgeExecutions)
@@ -10476,10 +10368,6 @@ func (m *RequestMutation) AddedIDs(name string) []ent.Value {
 	switch name {
 	case request.EdgeAPIKey:
 		if id := m.api_key; id != nil {
-			return []ent.Value{*id}
-		}
-	case request.EdgeTrace:
-		if id := m.trace; id != nil {
 			return []ent.Value{*id}
 		}
 	case request.EdgeExecutions:
@@ -10504,7 +10392,7 @@ func (m *RequestMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *RequestMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 5)
+	edges := make([]string, 0, 4)
 	if m.removedexecutions != nil {
 		edges = append(edges, request.EdgeExecutions)
 	}
@@ -10536,12 +10424,9 @@ func (m *RequestMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *RequestMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 5)
+	edges := make([]string, 0, 4)
 	if m.clearedapi_key {
 		edges = append(edges, request.EdgeAPIKey)
-	}
-	if m.clearedtrace {
-		edges = append(edges, request.EdgeTrace)
 	}
 	if m.clearedexecutions {
 		edges = append(edges, request.EdgeExecutions)
@@ -10561,8 +10446,6 @@ func (m *RequestMutation) EdgeCleared(name string) bool {
 	switch name {
 	case request.EdgeAPIKey:
 		return m.clearedapi_key
-	case request.EdgeTrace:
-		return m.clearedtrace
 	case request.EdgeExecutions:
 		return m.clearedexecutions
 	case request.EdgeChannel:
@@ -10580,9 +10463,6 @@ func (m *RequestMutation) ClearEdge(name string) error {
 	case request.EdgeAPIKey:
 		m.ClearAPIKey()
 		return nil
-	case request.EdgeTrace:
-		m.ClearTrace()
-		return nil
 	case request.EdgeChannel:
 		m.ClearChannel()
 		return nil
@@ -10596,9 +10476,6 @@ func (m *RequestMutation) ResetEdge(name string) error {
 	switch name {
 	case request.EdgeAPIKey:
 		m.ResetAPIKey()
-		return nil
-	case request.EdgeTrace:
-		m.ResetTrace()
 		return nil
 	case request.EdgeExecutions:
 		m.ResetExecutions()
@@ -12932,1185 +12809,6 @@ func (m *SystemMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *SystemMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown System edge %s", name)
-}
-
-// ThreadMutation represents an operation that mutates the Thread nodes in the graph.
-type ThreadMutation struct {
-	config
-	op            Op
-	typ           string
-	id            *int
-	created_at    *time.Time
-	updated_at    *time.Time
-	thread_id     *string
-	clearedFields map[string]struct{}
-	traces        map[int]struct{}
-	removedtraces map[int]struct{}
-	clearedtraces bool
-	done          bool
-	oldValue      func(context.Context) (*Thread, error)
-	predicates    []predicate.Thread
-}
-
-var _ ent.Mutation = (*ThreadMutation)(nil)
-
-// threadOption allows management of the mutation configuration using functional options.
-type threadOption func(*ThreadMutation)
-
-// newThreadMutation creates new mutation for the Thread entity.
-func newThreadMutation(c config, op Op, opts ...threadOption) *ThreadMutation {
-	m := &ThreadMutation{
-		config:        c,
-		op:            op,
-		typ:           TypeThread,
-		clearedFields: make(map[string]struct{}),
-	}
-	for _, opt := range opts {
-		opt(m)
-	}
-	return m
-}
-
-// withThreadID sets the ID field of the mutation.
-func withThreadID(id int) threadOption {
-	return func(m *ThreadMutation) {
-		var (
-			err   error
-			once  sync.Once
-			value *Thread
-		)
-		m.oldValue = func(ctx context.Context) (*Thread, error) {
-			once.Do(func() {
-				if m.done {
-					err = errors.New("querying old values post mutation is not allowed")
-				} else {
-					value, err = m.Client().Thread.Get(ctx, id)
-				}
-			})
-			return value, err
-		}
-		m.id = &id
-	}
-}
-
-// withThread sets the old Thread of the mutation.
-func withThread(node *Thread) threadOption {
-	return func(m *ThreadMutation) {
-		m.oldValue = func(context.Context) (*Thread, error) {
-			return node, nil
-		}
-		m.id = &node.ID
-	}
-}
-
-// Client returns a new `ent.Client` from the mutation. If the mutation was
-// executed in a transaction (ent.Tx), a transactional client is returned.
-func (m ThreadMutation) Client() *Client {
-	client := &Client{config: m.config}
-	client.init()
-	return client
-}
-
-// Tx returns an `ent.Tx` for mutations that were executed in transactions;
-// it returns an error otherwise.
-func (m ThreadMutation) Tx() (*Tx, error) {
-	if _, ok := m.driver.(*txDriver); !ok {
-		return nil, errors.New("ent: mutation is not running in a transaction")
-	}
-	tx := &Tx{config: m.config}
-	tx.init()
-	return tx, nil
-}
-
-// ID returns the ID value in the mutation. Note that the ID is only available
-// if it was provided to the builder or after it was returned from the database.
-func (m *ThreadMutation) ID() (id int, exists bool) {
-	if m.id == nil {
-		return
-	}
-	return *m.id, true
-}
-
-// IDs queries the database and returns the entity ids that match the mutation's predicate.
-// That means, if the mutation is applied within a transaction with an isolation level such
-// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
-// or updated by the mutation.
-func (m *ThreadMutation) IDs(ctx context.Context) ([]int, error) {
-	switch {
-	case m.op.Is(OpUpdateOne | OpDeleteOne):
-		id, exists := m.ID()
-		if exists {
-			return []int{id}, nil
-		}
-		fallthrough
-	case m.op.Is(OpUpdate | OpDelete):
-		return m.Client().Thread.Query().Where(m.predicates...).IDs(ctx)
-	default:
-		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
-	}
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (m *ThreadMutation) SetCreatedAt(t time.Time) {
-	m.created_at = &t
-}
-
-// CreatedAt returns the value of the "created_at" field in the mutation.
-func (m *ThreadMutation) CreatedAt() (r time.Time, exists bool) {
-	v := m.created_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCreatedAt returns the old "created_at" field's value of the Thread entity.
-// If the Thread object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ThreadMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
-	}
-	return oldValue.CreatedAt, nil
-}
-
-// ResetCreatedAt resets all changes to the "created_at" field.
-func (m *ThreadMutation) ResetCreatedAt() {
-	m.created_at = nil
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (m *ThreadMutation) SetUpdatedAt(t time.Time) {
-	m.updated_at = &t
-}
-
-// UpdatedAt returns the value of the "updated_at" field in the mutation.
-func (m *ThreadMutation) UpdatedAt() (r time.Time, exists bool) {
-	v := m.updated_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUpdatedAt returns the old "updated_at" field's value of the Thread entity.
-// If the Thread object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ThreadMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
-	}
-	return oldValue.UpdatedAt, nil
-}
-
-// ResetUpdatedAt resets all changes to the "updated_at" field.
-func (m *ThreadMutation) ResetUpdatedAt() {
-	m.updated_at = nil
-}
-
-// SetThreadID sets the "thread_id" field.
-func (m *ThreadMutation) SetThreadID(s string) {
-	m.thread_id = &s
-}
-
-// ThreadID returns the value of the "thread_id" field in the mutation.
-func (m *ThreadMutation) ThreadID() (r string, exists bool) {
-	v := m.thread_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldThreadID returns the old "thread_id" field's value of the Thread entity.
-// If the Thread object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ThreadMutation) OldThreadID(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldThreadID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldThreadID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldThreadID: %w", err)
-	}
-	return oldValue.ThreadID, nil
-}
-
-// ResetThreadID resets all changes to the "thread_id" field.
-func (m *ThreadMutation) ResetThreadID() {
-	m.thread_id = nil
-}
-
-// AddTraceIDs adds the "traces" edge to the Trace entity by ids.
-func (m *ThreadMutation) AddTraceIDs(ids ...int) {
-	if m.traces == nil {
-		m.traces = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.traces[ids[i]] = struct{}{}
-	}
-}
-
-// ClearTraces clears the "traces" edge to the Trace entity.
-func (m *ThreadMutation) ClearTraces() {
-	m.clearedtraces = true
-}
-
-// TracesCleared reports if the "traces" edge to the Trace entity was cleared.
-func (m *ThreadMutation) TracesCleared() bool {
-	return m.clearedtraces
-}
-
-// RemoveTraceIDs removes the "traces" edge to the Trace entity by IDs.
-func (m *ThreadMutation) RemoveTraceIDs(ids ...int) {
-	if m.removedtraces == nil {
-		m.removedtraces = make(map[int]struct{})
-	}
-	for i := range ids {
-		delete(m.traces, ids[i])
-		m.removedtraces[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedTraces returns the removed IDs of the "traces" edge to the Trace entity.
-func (m *ThreadMutation) RemovedTracesIDs() (ids []int) {
-	for id := range m.removedtraces {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// TracesIDs returns the "traces" edge IDs in the mutation.
-func (m *ThreadMutation) TracesIDs() (ids []int) {
-	for id := range m.traces {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetTraces resets all changes to the "traces" edge.
-func (m *ThreadMutation) ResetTraces() {
-	m.traces = nil
-	m.clearedtraces = false
-	m.removedtraces = nil
-}
-
-// Where appends a list predicates to the ThreadMutation builder.
-func (m *ThreadMutation) Where(ps ...predicate.Thread) {
-	m.predicates = append(m.predicates, ps...)
-}
-
-// WhereP appends storage-level predicates to the ThreadMutation builder. Using this method,
-// users can use type-assertion to append predicates that do not depend on any generated package.
-func (m *ThreadMutation) WhereP(ps ...func(*sql.Selector)) {
-	p := make([]predicate.Thread, len(ps))
-	for i := range ps {
-		p[i] = ps[i]
-	}
-	m.Where(p...)
-}
-
-// Op returns the operation name.
-func (m *ThreadMutation) Op() Op {
-	return m.op
-}
-
-// SetOp allows setting the mutation operation.
-func (m *ThreadMutation) SetOp(op Op) {
-	m.op = op
-}
-
-// Type returns the node type of this mutation (Thread).
-func (m *ThreadMutation) Type() string {
-	return m.typ
-}
-
-// Fields returns all fields that were changed during this mutation. Note that in
-// order to get all numeric fields that were incremented/decremented, call
-// AddedFields().
-func (m *ThreadMutation) Fields() []string {
-	fields := make([]string, 0, 3)
-	if m.created_at != nil {
-		fields = append(fields, thread.FieldCreatedAt)
-	}
-	if m.updated_at != nil {
-		fields = append(fields, thread.FieldUpdatedAt)
-	}
-	if m.thread_id != nil {
-		fields = append(fields, thread.FieldThreadID)
-	}
-	return fields
-}
-
-// Field returns the value of a field with the given name. The second boolean
-// return value indicates that this field was not set, or was not defined in the
-// schema.
-func (m *ThreadMutation) Field(name string) (ent.Value, bool) {
-	switch name {
-	case thread.FieldCreatedAt:
-		return m.CreatedAt()
-	case thread.FieldUpdatedAt:
-		return m.UpdatedAt()
-	case thread.FieldThreadID:
-		return m.ThreadID()
-	}
-	return nil, false
-}
-
-// OldField returns the old value of the field from the database. An error is
-// returned if the mutation operation is not UpdateOne, or the query to the
-// database failed.
-func (m *ThreadMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
-	switch name {
-	case thread.FieldCreatedAt:
-		return m.OldCreatedAt(ctx)
-	case thread.FieldUpdatedAt:
-		return m.OldUpdatedAt(ctx)
-	case thread.FieldThreadID:
-		return m.OldThreadID(ctx)
-	}
-	return nil, fmt.Errorf("unknown Thread field %s", name)
-}
-
-// SetField sets the value of a field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *ThreadMutation) SetField(name string, value ent.Value) error {
-	switch name {
-	case thread.FieldCreatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCreatedAt(v)
-		return nil
-	case thread.FieldUpdatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUpdatedAt(v)
-		return nil
-	case thread.FieldThreadID:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetThreadID(v)
-		return nil
-	}
-	return fmt.Errorf("unknown Thread field %s", name)
-}
-
-// AddedFields returns all numeric fields that were incremented/decremented during
-// this mutation.
-func (m *ThreadMutation) AddedFields() []string {
-	return nil
-}
-
-// AddedField returns the numeric value that was incremented/decremented on a field
-// with the given name. The second boolean return value indicates that this field
-// was not set, or was not defined in the schema.
-func (m *ThreadMutation) AddedField(name string) (ent.Value, bool) {
-	return nil, false
-}
-
-// AddField adds the value to the field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *ThreadMutation) AddField(name string, value ent.Value) error {
-	switch name {
-	}
-	return fmt.Errorf("unknown Thread numeric field %s", name)
-}
-
-// ClearedFields returns all nullable fields that were cleared during this
-// mutation.
-func (m *ThreadMutation) ClearedFields() []string {
-	return nil
-}
-
-// FieldCleared returns a boolean indicating if a field with the given name was
-// cleared in this mutation.
-func (m *ThreadMutation) FieldCleared(name string) bool {
-	_, ok := m.clearedFields[name]
-	return ok
-}
-
-// ClearField clears the value of the field with the given name. It returns an
-// error if the field is not defined in the schema.
-func (m *ThreadMutation) ClearField(name string) error {
-	return fmt.Errorf("unknown Thread nullable field %s", name)
-}
-
-// ResetField resets all changes in the mutation for the field with the given name.
-// It returns an error if the field is not defined in the schema.
-func (m *ThreadMutation) ResetField(name string) error {
-	switch name {
-	case thread.FieldCreatedAt:
-		m.ResetCreatedAt()
-		return nil
-	case thread.FieldUpdatedAt:
-		m.ResetUpdatedAt()
-		return nil
-	case thread.FieldThreadID:
-		m.ResetThreadID()
-		return nil
-	}
-	return fmt.Errorf("unknown Thread field %s", name)
-}
-
-// AddedEdges returns all edge names that were set/added in this mutation.
-func (m *ThreadMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.traces != nil {
-		edges = append(edges, thread.EdgeTraces)
-	}
-	return edges
-}
-
-// AddedIDs returns all IDs (to other nodes) that were added for the given edge
-// name in this mutation.
-func (m *ThreadMutation) AddedIDs(name string) []ent.Value {
-	switch name {
-	case thread.EdgeTraces:
-		ids := make([]ent.Value, 0, len(m.traces))
-		for id := range m.traces {
-			ids = append(ids, id)
-		}
-		return ids
-	}
-	return nil
-}
-
-// RemovedEdges returns all edge names that were removed in this mutation.
-func (m *ThreadMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.removedtraces != nil {
-		edges = append(edges, thread.EdgeTraces)
-	}
-	return edges
-}
-
-// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
-// the given name in this mutation.
-func (m *ThreadMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	case thread.EdgeTraces:
-		ids := make([]ent.Value, 0, len(m.removedtraces))
-		for id := range m.removedtraces {
-			ids = append(ids, id)
-		}
-		return ids
-	}
-	return nil
-}
-
-// ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *ThreadMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.clearedtraces {
-		edges = append(edges, thread.EdgeTraces)
-	}
-	return edges
-}
-
-// EdgeCleared returns a boolean which indicates if the edge with the given name
-// was cleared in this mutation.
-func (m *ThreadMutation) EdgeCleared(name string) bool {
-	switch name {
-	case thread.EdgeTraces:
-		return m.clearedtraces
-	}
-	return false
-}
-
-// ClearEdge clears the value of the edge with the given name. It returns an error
-// if that edge is not defined in the schema.
-func (m *ThreadMutation) ClearEdge(name string) error {
-	switch name {
-	}
-	return fmt.Errorf("unknown Thread unique edge %s", name)
-}
-
-// ResetEdge resets all changes to the edge with the given name in this mutation.
-// It returns an error if the edge is not defined in the schema.
-func (m *ThreadMutation) ResetEdge(name string) error {
-	switch name {
-	case thread.EdgeTraces:
-		m.ResetTraces()
-		return nil
-	}
-	return fmt.Errorf("unknown Thread edge %s", name)
-}
-
-// TraceMutation represents an operation that mutates the Trace nodes in the graph.
-type TraceMutation struct {
-	config
-	op              Op
-	typ             string
-	id              *int
-	created_at      *time.Time
-	updated_at      *time.Time
-	trace_id        *string
-	clearedFields   map[string]struct{}
-	thread          *int
-	clearedthread   bool
-	requests        map[int]struct{}
-	removedrequests map[int]struct{}
-	clearedrequests bool
-	done            bool
-	oldValue        func(context.Context) (*Trace, error)
-	predicates      []predicate.Trace
-}
-
-var _ ent.Mutation = (*TraceMutation)(nil)
-
-// traceOption allows management of the mutation configuration using functional options.
-type traceOption func(*TraceMutation)
-
-// newTraceMutation creates new mutation for the Trace entity.
-func newTraceMutation(c config, op Op, opts ...traceOption) *TraceMutation {
-	m := &TraceMutation{
-		config:        c,
-		op:            op,
-		typ:           TypeTrace,
-		clearedFields: make(map[string]struct{}),
-	}
-	for _, opt := range opts {
-		opt(m)
-	}
-	return m
-}
-
-// withTraceID sets the ID field of the mutation.
-func withTraceID(id int) traceOption {
-	return func(m *TraceMutation) {
-		var (
-			err   error
-			once  sync.Once
-			value *Trace
-		)
-		m.oldValue = func(ctx context.Context) (*Trace, error) {
-			once.Do(func() {
-				if m.done {
-					err = errors.New("querying old values post mutation is not allowed")
-				} else {
-					value, err = m.Client().Trace.Get(ctx, id)
-				}
-			})
-			return value, err
-		}
-		m.id = &id
-	}
-}
-
-// withTrace sets the old Trace of the mutation.
-func withTrace(node *Trace) traceOption {
-	return func(m *TraceMutation) {
-		m.oldValue = func(context.Context) (*Trace, error) {
-			return node, nil
-		}
-		m.id = &node.ID
-	}
-}
-
-// Client returns a new `ent.Client` from the mutation. If the mutation was
-// executed in a transaction (ent.Tx), a transactional client is returned.
-func (m TraceMutation) Client() *Client {
-	client := &Client{config: m.config}
-	client.init()
-	return client
-}
-
-// Tx returns an `ent.Tx` for mutations that were executed in transactions;
-// it returns an error otherwise.
-func (m TraceMutation) Tx() (*Tx, error) {
-	if _, ok := m.driver.(*txDriver); !ok {
-		return nil, errors.New("ent: mutation is not running in a transaction")
-	}
-	tx := &Tx{config: m.config}
-	tx.init()
-	return tx, nil
-}
-
-// ID returns the ID value in the mutation. Note that the ID is only available
-// if it was provided to the builder or after it was returned from the database.
-func (m *TraceMutation) ID() (id int, exists bool) {
-	if m.id == nil {
-		return
-	}
-	return *m.id, true
-}
-
-// IDs queries the database and returns the entity ids that match the mutation's predicate.
-// That means, if the mutation is applied within a transaction with an isolation level such
-// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
-// or updated by the mutation.
-func (m *TraceMutation) IDs(ctx context.Context) ([]int, error) {
-	switch {
-	case m.op.Is(OpUpdateOne | OpDeleteOne):
-		id, exists := m.ID()
-		if exists {
-			return []int{id}, nil
-		}
-		fallthrough
-	case m.op.Is(OpUpdate | OpDelete):
-		return m.Client().Trace.Query().Where(m.predicates...).IDs(ctx)
-	default:
-		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
-	}
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (m *TraceMutation) SetCreatedAt(t time.Time) {
-	m.created_at = &t
-}
-
-// CreatedAt returns the value of the "created_at" field in the mutation.
-func (m *TraceMutation) CreatedAt() (r time.Time, exists bool) {
-	v := m.created_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCreatedAt returns the old "created_at" field's value of the Trace entity.
-// If the Trace object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TraceMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
-	}
-	return oldValue.CreatedAt, nil
-}
-
-// ResetCreatedAt resets all changes to the "created_at" field.
-func (m *TraceMutation) ResetCreatedAt() {
-	m.created_at = nil
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (m *TraceMutation) SetUpdatedAt(t time.Time) {
-	m.updated_at = &t
-}
-
-// UpdatedAt returns the value of the "updated_at" field in the mutation.
-func (m *TraceMutation) UpdatedAt() (r time.Time, exists bool) {
-	v := m.updated_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUpdatedAt returns the old "updated_at" field's value of the Trace entity.
-// If the Trace object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TraceMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
-	}
-	return oldValue.UpdatedAt, nil
-}
-
-// ResetUpdatedAt resets all changes to the "updated_at" field.
-func (m *TraceMutation) ResetUpdatedAt() {
-	m.updated_at = nil
-}
-
-// SetTraceID sets the "trace_id" field.
-func (m *TraceMutation) SetTraceID(s string) {
-	m.trace_id = &s
-}
-
-// TraceID returns the value of the "trace_id" field in the mutation.
-func (m *TraceMutation) TraceID() (r string, exists bool) {
-	v := m.trace_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldTraceID returns the old "trace_id" field's value of the Trace entity.
-// If the Trace object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TraceMutation) OldTraceID(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldTraceID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldTraceID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldTraceID: %w", err)
-	}
-	return oldValue.TraceID, nil
-}
-
-// ResetTraceID resets all changes to the "trace_id" field.
-func (m *TraceMutation) ResetTraceID() {
-	m.trace_id = nil
-}
-
-// SetThreadID sets the "thread_id" field.
-func (m *TraceMutation) SetThreadID(i int) {
-	m.thread = &i
-}
-
-// ThreadID returns the value of the "thread_id" field in the mutation.
-func (m *TraceMutation) ThreadID() (r int, exists bool) {
-	v := m.thread
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldThreadID returns the old "thread_id" field's value of the Trace entity.
-// If the Trace object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TraceMutation) OldThreadID(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldThreadID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldThreadID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldThreadID: %w", err)
-	}
-	return oldValue.ThreadID, nil
-}
-
-// ClearThreadID clears the value of the "thread_id" field.
-func (m *TraceMutation) ClearThreadID() {
-	m.thread = nil
-	m.clearedFields[trace.FieldThreadID] = struct{}{}
-}
-
-// ThreadIDCleared returns if the "thread_id" field was cleared in this mutation.
-func (m *TraceMutation) ThreadIDCleared() bool {
-	_, ok := m.clearedFields[trace.FieldThreadID]
-	return ok
-}
-
-// ResetThreadID resets all changes to the "thread_id" field.
-func (m *TraceMutation) ResetThreadID() {
-	m.thread = nil
-	delete(m.clearedFields, trace.FieldThreadID)
-}
-
-// ClearThread clears the "thread" edge to the Thread entity.
-func (m *TraceMutation) ClearThread() {
-	m.clearedthread = true
-	m.clearedFields[trace.FieldThreadID] = struct{}{}
-}
-
-// ThreadCleared reports if the "thread" edge to the Thread entity was cleared.
-func (m *TraceMutation) ThreadCleared() bool {
-	return m.ThreadIDCleared() || m.clearedthread
-}
-
-// ThreadIDs returns the "thread" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// ThreadID instead. It exists only for internal usage by the builders.
-func (m *TraceMutation) ThreadIDs() (ids []int) {
-	if id := m.thread; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetThread resets all changes to the "thread" edge.
-func (m *TraceMutation) ResetThread() {
-	m.thread = nil
-	m.clearedthread = false
-}
-
-// AddRequestIDs adds the "requests" edge to the Request entity by ids.
-func (m *TraceMutation) AddRequestIDs(ids ...int) {
-	if m.requests == nil {
-		m.requests = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.requests[ids[i]] = struct{}{}
-	}
-}
-
-// ClearRequests clears the "requests" edge to the Request entity.
-func (m *TraceMutation) ClearRequests() {
-	m.clearedrequests = true
-}
-
-// RequestsCleared reports if the "requests" edge to the Request entity was cleared.
-func (m *TraceMutation) RequestsCleared() bool {
-	return m.clearedrequests
-}
-
-// RemoveRequestIDs removes the "requests" edge to the Request entity by IDs.
-func (m *TraceMutation) RemoveRequestIDs(ids ...int) {
-	if m.removedrequests == nil {
-		m.removedrequests = make(map[int]struct{})
-	}
-	for i := range ids {
-		delete(m.requests, ids[i])
-		m.removedrequests[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedRequests returns the removed IDs of the "requests" edge to the Request entity.
-func (m *TraceMutation) RemovedRequestsIDs() (ids []int) {
-	for id := range m.removedrequests {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// RequestsIDs returns the "requests" edge IDs in the mutation.
-func (m *TraceMutation) RequestsIDs() (ids []int) {
-	for id := range m.requests {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetRequests resets all changes to the "requests" edge.
-func (m *TraceMutation) ResetRequests() {
-	m.requests = nil
-	m.clearedrequests = false
-	m.removedrequests = nil
-}
-
-// Where appends a list predicates to the TraceMutation builder.
-func (m *TraceMutation) Where(ps ...predicate.Trace) {
-	m.predicates = append(m.predicates, ps...)
-}
-
-// WhereP appends storage-level predicates to the TraceMutation builder. Using this method,
-// users can use type-assertion to append predicates that do not depend on any generated package.
-func (m *TraceMutation) WhereP(ps ...func(*sql.Selector)) {
-	p := make([]predicate.Trace, len(ps))
-	for i := range ps {
-		p[i] = ps[i]
-	}
-	m.Where(p...)
-}
-
-// Op returns the operation name.
-func (m *TraceMutation) Op() Op {
-	return m.op
-}
-
-// SetOp allows setting the mutation operation.
-func (m *TraceMutation) SetOp(op Op) {
-	m.op = op
-}
-
-// Type returns the node type of this mutation (Trace).
-func (m *TraceMutation) Type() string {
-	return m.typ
-}
-
-// Fields returns all fields that were changed during this mutation. Note that in
-// order to get all numeric fields that were incremented/decremented, call
-// AddedFields().
-func (m *TraceMutation) Fields() []string {
-	fields := make([]string, 0, 4)
-	if m.created_at != nil {
-		fields = append(fields, trace.FieldCreatedAt)
-	}
-	if m.updated_at != nil {
-		fields = append(fields, trace.FieldUpdatedAt)
-	}
-	if m.trace_id != nil {
-		fields = append(fields, trace.FieldTraceID)
-	}
-	if m.thread != nil {
-		fields = append(fields, trace.FieldThreadID)
-	}
-	return fields
-}
-
-// Field returns the value of a field with the given name. The second boolean
-// return value indicates that this field was not set, or was not defined in the
-// schema.
-func (m *TraceMutation) Field(name string) (ent.Value, bool) {
-	switch name {
-	case trace.FieldCreatedAt:
-		return m.CreatedAt()
-	case trace.FieldUpdatedAt:
-		return m.UpdatedAt()
-	case trace.FieldTraceID:
-		return m.TraceID()
-	case trace.FieldThreadID:
-		return m.ThreadID()
-	}
-	return nil, false
-}
-
-// OldField returns the old value of the field from the database. An error is
-// returned if the mutation operation is not UpdateOne, or the query to the
-// database failed.
-func (m *TraceMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
-	switch name {
-	case trace.FieldCreatedAt:
-		return m.OldCreatedAt(ctx)
-	case trace.FieldUpdatedAt:
-		return m.OldUpdatedAt(ctx)
-	case trace.FieldTraceID:
-		return m.OldTraceID(ctx)
-	case trace.FieldThreadID:
-		return m.OldThreadID(ctx)
-	}
-	return nil, fmt.Errorf("unknown Trace field %s", name)
-}
-
-// SetField sets the value of a field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *TraceMutation) SetField(name string, value ent.Value) error {
-	switch name {
-	case trace.FieldCreatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCreatedAt(v)
-		return nil
-	case trace.FieldUpdatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUpdatedAt(v)
-		return nil
-	case trace.FieldTraceID:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetTraceID(v)
-		return nil
-	case trace.FieldThreadID:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetThreadID(v)
-		return nil
-	}
-	return fmt.Errorf("unknown Trace field %s", name)
-}
-
-// AddedFields returns all numeric fields that were incremented/decremented during
-// this mutation.
-func (m *TraceMutation) AddedFields() []string {
-	var fields []string
-	return fields
-}
-
-// AddedField returns the numeric value that was incremented/decremented on a field
-// with the given name. The second boolean return value indicates that this field
-// was not set, or was not defined in the schema.
-func (m *TraceMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	}
-	return nil, false
-}
-
-// AddField adds the value to the field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *TraceMutation) AddField(name string, value ent.Value) error {
-	switch name {
-	}
-	return fmt.Errorf("unknown Trace numeric field %s", name)
-}
-
-// ClearedFields returns all nullable fields that were cleared during this
-// mutation.
-func (m *TraceMutation) ClearedFields() []string {
-	var fields []string
-	if m.FieldCleared(trace.FieldThreadID) {
-		fields = append(fields, trace.FieldThreadID)
-	}
-	return fields
-}
-
-// FieldCleared returns a boolean indicating if a field with the given name was
-// cleared in this mutation.
-func (m *TraceMutation) FieldCleared(name string) bool {
-	_, ok := m.clearedFields[name]
-	return ok
-}
-
-// ClearField clears the value of the field with the given name. It returns an
-// error if the field is not defined in the schema.
-func (m *TraceMutation) ClearField(name string) error {
-	switch name {
-	case trace.FieldThreadID:
-		m.ClearThreadID()
-		return nil
-	}
-	return fmt.Errorf("unknown Trace nullable field %s", name)
-}
-
-// ResetField resets all changes in the mutation for the field with the given name.
-// It returns an error if the field is not defined in the schema.
-func (m *TraceMutation) ResetField(name string) error {
-	switch name {
-	case trace.FieldCreatedAt:
-		m.ResetCreatedAt()
-		return nil
-	case trace.FieldUpdatedAt:
-		m.ResetUpdatedAt()
-		return nil
-	case trace.FieldTraceID:
-		m.ResetTraceID()
-		return nil
-	case trace.FieldThreadID:
-		m.ResetThreadID()
-		return nil
-	}
-	return fmt.Errorf("unknown Trace field %s", name)
-}
-
-// AddedEdges returns all edge names that were set/added in this mutation.
-func (m *TraceMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.thread != nil {
-		edges = append(edges, trace.EdgeThread)
-	}
-	if m.requests != nil {
-		edges = append(edges, trace.EdgeRequests)
-	}
-	return edges
-}
-
-// AddedIDs returns all IDs (to other nodes) that were added for the given edge
-// name in this mutation.
-func (m *TraceMutation) AddedIDs(name string) []ent.Value {
-	switch name {
-	case trace.EdgeThread:
-		if id := m.thread; id != nil {
-			return []ent.Value{*id}
-		}
-	case trace.EdgeRequests:
-		ids := make([]ent.Value, 0, len(m.requests))
-		for id := range m.requests {
-			ids = append(ids, id)
-		}
-		return ids
-	}
-	return nil
-}
-
-// RemovedEdges returns all edge names that were removed in this mutation.
-func (m *TraceMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.removedrequests != nil {
-		edges = append(edges, trace.EdgeRequests)
-	}
-	return edges
-}
-
-// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
-// the given name in this mutation.
-func (m *TraceMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	case trace.EdgeRequests:
-		ids := make([]ent.Value, 0, len(m.removedrequests))
-		for id := range m.removedrequests {
-			ids = append(ids, id)
-		}
-		return ids
-	}
-	return nil
-}
-
-// ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *TraceMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.clearedthread {
-		edges = append(edges, trace.EdgeThread)
-	}
-	if m.clearedrequests {
-		edges = append(edges, trace.EdgeRequests)
-	}
-	return edges
-}
-
-// EdgeCleared returns a boolean which indicates if the edge with the given name
-// was cleared in this mutation.
-func (m *TraceMutation) EdgeCleared(name string) bool {
-	switch name {
-	case trace.EdgeThread:
-		return m.clearedthread
-	case trace.EdgeRequests:
-		return m.clearedrequests
-	}
-	return false
-}
-
-// ClearEdge clears the value of the edge with the given name. It returns an error
-// if that edge is not defined in the schema.
-func (m *TraceMutation) ClearEdge(name string) error {
-	switch name {
-	case trace.EdgeThread:
-		m.ClearThread()
-		return nil
-	}
-	return fmt.Errorf("unknown Trace unique edge %s", name)
-}
-
-// ResetEdge resets all changes to the edge with the given name in this mutation.
-// It returns an error if the edge is not defined in the schema.
-func (m *TraceMutation) ResetEdge(name string) error {
-	switch name {
-	case trace.EdgeThread:
-		m.ResetThread()
-		return nil
-	case trace.EdgeRequests:
-		m.ResetRequests()
-		return nil
-	}
-	return fmt.Errorf("unknown Trace edge %s", name)
 }
 
 // UsageLogMutation represents an operation that mutates the UsageLog nodes in the graph.

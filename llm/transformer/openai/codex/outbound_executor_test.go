@@ -163,13 +163,22 @@ var _ pipeline.ChannelCustomizedExecutor = (*OutboundTransformer)(nil)
 
 type mockCodexExecutor struct {
 	streamEvents []*httpclient.StreamEvent
+	doCalled     bool
+	streamCalled bool
 }
 
-func (m *mockCodexExecutor) Do(_ context.Context, _ *httpclient.Request) (*httpclient.Response, error) {
-	return nil, assert.AnError
+func (m *mockCodexExecutor) Do(_ context.Context, req *httpclient.Request) (*httpclient.Response, error) {
+	m.doCalled = true
+	return &httpclient.Response{
+		StatusCode: http.StatusOK,
+		Headers:    http.Header{"Content-Type": []string{"application/json"}},
+		Body:       []byte(`{"id":"resp_123","created_at":1766580000,"model":"gpt-5.5","status":"completed","output":[]}`),
+		Request:    req,
+	}, nil
 }
 
 func (m *mockCodexExecutor) DoStream(_ context.Context, _ *httpclient.Request) (streams.Stream[*httpclient.StreamEvent], error) {
+	m.streamCalled = true
 	return streams.SliceStream(m.streamEvents), nil
 }
 
@@ -312,6 +321,125 @@ func TestCodexOutbound_ForcesArrayInputsForSingleMessage(t *testing.T) {
 	require.True(t, ok, "first input item should be a map, got %T", inputSlice[0])
 	assert.Equal(t, "message", first["type"])
 	assert.Equal(t, "user", first["role"])
+}
+
+func TestCodexOutbound_EmulatesCompactThroughResponses(t *testing.T) {
+	ctx := context.Background()
+	outbound := newTestCodexOutbound(t)
+
+	hreq, err := outbound.TransformRequest(ctx, &llm.Request{
+		Model:       "gpt-5.5",
+		RequestType: llm.RequestTypeCompact,
+		APIFormat:   llm.APIFormatOpenAIResponseCompact,
+		Compact: &llm.CompactRequest{
+			Instructions:   "Compact the conversation",
+			PromptCacheKey: "session-1",
+			Input: []llm.Message{{
+				Role:    "user",
+				Content: llm.MessageContent{Content: lo.ToPtr("Hello")},
+			}},
+		},
+	})
+	require.NoError(t, err)
+
+	assert.NotContains(t, hreq.URL, "/responses/compact")
+	assert.Contains(t, hreq.URL, "/responses")
+	assert.Empty(t, hreq.RequestType)
+	assert.Equal(t, string(llm.APIFormatOpenAIResponse), hreq.APIFormat)
+	assert.Equal(t, "application/json", hreq.Headers.Get("Accept"))
+	assert.Equal(t, true, hreq.TransformerMetadata[codexCompactEmulatedKey])
+	assert.Equal(t, "Compact the conversation", hreq.TransformerMetadata[codexCompactInstructionsKey])
+
+	body := decodeCodexRequestBody(t, hreq)
+	assert.Equal(t, "gpt-5.5", body["model"])
+	assert.Equal(t, "Compact the conversation", body["instructions"])
+	assert.Equal(t, "session-1", body["prompt_cache_key"])
+	assert.Equal(t, false, body["stream"])
+}
+
+func TestCodexOutbound_NativeCompactUsesCompactEndpoint(t *testing.T) {
+	ctx := context.Background()
+	outbound := newTestCodexOutbound(t)
+
+	hreq, err := outbound.TransformRequest(ctx, &llm.Request{
+		Model:       "gpt-5.5",
+		RequestType: llm.RequestTypeCompact,
+		APIFormat:   llm.APIFormatOpenAIResponseCompact,
+		TransformerMetadata: map[string]any{
+			"codex_compact_mode": "native",
+		},
+		Compact: &llm.CompactRequest{
+			Instructions:   "Compact the conversation",
+			PromptCacheKey: "session-1",
+			Input: []llm.Message{{
+				Role:    "user",
+				Content: llm.MessageContent{Content: lo.ToPtr("Hello")},
+			}},
+		},
+	})
+	require.NoError(t, err)
+
+	assert.Contains(t, hreq.URL, "/responses/compact")
+	assert.Equal(t, string(llm.RequestTypeCompact), hreq.RequestType)
+	assert.Equal(t, string(llm.APIFormatOpenAIResponseCompact), hreq.APIFormat)
+	assert.Equal(t, "application/json", hreq.Headers.Get("Accept"))
+	assert.NotContains(t, hreq.TransformerMetadata, codexCompactEmulatedKey)
+
+	var body map[string]any
+	require.NoError(t, json.Unmarshal(hreq.Body, &body))
+	assert.Equal(t, "gpt-5.5", body["model"])
+	assert.Equal(t, "Compact the conversation", body["instructions"])
+	assert.Equal(t, "session-1", body["prompt_cache_key"])
+}
+
+func TestCodexOutbound_WrapsEmulatedCompactResponse(t *testing.T) {
+	ctx := context.Background()
+	outbound := newTestCodexOutbound(t)
+
+	httpResp := &httpclient.Response{
+		StatusCode: http.StatusOK,
+		Body: []byte(`{
+			"id":"resp_123",
+			"created_at":1766580000,
+			"model":"gpt-5.5",
+			"status":"completed",
+			"output":[{"type":"message","id":"msg_123","role":"assistant","content":[{"type":"output_text","text":"summary"}]}]
+		}`),
+		Request: &httpclient.Request{
+			TransformerMetadata: map[string]any{
+				codexCompactEmulatedKey:     true,
+				codexCompactInstructionsKey: "Compact the conversation",
+			},
+		},
+	}
+
+	llmResp, err := outbound.TransformResponse(ctx, httpResp)
+	require.NoError(t, err)
+
+	assert.Equal(t, llm.RequestTypeCompact, llmResp.RequestType)
+	assert.Equal(t, llm.APIFormatOpenAIResponseCompact, llmResp.APIFormat)
+	require.NotNil(t, llmResp.Compact)
+	assert.Equal(t, "response.compaction", llmResp.Compact.Object)
+	assert.Equal(t, "Compact the conversation", llmResp.Compact.Instructions)
+	require.Len(t, llmResp.Compact.Output, 1)
+	assert.Equal(t, "summary", lo.FromPtr(llmResp.Compact.Output[0].Content.Content))
+}
+
+func TestCodexExecutor_EmulatedCompactUsesNonStreamingExecutor(t *testing.T) {
+	ctx := context.Background()
+	outbound := newTestCodexOutbound(t)
+	inner := &mockCodexExecutor{}
+	executor := outbound.CustomizeExecutor(inner)
+
+	_, err := executor.Do(ctx, &httpclient.Request{
+		TransformerMetadata: map[string]any{
+			codexCompactEmulatedKey: true,
+		},
+	})
+	require.NoError(t, err)
+
+	assert.True(t, inner.doCalled)
+	assert.False(t, inner.streamCalled)
 }
 
 func newTestCodexOutbound(t *testing.T) *OutboundTransformer {

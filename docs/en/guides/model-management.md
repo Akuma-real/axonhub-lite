@@ -171,7 +171,7 @@ Check in order:
 ### Q: How to verify associations are working?
 
 1. Send a test request
-2. Check the Trace in the console to see which channel the request actually went through
+2. Check the Requests page in the console to see which channel the request actually went through
 3. Check logs for candidate selection records
 
 ### Q: Will too many associations affect performance?

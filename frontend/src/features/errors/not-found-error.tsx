@@ -11,8 +11,6 @@ import {
   IconArrowLeft,
   IconExternalLink,
   IconStack2,
-  IconActivity,
-  IconRoute,
 } from '@tabler/icons-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -76,20 +74,6 @@ export default function NotFoundError() {
         path: '/requests',
         icon: <IconChartBar className='h-5 w-5' />,
         keywords: ['requests', 'api', 'analytics', 'monitoring', 'usage'],
-      },
-      {
-        title: 'Traces',
-        description: 'Inspect gateway traces and execution flow',
-        path: '/traces',
-        icon: <IconRoute className='h-5 w-5' />,
-        keywords: ['traces', 'trace', 'debug', 'flow'],
-      },
-      {
-        title: 'Threads',
-        description: 'Review conversation threads',
-        path: '/threads',
-        icon: <IconActivity className='h-5 w-5' />,
-        keywords: ['threads', 'conversations', 'messages'],
       },
       {
         title: 'Settings',

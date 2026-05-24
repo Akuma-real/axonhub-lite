@@ -20,11 +20,6 @@ Each test case is organized in its own directory with dedicated tests and docume
 
 ## Common Integration Features
 
-### Headers Integration
-All tests include proper AxonHub header handling:
-- `AH-Trace-Id`: Request tracing identifier
-- `AH-Thread-Id`: Conversation thread identifier
-
 ### API Patterns Demonstrated
 - **Generate Content**: Basic and advanced chat interactions
 - **Chat Sessions**: Multi-turn conversation with context preservation
@@ -48,8 +43,6 @@ All tests include proper AxonHub header handling:
 ```bash
 export TEST_AXONHUB_API_KEY="your-api-key-here"
 export TEST_GEMINI_BASE_URL="http://localhost:8090/gemini"  # Optional, defaults to AxonHub
-export TEST_TRACE_ID="test-trace-123"              # Optional, defaults provided
-export TEST_THREAD_ID="test-thread-456"            # Optional, defaults provided
 export TEST_PROJECT_ID="test-project"              # Optional, defaults provided
 export TEST_MODEL="gemini-1.5-flash"               # Optional, defaults to gemini-1.5-flash
 ```
@@ -103,10 +96,6 @@ You can customize test behavior with environment variables:
 # Custom API endpoint
 export TEST_GEMINI_BASE_URL="https://your-proxy.com/gemini"
 
-# Custom trace/thread IDs for testing
-export TEST_TRACE_ID="custom-trace-abc"
-export TEST_THREAD_ID="custom-thread-xyz"
-
 # Custom model for tests
 export TEST_MODEL="gemini-1.5-pro"
 ```
@@ -147,18 +136,8 @@ If no `TEST_MODEL` is specified, the system defaults to `gemini-1.5-flash`.
 
 These tests demonstrate proper integration patterns for AxonHub:
 
-### Header Propagation
-All requests include standard AxonHub headers for tracing and threading:
-
-```go
-headers := map[string]string{
-    "AH-Trace-Id":  traceID,
-    "AH-Thread-Id": threadID,
-}
-```
-
 ### Context Management
-Tests show how to maintain conversation context and state across multiple API calls using Gemini chat sessions, which is essential for AxonHub's conversation threading system.
+Tests show how to maintain conversation context and state across multiple API calls using Gemini chat sessions.
 
 ### Error Handling
 Proper error handling and validation patterns that integrate well with AxonHub's error reporting and logging systems.

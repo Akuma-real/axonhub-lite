@@ -10,13 +10,8 @@ server:
   base_path: ""                 # Base path for API routes (env: AXONHUB_SERVER_BASE_PATH)
   request_timeout: "30s"        # Request timeout duration (env: AXONHUB_SERVER_REQUEST_TIMEOUT)
   llm_request_timeout: "600s"   # LLM request timeout duration (env: AXONHUB_SERVER_LLM_REQUEST_TIMEOUT)
-  trace:
-    thread_header: "AH-Thread-Id" # Thread ID header name (env: AXONHUB_SERVER_TRACE_THREAD_HEADER)
-    trace_header: "AH-Trace-Id" # Trace ID header name (env: AXONHUB_SERVER_TRACE_TRACE_HEADER)
-    extra_trace_headers: [] # Extra trace headers (env: AXONHUB_SERVER_TRACE_EXTRA_TRACE_HEADERS)
-    extra_trace_body_fields: [] # Extra trace body fields (env: AXONHUB_SERVER_TRACE_EXTRA_TRACE_BODY_FIELDS)
-    claude_code_trace_enabled: false # Enable extracting trace IDs from Claude Code request metadata (env: AXONHUB_SERVER_TRACE_CLAUDE_CODE_TRACE_ENABLED)
-    codex_trace_enabled: false # Enable extracting trace IDs from Codex Session_id header (env: AXONHUB_SERVER_TRACE_CODEX_TRACE_ENABLED)
+  request_log:
+    request_header: "AH-Request-Id" # Request ID response header name (env: AXONHUB_SERVER_REQUEST_LOG_REQUEST_HEADER)
   debug: false                  # Enable debug mode (env: AXONHUB_SERVER_DEBUG)
   disable_ssl_verify: false     # Disable SSL certificate verification for self-signed certificates (env: AXONHUB_SERVER_DISABLE_SSL_VERIFY)
   cors:
@@ -39,8 +34,7 @@ server:
       - "X-API-Key"
       - "X-Goog-Api-Key"
       - "X-Project-ID"
-      - "AH-Thread-Id"
-      - "AH-Trace-Id"
+      - "AH-Request-Id"
       # Add any other headers your frontend sends
     exposed_headers: []         # Exposed headers (env: AXONHUB_SERVER_CORS_EXPOSED_HEADERS)
     allow_credentials: true     # Allow credentials (env: AXONHUB_SERVER_CORS_ALLOW_CREDENTIALS)
@@ -164,6 +158,6 @@ provider_quota:
 # export AXONHUB_LOG_FILE_MAX_SIZE=200
 # export AXONHUB_LOG_FILE_MAX_AGE=14
 # export AXONHUB_LOG_FILE_MAX_BACKUPS=7
-# export AXONHUB_SERVER_TRACE_HEADER="X-Trace-ID"
+# export AXONHUB_SERVER_REQUEST_LOG_REQUEST_HEADER="X-Request-ID"
 # export AXONHUB_METRICS_ENABLED=false
 # export AXONHUB_GC_CRON="0 3 * * 0"  # Run weekly on Sunday at 3:00 AM

@@ -20,7 +20,6 @@ Welcome to the AxonHub documentation center! This index will help you quickly fi
 | [API Key Profiles](guides/api-key-profiles.md) | Create and manage API key profiles |
 | [Load Balancing](guides/load-balance.md) | Smart routing and failover settings |
 | [Cost Tracking](guides/cost-tracking.md) | Real-time monitoring and usage analytics |
-| [Request Tracing](guides/tracing.md) | Complete request traceability |
 | [Request Override](guides/request-override.md) | Dynamically modify request parameters |
 | [Antigravity](guides/antigravity.md) | Advanced routing and optimization features |
 

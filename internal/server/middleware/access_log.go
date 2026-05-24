@@ -7,7 +7,7 @@ import (
 
 	"github.com/looplj/axonhub/internal/contexts"
 	"github.com/looplj/axonhub/internal/log"
-	"github.com/looplj/axonhub/internal/tracing"
+	"github.com/looplj/axonhub/internal/requestlog"
 )
 
 // AccessLog returns a middleware that logs access information for each request.
@@ -47,7 +47,7 @@ func AccessLog() gin.HandlerFunc {
 		}
 
 		// Add GraphQL operation name if available
-		if opName, ok := tracing.GetOperationName(ctx); ok {
+		if opName, ok := requestlog.GetOperationName(ctx); ok {
 			fields = append(fields, log.String("operation", opName))
 		}
 

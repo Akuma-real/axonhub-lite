@@ -1,4 +1,4 @@
-.PHONY: test test-trace test-weight test-advanced test-all clean help
+.PHONY: test test-weight test-advanced test-all clean help
 
 # Default target
 .DEFAULT_GOAL := help
@@ -20,18 +20,12 @@ help: ## Show this help message
 	@echo "  TEST_AXONHUB_API_KEY      API key for AxonHub (required)"
 	@echo "  TEST_OPENAI_BASE_URL      Base URL for AxonHub (default: http://localhost:8090/v1)"
 	@echo "  TEST_MODEL                Model to use for tests (default: deepseek-chat)"
-	@echo "  TEST_DISABLE_TRACE        Disable trace ID generation (default: false)"
-	@echo "  TEST_DISABLE_THREAD       Disable thread ID generation (default: false)"
 	@echo "  TEST_TIMEOUT              Test timeout (default: 5m)"
 	@echo "  TEST_FLAGS                Additional go test flags (default: -v)"
 
 test: ## Run all load balance tests
 	@echo "Running all load balance tests..."
 	$(GO_TEST) ./...
-
-test-trace: ## Run trace-based load balancing tests
-	@echo "Running trace-based load balancing tests..."
-	$(GO_TEST) -run TestTrace ./...
 
 test-weight: ## Run weight-based load balancing tests
 	@echo "Running weight-based load balancing tests..."
@@ -76,7 +70,7 @@ test-debug: ## Run tests with debug output
 
 test-quick: ## Run quick smoke tests
 	@echo "Running quick smoke tests..."
-	$(GO_TEST) -run "TestTraceBasedLoadBalancing$$|TestWeightBasedLoadBalancing$$" -short ./...
+	$(GO_TEST) -run "TestWeightBasedLoadBalancing$$|TestLoadBalancingWithRetry$$" -short ./...
 
 test-concurrent: ## Run concurrent load tests
 	@echo "Running concurrent load tests..."
@@ -116,8 +110,6 @@ check-env: ## Check required environment variables
 	fi
 	@echo "✅ TEST_OPENAI_BASE_URL: $${TEST_OPENAI_BASE_URL:-http://localhost:8090/v1 (default)}"
 	@echo "✅ TEST_MODEL: $${TEST_MODEL:-deepseek-chat (default)}"
-	@echo "✅ TEST_DISABLE_TRACE: $${TEST_DISABLE_TRACE:-false (default)}"
-	@echo "✅ TEST_DISABLE_THREAD: $${TEST_DISABLE_THREAD:-false (default)}"
 
 verify: check-env ## Verify test environment is ready
 	@echo ""
@@ -155,7 +147,7 @@ vet: ## Run go vet
 	@go vet ./...
 
 # Quick test combinations
-test-basic: test-trace test-weight ## Run basic load balancing tests
+test-basic: test-weight test-failover ## Run basic load balancing tests
 
 test-full: test-basic test-advanced ## Run comprehensive test suite
 

@@ -35,22 +35,7 @@ Each test case is organized in its own directory with dedicated tests and docume
    - Tool integration in conversations
    - Message history management
 
-6. **[trace_multiple_requests](./trace_multiple_requests)** - Multiple requests in single trace tests
-   - Multi-turn conversation within single trace
-   - Function calling with tool integration
-   - Context preservation across multiple calls
-
-7. **[tread_multiple_traces](./tread_multiple_traces)** - Multiple traces in single thread tests
-   - Multiple traces within single thread
-   - Thread ID consistency verification
-   - Trace ID uniqueness verification
-
 ## Common Integration Features
-
-### Headers Integration
-All tests include proper AxonHub header handling:
-- `AH-Trace-Id`: Request tracing identifier
-- `AH-Thread-Id`: Conversation thread identifier
 
 ### API Patterns Demonstrated
 - **Chat Completions**: Basic and advanced chat interactions
@@ -76,8 +61,6 @@ All tests include proper AxonHub header handling:
 ```bash
 export TEST_AXONHUB_API_KEY="your-api-key-here"
 export TEST_OPENAI_BASE_URL="https://api.openai.com/v1"  # Optional, defaults to OpenAI
-export TEST_TRACE_ID="test-trace-123"              # Optional, defaults provided
-export TEST_THREAD_ID="test-thread-456"            # Optional, defaults provided
 export TEST_PROJECT_ID="test-project"              # Optional, defaults provided
 export TEST_MODEL="gpt-4o"                         # Optional, defaults to gpt-4o
 ```
@@ -112,12 +95,6 @@ go test -v ./streaming
 
 # Conversation tests
 go test -v ./conversation
-
-# Multiple requests in single trace
-go test -v ./trace_multiple_requests
-
-# Multiple traces in single thread
-go test -v ./tread_multiple_traces
 ```
 
 ### Run Individual Tests
@@ -130,9 +107,6 @@ go test -v -run TestStreamingWithTools ./streaming
 
 # Run conversation context preservation
 go test -v -run TestConversationContextPreservation ./conversation
-
-# Run multiple traces test
-go test -v -run TestSingleThreadMultipleTraces ./tread_multiple_traces
 ```
 
 ## Test Configuration
@@ -151,10 +125,6 @@ You can customize test behavior with environment variables:
 ```bash
 # Custom API endpoint
 export TEST_OPENAI_BASE_URL="https://your-proxy.com/v1"
-
-# Custom trace/thread IDs for testing
-export TEST_TRACE_ID="custom-trace-abc"
-export TEST_THREAD_ID="custom-thread-xyz"
 
 # Custom model for tests
 export TEST_MODEL="gpt-4o-mini"
@@ -201,18 +171,8 @@ If no `TEST_MODEL` is specified, the system defaults to `gpt-4o`.
 
 These tests demonstrate proper integration patterns for AxonHub:
 
-### Header Propagation
-All requests include standard AxonHub headers for tracing and threading:
-
-```go
-headers := map[string]string{
-    "AH-Trace-Id":  traceID,
-    "AH-Thread-Id": threadID,
-}
-```
-
 ### Context Management
-Tests show how to maintain conversation context and state across multiple API calls, which is essential for AxonHub's conversation threading system.
+Tests show how to maintain conversation context and state across multiple API calls using provider-native message history.
 
 ### Error Handling
 Proper error handling and validation patterns that integrate well with AxonHub's error reporting and logging systems.

@@ -66,13 +66,13 @@ func (h *TestHelper) RunWithHeaders(t *testing.T, testFunc func(ctx context.Cont
 	}
 }
 
-// CreateMessageWithHeaders creates a message with trace headers passed at call time
+// CreateMessageWithHeaders creates a message with configured headers passed at call time.
 func (h *TestHelper) CreateMessageWithHeaders(ctx context.Context, params anthropic.MessageNewParams) (*anthropic.Message, error) {
 	headerOpts := h.Config.GetHeaderOptions()
 	return h.Client.Messages.New(ctx, params, headerOpts...)
 }
 
-// CreateMessageStreamWithHeaders creates a streaming message with trace headers passed at call time
+// CreateMessageStreamWithHeaders creates a streaming message with configured headers passed at call time.
 func (h *TestHelper) CreateMessageStreamWithHeaders(ctx context.Context, params anthropic.MessageNewParams) *ssestream.Stream[anthropic.MessageStreamEventUnion] {
 	headerOpts := h.Config.GetHeaderOptions()
 	return h.Client.Messages.NewStreaming(ctx, params, headerOpts...)
@@ -109,43 +109,6 @@ func (h *TestHelper) GetModelWithFallback(fallback string) anthropic.Model {
 // SetModel sets the model for tests
 func (h *TestHelper) SetModel(model anthropic.Model) {
 	h.Config.SetModel(string(model))
-}
-
-// CreateTestHelperWithNewTrace creates a new test helper with the same thread but new trace ID
-func CreateTestHelperWithNewTrace(t *testing.T, existingConfig *Config) *TestHelper {
-	t.Helper()
-
-	// Create a new config based on existing one
-	newConfig := &Config{
-		APIKey:        existingConfig.APIKey,
-		BaseURL:       existingConfig.BaseURL,
-		Timeout:       existingConfig.Timeout,
-		MaxRetries:    existingConfig.MaxRetries,
-		Model:         existingConfig.Model,
-		DisableTrace:  existingConfig.DisableTrace,
-		DisableThread: existingConfig.DisableThread,
-		ThreadID:      existingConfig.ThreadID, // Keep same thread ID
-	}
-
-	// Only generate new trace ID if not disabled
-	if !existingConfig.DisableTrace {
-		// Use existing trace ID prefix if available, otherwise default to "trace"
-		prefix := "trace"
-		if existingConfig.TraceID != "" {
-			// Extract prefix from existing trace ID (everything before the first hyphen)
-			if idx := strings.Index(existingConfig.TraceID, "-"); idx > 0 {
-				prefix = existingConfig.TraceID[:idx]
-			}
-		}
-		newConfig.TraceID = getRandomTraceIDWithPrefix(prefix)
-	}
-
-	client := newConfig.NewClient()
-
-	return &TestHelper{
-		Config: newConfig,
-		Client: client,
-	}
 }
 
 func ContainsCaseInsensitive(text, substring string) bool {

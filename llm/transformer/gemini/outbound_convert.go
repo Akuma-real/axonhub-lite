@@ -436,7 +436,7 @@ func convertLLMMessageToGeminiContent(msg *llm.Message) *Content {
 		// If there are tool calls but no thought signature, use a default one.
 		// This field is not compatible with OpenAI sdk, so we use the default value.
 		// We try the best to support this fields to keep this fields in the chat conversions, so we use the ReasoningSignature to hold the field,
-		// And this field will be preserved during claude code trace, will not degrade the gemini model performance.
+		// This field is preserved for Claude Code compatibility and does not degrade Gemini model performance.
 		msgThoughtSignature := shared.DecodeGeminiThoughtSignature(msg.ReasoningSignature)
 
 		if (len(msg.ToolCalls) > 0 || msg.ReasoningContent != nil) && msgThoughtSignature == nil {

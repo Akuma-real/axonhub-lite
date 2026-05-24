@@ -45,7 +45,7 @@ test-conversation: setup
 # Run all tests except responses and extra_body
 test-exclude-responses-extra-body: setup
 	@echo "Running all tests except responses and extra_body..."
-	go test --count=1 -parallel=1 -v ./qa_simple ./tool_single ./tool_multiple ./streaming ./conversation ./thread_multiple_traces ./trace_multiple_requests
+	go test --count=1 -parallel=1 -v ./qa_simple ./tool_single ./tool_multiple ./streaming ./conversation
 
 # Run specific test patterns
 test-simple: setup
@@ -107,8 +107,6 @@ check-env:
 		echo "✓ OPENAI_API_KEY is set"; \
 	fi
 	@echo "OPENAI_BASE_URL: $${OPENAI_BASE_URL:-https://api.openai.com/v1}"
-	@echo "TEST_TRACE_ID: $${TEST_TRACE_ID:-test-trace-123}"
-	@echo "TEST_THREAD_ID: $${TEST_THREAD_ID:-test-thread-456}"
 	@echo "TEST_PROJECT_ID: $${TEST_PROJECT_ID:-test-project}"
 
 # Quick validation (fast tests only)
@@ -155,8 +153,6 @@ env-reminder:
 	@echo "Make sure you have set the following environment variables:"
 	@echo "  export OPENAI_API_KEY='your-openai-api-key'"
 	@echo "  export OPENAI_BASE_URL='https://api.openai.com/v1'  # Optional"
-	@echo "  export TEST_TRACE_ID='test-trace-123'              # Optional"
-	@echo "  export TEST_THREAD_ID='test-thread-456'            # Optional"
 	@echo "  export TEST_PROJECT_ID='test-project'              # Optional"
 	@echo ""
 	@echo "You can also create a .env file in the test directory."

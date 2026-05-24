@@ -146,7 +146,7 @@ func buildChannel(c *ent.Channel, httpClient *httpclient.HttpClient) *Channel {
 }
 
 // getAPIKeyProvider returns an APIKeyProvider based on the channel.
-// If multiple enabled API keys are configured, it returns a TraceStickyKeyProvider for consistent hashing.
+// If multiple enabled API keys are configured, it returns a RandomKeyProvider.
 // Otherwise, it returns a StaticKeyProvider.
 //
 // NOTE: This function panics when there is no enabled API key. This is intended as an assertion:
@@ -154,7 +154,7 @@ func buildChannel(c *ent.Channel, httpClient *httpclient.HttpClient) *Channel {
 func getAPIKeyProvider(ch *Channel) auth.APIKeyProvider {
 	enabled := ch.cachedEnabledAPIKeys
 	if len(enabled) > 1 {
-		return NewTraceStickyKeyProvider(ch)
+		return auth.NewRandomKeyProvider(enabled)
 	}
 
 	if len(enabled) == 1 {

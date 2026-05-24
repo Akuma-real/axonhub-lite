@@ -30,24 +30,7 @@ The load balancing system uses the Strategy pattern to make the prioritization l
 
 ## Built-in Strategies
 
-### 1. TraceAwareStrategy (Priority: up to 1000 points)
-
-**Purpose**: Sticky routing for conversational consistency.
-
-**Algorithm**:
-1. Reads trace metadata from context (if debug or upstream provided it).
-2. Queries the last successful channel ID for that trace.
-3. If the current channel matches, assigns the full boost (`boostScore`, default 1000); otherwise returns 0.
-
-**Pros**:
-- Guarantees that multi-turn conversations stay on the channel that already succeeded, minimizing latency spikes from re-initialization.
-- Zero-cost when no trace information exists (strategy returns 0 quickly).
-
-**Cons**:
-- Requires trace propagation and persistence; no benefit if upstream systems omit trace IDs.
-- Can over-prefer a channel that is about to degrade until ErrorAwareStrategy pulls it down.
-
-### 2. ErrorAwareStrategy (Priority: 0-200 points)
+### 1. ErrorAwareStrategy (Priority: 0-200 points)
 
 **Purpose**: Deprioritizes channels based on their recent error history.
 
@@ -63,7 +46,7 @@ The load balancing system uses the Strategy pattern to make the prioritization l
 NewErrorAwareStrategy(channelService)
 ```
 
-### 3. WeightStrategy (Priority: 0-100 points)
+### 2. WeightStrategy (Priority: 0-100 points)
 
 **Purpose**: Respects admin-configured channel priorities.
 
@@ -116,42 +99,41 @@ The `DefaultChannelSelector` uses these strategies in order:
 
 ```go
 loadBalancer := NewLoadBalancer(
-    NewTraceAwareStrategy(requestService),                         // Priority 1: Trace consistency
-    NewErrorAwareStrategy(channelService),                         // Priority 2: Health
-    NewWeightRoundRobinStrategy(channelService),                   // Priority 3: Fairness + admin weight
-    NewLatencyAwareStrategy(channelService),                       // Priority 4: Streaming FTTL/TPS or non-streaming latency
-    NewRateLimitAwareStrategy(rateLimitTracker, connectionTracker), // Priority 5: Rate limits + concurrency fallback
+    NewErrorAwareStrategy(channelService),                         // Priority 1: Health
+    NewWeightRoundRobinStrategy(channelService),                   // Priority 2: Fairness + admin weight
+    NewLatencyAwareStrategy(channelService),                       // Priority 3: Streaming FTTL/TPS or non-streaming latency
+    NewRateLimitAwareStrategy(rateLimitTracker, connectionTracker), // Priority 4: Rate limits + concurrency fallback
 )
 ```
 
-**Total Score Range**: ~-9790-1530 points per channel (Trace 0-1000 + Error 0-200 + WeightRoundRobin 10-150 + Latency 0-80 + RateLimit -10000-100)
+**Total Score Range**: ~-9790-530 points per channel (Error 0-200 + WeightRoundRobin 10-150 + Latency 0-80 + RateLimit -10000-100)
 
 ### Default Strategy Mix Analysis
 
 **Strengths**:
-1. **Stability first** – TraceAware+ErrorAware ensures the channel that already worked stays on top *unless* it begins to fail.
+1. **Health first** – ErrorAware keeps degrading channels out of the preferred set while allowing recovery after cooldown.
 2. **Fair utilization** – WeightRoundRobin keeps new or idle channels active without ignoring business priorities.
 3. **Real-time protection** – LatencyAware and RateLimitAware react to live first-token latency, throughput, end-to-end latency, concurrency, and cooldown state before a channel is fully overloaded.
 
 **Trade-offs**:
-1. Requires multiple runtime signals (trace, metrics, request history, connections); missing data downgrades overall accuracy.
-2. Score magnitudes are very top-heavy (TraceAware dominates). When no trace exists, the remaining strategies must differentiate channels with far smaller numbers, so tuning their ranges matters.
+1. Requires multiple runtime signals (metrics, request history, connections); missing data downgrades overall accuracy.
+2. Score ranges must stay balanced so no single non-failure signal overwhelms health and rate-limit protection.
 3. Concurrency protection depends on accurate connection tracking and sensible `MaxConcurrent` or tracker capacities.
 
 ## Scoring Example
 
-Given 3 channels for a traced request with connection limits:
+Given 3 channels for a request with connection limits:
 
-| Channel | Trace Match | Consecutive Failures | Request Load | Weight | Utilization | Total Score | Rank |
-|---------|-------------|----------------------|--------------|--------|-------------|-------------|------|
-| A       | Yes         | 0                    | Near 0       | 80     | 20%         | 1390        | 1    |
-| C       | No          | 0                    | Low          | 50     | 20%         | 430         | 2    |
-| B       | No          | 1                    | High         | 100    | 90%         | 210         | 3    |
+| Channel | Consecutive Failures | Request Load | Weight | Utilization | Total Score | Rank |
+|---------|----------------------|--------------|--------|-------------|-------------|------|
+| A       | 0                    | Near 0       | 80     | 20%         | 390         | 1    |
+| C       | 0                    | Low          | 50     | 20%         | 430         | 2    |
+| B       | 1                    | High         | 100    | 90%         | 210         | 3    |
 
 **Calculation**:
-- Channel A: 1000 (trace) + 200 (healthy) + 150 (round robin) + 40 (weight) + 40 (connection) ≈ **1390**
-- Channel C: 0 (trace) + 200 + 120 (round robin) + 25 (weight) + 40 (connection) ≈ **385** (rounded to 430 after other boosts)
-- Channel B: 0 (trace) + 150 (health, -50 failure penalty) + 30 (round robin due to high load) + 50 (weight) + 5 (connection) ≈ **235** (rounded to 210 after cooldown penalty)
+- Channel A: 200 (healthy) + 150 (round robin) + 40 (weight) + 40 (connection) ≈ **430**
+- Channel C: 200 + 120 (round robin) + 25 (weight) + 40 (connection) ≈ **385** (rounded to 430 after other boosts)
+- Channel B: 150 (health, -50 failure penalty) + 30 (round robin due to high load) + 50 (weight) + 5 (connection) ≈ **235** (rounded to 210 after cooldown penalty)
 
 ## Observability
 
@@ -185,10 +167,6 @@ The load balancer provides comprehensive structured logging for debugging and mo
   "total_score": 1280.0,
   "final_rank": 1,
   "strategy_breakdown": {
-    "TraceAware": {
-      "score": 1000.0,
-      "duration_ms": 2.1
-    },
     "ErrorAware": {
       "score": 200.0,
       "duration_ms": 5.3
@@ -203,7 +181,6 @@ The load balancer provides comprehensive structured logging for debugging and mo
 ```
 
 **Strategy-Level Logging**:
-- **TraceAwareStrategy**: Logs when boosting channels based on trace history
 - ErrorAwareStrategy: Logs all penalties (consecutive failures, recent failures) and calculation details
 - **WeightStrategy**: Logs weight calculation with clamping warnings
 
@@ -256,11 +233,6 @@ if info := chat.GetDebugInfo(ctx); info != nil {
 
 ### Strategy-Specific Logs
 
-**TraceAwareStrategy** logs:
-- Debug: When boosting a channel (score: 1000, reason: "last_successful_channel_in_trace")
-- Trace: When no trace in context or channel not in trace
-- Debug: Errors retrieving trace information
-
 **ErrorAwareStrategy** logs:
 - Debug: All penalty calculations with values and reasons
   - Consecutive failures penalty
@@ -274,7 +246,7 @@ if info := chat.GetDebugInfo(ctx); info != nil {
 
 **WeightStrategy** logs:
 - Warn: When channel has negative weight (clamped to 0)
-- Trace: Weight calculation details
+- Debug: Weight calculation details
 
 ### Viewing Logs
 
@@ -293,9 +265,6 @@ tail -f axonhub.log | grep "Load balancing decision"
 # View specific channel details
 tail -f axonhub.log | grep "Channel load balancing details"
 
-# View TraceAware strategy logs
-tail -f axonhub.log | grep "TraceAwareStrategy"
-
 # View ErrorAware strategy logs
 tail -f axonhub.log | grep "ErrorAwareStrategy"
 
@@ -309,10 +278,6 @@ tail -f axonhub.log | grep "ErrorAwareStrategy"
 grep "ErrorAwareStrategy.*penalty" axonhub.log | \
   jq '{channel: .channel_name, penalty_reason: .details} | select(.penalty_reason != null)'
 
-# Analyze TraceAware strategy effectiveness
-grep "TraceAwareStrategy: boosting" axonhub.log | \
-  jq '{channel: .channel_name, trace_id: .trace_id}' | \
-  sort | uniq -c | sort -nr
 ```
 
 ### Performance Considerations
@@ -324,21 +289,6 @@ grep "TraceAwareStrategy: boosting" axonhub.log | \
 5. **Graceful Degradation**: If context information is missing, logs use sensible defaults (e.g., "unknown" for model)
 
 ### Debugging Strategy Behavior
-
-**Verify TraceAwareStrategy**:
-```bash
-# Send request with existing trace_id
-curl -X POST http://localhost:8090/v1/chat/completions \
-  -H "Content-Type: application/json" \
-  -H "X-Trace-ID: 12345" \
-  -d '{
-    "model": "gpt-4",
-    "messages": [{"role": "user", "content": "hello"}]
-  }'
-
-# Check logs for trace boosting
-tail -f axonhub.log | grep "TraceAwareStrategy: boosting"
-```
 
 **Verify ErrorAwareStrategy**:
 ```bash
@@ -375,5 +325,5 @@ tail -f axonhub.log | grep "WeightStrategy" | jq '{channel: .channel_name, score
 - `/internal/server/chat/strategies.go` - Strategy implementations with detailed logging
 - `/internal/server/chat/debug.go` - Debug mode implementation and helper functions
 - `/internal/server/chat/channels.go` - Channel selector integration
-- `/internal/server/biz/channel.go` - Channel service with trace support
+- `/internal/server/biz/channel.go` - Channel service and metrics
 - `/internal/server/biz/channel_performance.go` - Performance metrics

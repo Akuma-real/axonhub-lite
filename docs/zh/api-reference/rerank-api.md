@@ -197,8 +197,6 @@ func main() {
     )
     httpReq.Header.Set("Authorization", "Bearer your-axonhub-api-key")
     httpReq.Header.Set("Content-Type", "application/json")
-    httpReq.Header.Set("AH-Trace-Id", "trace-example-123")
-    httpReq.Header.Set("AH-Thread-Id", "thread-example-abc")
 
     client := &http.Client{}
     resp, err := client.Do(httpReq)
@@ -221,7 +219,6 @@ func main() {
 
 ## 最佳实践
 
-1. **使用追踪头**：添加 `AH-Trace-Id` 和 `AH-Thread-Id` 头以获得更好的可观测性
-2. **限制结果数量**：使用 `top_n` 限制结果数量以提高性能
-3. **返回文档**：仅在需要响应中包含文档文本时设置 `return_documents: true`
-4. **模型选择**：根据您的用例和语言选择合适的重排序模型
+1. **限制结果数量**：使用 `top_n` 限制结果数量以提高性能
+2. **返回文档**：仅在需要响应中包含文档文本时设置 `return_documents: true`
+3. **模型选择**：根据您的用例和语言选择合适的重排序模型

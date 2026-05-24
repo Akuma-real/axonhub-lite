@@ -26,11 +26,6 @@ Each test case is organized in its own directory with dedicated tests and docume
 
 ## Common Integration Features
 
-### Headers Integration
-All tests include proper AxonHub header handling:
-- `AH-Trace-Id`: Request tracing identifier
-- `AH-Thread-Id`: Conversation thread identifier
-
 ### API Patterns Demonstrated
 - **Chat Completions**: Basic and advanced chat interactions
 - **Function Calling**: Tool definition, execution, and continuation
@@ -55,8 +50,6 @@ All tests include proper AxonHub header handling:
 export TEST_AXONHUB_API_KEY="your-anthropic-api-key"
 export TEST_ANTHROPIC_BASE_URL="https://api.anthropic.com"  # Optional, defaults to Anthropic
 export TEST_MODEL="claude-3-5-sonnet-20241022"              # Optional, defaults to Claude 3.5 Sonnet
-export TEST_TRACE_ID="test-trace-123"                       # Optional, auto-generated
-export TEST_THREAD_ID="test-thread-456"                     # Optional, auto-generated
 ```
 
 ## Running Tests
@@ -134,9 +127,6 @@ export TEST_ANTHROPIC_BASE_URL="https://your-proxy.com"
 # Custom model for tests
 export TEST_MODEL="claude-3-haiku-20240307"
 
-# Custom trace/thread IDs for testing
-export TEST_TRACE_ID="custom-trace-abc"
-export TEST_THREAD_ID="custom-thread-xyz"
 ```
 
 ## Model Configuration
@@ -178,18 +168,8 @@ If no `TEST_MODEL` is specified, the system defaults to `claude-3-5-sonnet-20241
 
 These tests demonstrate proper integration patterns for AxonHub:
 
-### Header Propagation
-All requests include standard AxonHub headers for tracing and threading:
-
-```go
-headers := map[string]string{
-    "AH-Trace-Id":  traceID,
-    "AH-Thread-Id": threadID,
-}
-```
-
 ### Context Management
-Tests show how to maintain conversation context and state across multiple API calls, which is essential for AxonHub's conversation threading system.
+Tests show how to maintain conversation context and state across multiple API calls using provider-native message history.
 
 ### Error Handling
 Proper error handling and validation patterns that integrate well with AxonHub's error reporting and logging systems.

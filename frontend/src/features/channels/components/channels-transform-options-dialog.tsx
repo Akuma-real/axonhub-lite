@@ -11,6 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Form, FormField, FormItem, FormLabel, FormMessage, FormControl } from '@/components/ui/form';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useUpdateChannel } from '../data/channels';
 import { Channel, TransformOptions } from '../data/schema';
 import { mergeChannelSettingsForUpdate } from '../utils/merge';
@@ -25,6 +26,7 @@ const transformOptionsFormSchema = z.object({
   forceArrayInstructions: z.boolean().optional(),
   forceArrayInputs: z.boolean().optional(),
   replaceDeveloperRoleWithSystem: z.boolean().optional(),
+  codexCompactMode: z.enum(['emulated', 'native']).optional(),
 });
 
 export function ChannelsTransformOptionsDialog({ open, onOpenChange, currentRow }: Props) {
@@ -37,6 +39,7 @@ export function ChannelsTransformOptionsDialog({ open, onOpenChange, currentRow 
       forceArrayInstructions: currentRow.settings?.transformOptions?.forceArrayInstructions || false,
       forceArrayInputs: currentRow.settings?.transformOptions?.forceArrayInputs || false,
       replaceDeveloperRoleWithSystem: currentRow.settings?.transformOptions?.replaceDeveloperRoleWithSystem || false,
+      codexCompactMode: currentRow.settings?.transformOptions?.codexCompactMode || 'emulated',
     },
   });
 
@@ -46,14 +49,24 @@ export function ChannelsTransformOptionsDialog({ open, onOpenChange, currentRow 
         forceArrayInstructions: currentRow.settings?.transformOptions?.forceArrayInstructions || false,
         forceArrayInputs: currentRow.settings?.transformOptions?.forceArrayInputs || false,
         replaceDeveloperRoleWithSystem: currentRow.settings?.transformOptions?.replaceDeveloperRoleWithSystem || false,
+        codexCompactMode: currentRow.settings?.transformOptions?.codexCompactMode || 'emulated',
       });
     }
   }, [open, currentRow, form]);
 
   const onSubmit = async (values: TransformOptions) => {
     try {
+      const { codexCompactMode, ...baseTransformOptions } = values;
+      const transformOptions =
+        currentRow.type === 'codex'
+          ? {
+              ...baseTransformOptions,
+              codexCompactMode: codexCompactMode || 'emulated',
+            }
+          : baseTransformOptions;
+
       const nextSettings = mergeChannelSettingsForUpdate(currentRow.settings, {
-        transformOptions: values,
+        transformOptions,
       });
 
       await updateChannel.mutateAsync({
@@ -156,6 +169,37 @@ export function ChannelsTransformOptionsDialog({ open, onOpenChange, currentRow 
                       </FormItem>
                     )}
                   />
+
+                  {currentRow.type === 'codex' && (
+                    <FormField
+                      control={form.control}
+                      name='codexCompactMode'
+                      render={({ field }) => (
+                        <FormItem className='space-y-2'>
+                          <FormLabel>{t('channels.dialogs.fields.transformOptions.codexCompactMode.label')}</FormLabel>
+                          <FormControl>
+                            <Select value={field.value || 'emulated'} onValueChange={field.onChange}>
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value='emulated'>
+                                  {t('channels.dialogs.fields.transformOptions.codexCompactMode.options.emulated')}
+                                </SelectItem>
+                                <SelectItem value='native'>
+                                  {t('channels.dialogs.fields.transformOptions.codexCompactMode.options.native')}
+                                </SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </FormControl>
+                          <p className='text-muted-foreground text-xs'>
+                            {t('channels.dialogs.fields.transformOptions.codexCompactMode.description')}
+                          </p>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
                 </form>
               </Form>
             </CardContent>

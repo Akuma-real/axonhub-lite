@@ -62,12 +62,8 @@ server:
   base_path: ""                 # Base path for API routes
   request_timeout: "30s"        # Request timeout duration
   llm_request_timeout: "600s"   # LLM request timeout duration
-  trace:
-    thread_header: "AH-Thread-Id" # Thread ID header name
-    trace_header: "AH-Trace-Id" # Trace ID header name
-    extra_trace_headers: []     # Extra trace headers
-    claude_code_trace_enabled: false # Enable Claude Code trace extraction
-    codex_trace_enabled: false # Enable Codex trace extraction
+  request_log:
+    request_header: "AH-Request-Id" # Request ID response header name
   debug: false                  # Enable debug mode
   disable_ssl_verify: false     # Disable SSL certificate verification for upstream requests (self-signed certificates)
 ```
@@ -78,11 +74,8 @@ server:
 - `AXONHUB_SERVER_BASE_PATH`
 - `AXONHUB_SERVER_REQUEST_TIMEOUT`
 - `AXONHUB_SERVER_LLM_REQUEST_TIMEOUT`
-- `AXONHUB_SERVER_TRACE_THREAD_HEADER`
-- `AXONHUB_SERVER_TRACE_TRACE_HEADER`
-- `AXONHUB_SERVER_TRACE_EXTRA_TRACE_HEADERS`
-- `AXONHUB_SERVER_TRACE_CLAUDE_CODE_TRACE_ENABLED`
-- `AXONHUB_SERVER_TRACE_CODEX_TRACE_ENABLED`
+- `AXONHUB_SERVER_REQUEST_LOG_REQUEST_HEADER`
+- `AXONHUB_SERVER_TRACE_REQUEST_HEADER`
 - `AXONHUB_SERVER_DEBUG`
 - `AXONHUB_SERVER_DISABLE_SSL_VERIFY`
 

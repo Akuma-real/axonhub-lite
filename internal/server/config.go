@@ -3,7 +3,7 @@ package server
 import (
 	"time"
 
-	"github.com/looplj/axonhub/internal/tracing"
+	"github.com/looplj/axonhub/internal/requestlog"
 )
 
 type Config struct {
@@ -20,8 +20,8 @@ type Config struct {
 	// LLMRequestTimeout is the maximum duration for processing a request to LLM.
 	LLMRequestTimeout time.Duration `conf:"llm_request_timeout" yaml:"llm_request_timeout" json:"llm_request_timeout"`
 
-	Trace     tracing.Config `conf:"trace" yaml:"trace" json:"trace"`
-	Dashboard Dashboard      `conf:"dashboard" yaml:"dashboard" json:"dashboard"`
+	RequestLog requestlog.Config `conf:"request_log" yaml:"request_log" json:"request_log"`
+	Dashboard  Dashboard         `conf:"dashboard" yaml:"dashboard" json:"dashboard"`
 
 	Debug            bool `conf:"debug" yaml:"debug" json:"debug"`
 	DisableSSLVerify bool `conf:"disable_ssl_verify" yaml:"disable_ssl_verify" json:"disable_ssl_verify"`

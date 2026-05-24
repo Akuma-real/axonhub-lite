@@ -92,7 +92,19 @@ type TransformOptions struct {
 
 	// ReplaceDeveloperRoleWithSystem replaces developer role with system in messages for Bailian compatibility.
 	ReplaceDeveloperRoleWithSystem bool `json:"replaceDeveloperRoleWithSystem"`
+
+	// CodexCompactMode controls how Codex compact requests are sent upstream.
+	CodexCompactMode CodexCompactMode `json:"codexCompactMode,omitempty"`
 }
+
+type CodexCompactMode string
+
+const (
+	// CodexCompactModeEmulated sends a regular /responses request and wraps the response as compact.
+	CodexCompactModeEmulated CodexCompactMode = "emulated"
+	// CodexCompactModeNative sends the upstream native /responses/compact request.
+	CodexCompactModeNative CodexCompactMode = "native"
+)
 
 type ChannelSettings struct {
 	// ExtraModelPrefix sets the channel accept the model with the extra prefix.

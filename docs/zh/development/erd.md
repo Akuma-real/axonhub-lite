@@ -11,8 +11,6 @@ erDiagram
     Channel ||--o{ RequestExecution : handles
     Request ||--o{ RequestExecution : contains
     Request ||--o{ UsageLog : records
-    Trace ||--o{ Request : groups
-    Thread ||--o{ Trace : contains
     Model ||--o{ ChannelModelPrice : prices
     Channel ||--o{ ChannelProbe : checks
     ChannelOverrideTemplate }o--o{ Channel : applies_to
@@ -29,10 +27,8 @@ erDiagram
 | Request | 全局请求记录。 |
 | RequestExecution | 单次请求在某个渠道上的执行记录。 |
 | UsageLog | 请求的 Token 和费用统计。 |
-| Trace | 全局请求诊断链路分组。 |
-| Thread | 全局会话线程分组。 |
 | System | 实例级设置，包括重试、存储策略、模型行为和品牌配置。 |
 
 ## 鉴权模型
 
-管理员 JWT 可以管理全部后台资源。有效 API Key 可以调用网关端点，并写入对应的请求、Trace、Thread、执行和用量记录。
+管理员 JWT 可以管理全部后台资源。有效 API Key 可以调用网关端点，并写入对应的请求、执行和用量记录。

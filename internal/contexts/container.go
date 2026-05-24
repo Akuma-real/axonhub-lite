@@ -10,14 +10,11 @@ import (
 
 // contextContainer contains all values in the context.
 type contextContainer struct {
-	TraceID       *string
 	RequestID     *string
 	OperationName *string
 	APIKey        *ent.APIKey
 	User          *ent.User
 	Source        *request.Source
-	Thread        *ent.Thread
-	Trace         *ent.Trace
 	Errors        []error
 	mu            sync.RWMutex
 

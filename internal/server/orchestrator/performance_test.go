@@ -277,7 +277,7 @@ func TestPerformanceRecording_OnOutboundRawRequest_NoChannel(t *testing.T) {
 // catch the regression if the fix is reverted. It documents the exact bug scenario.
 func TestPerformanceRecording_StreamFlagBugRegression(t *testing.T) {
 	// This test documents the bug introduced in commit 8afd95c3:
-	// "feat: trace stikcy api key for multiple api keys channel"
+	// "feat: sticky api key for multiple api keys channel"
 	//
 	// The bug: OnOutboundRawRequest() was creating a new PerformanceRecord without
 	// preserving the Stream flag that was set in OnInboundLlmRequest().

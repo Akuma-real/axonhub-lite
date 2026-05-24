@@ -18,7 +18,7 @@ AxonHub uses Go templates for dynamic value rendering. You can access the follow
 | `.Model` | The model name currently set in the request (after model mapping). | `{{.Model}}` |
 | `.ReasoningEffort` | The `reasoning_effort` value (none, low, medium, high). | `{{.ReasoningEffort}}` |
 | `.Metadata` | Custom metadata map passed in the request. | `{{index .Metadata "user_id"}}` |
-| `.RequestHeader` | Filtered inbound client headers. Supports canonical/lowercase lookup and returns the first value. | `{{index .RequestHeader "X-Trace-Id"}}` |
+| `.RequestHeader` | Filtered inbound client headers. Supports canonical/lowercase lookup and returns the first value. | `{{index .RequestHeader "X-Client-Request-Id"}}` |
 
 ## Override Operation Types
 
@@ -95,8 +95,8 @@ You can use templates to make parameters dynamic based on the input request:
   },
   {
     "op": "set",
-    "path": "trace_id",
-    "value": "{{index .RequestHeader \"x-trace-id\"}}"
+    "path": "client_request_id",
+    "value": "{{index .RequestHeader \"x-client-request-id\"}}"
   }
 ]
 ```
@@ -266,8 +266,8 @@ Override headers use the same operation format as override parameters:
   },
   {
     "op": "set",
-    "path": "X-Trace-Id",
-    "value": "{{index .RequestHeader \"x-trace-id\"}}"
+    "path": "X-Client-Request-Id",
+    "value": "{{index .RequestHeader \"x-client-request-id\"}}"
   },
   {
     "op": "delete",

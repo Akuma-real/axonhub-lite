@@ -62,12 +62,8 @@ server:
   base_path: ""                 # API 路由的基础路径
   request_timeout: "30s"        # 请求超时时间
   llm_request_timeout: "600s"   # LLM 请求超时时间
-  trace:
-    thread_header: "AH-Thread-Id" # 线程 ID 请求头名称
-    trace_header: "AH-Trace-Id" # 追踪 ID 请求头名称
-    extra_trace_headers: []     # 额外的追踪请求头
-    claude_code_trace_enabled: false # 启用 Claude Code 追踪提取
-    codex_trace_enabled: false # 启用 Codex 追踪提取
+  request_log:
+    request_header: "AH-Request-Id" # 请求 ID 响应头名称
   debug: false                  # 启用调试模式
   disable_ssl_verify: false     # 禁用上游请求的 SSL 证书校验（自签名证书）
 ```
@@ -78,11 +74,8 @@ server:
 - `AXONHUB_SERVER_BASE_PATH`
 - `AXONHUB_SERVER_REQUEST_TIMEOUT`
 - `AXONHUB_SERVER_LLM_REQUEST_TIMEOUT`
-- `AXONHUB_SERVER_TRACE_THREAD_HEADER`
-- `AXONHUB_SERVER_TRACE_TRACE_HEADER`
-- `AXONHUB_SERVER_TRACE_EXTRA_TRACE_HEADERS`
-- `AXONHUB_SERVER_TRACE_CLAUDE_CODE_TRACE_ENABLED`
-- `AXONHUB_SERVER_TRACE_CODEX_TRACE_ENABLED`
+- `AXONHUB_SERVER_REQUEST_LOG_REQUEST_HEADER`
+- `AXONHUB_SERVER_TRACE_REQUEST_HEADER`
 - `AXONHUB_SERVER_DEBUG`
 - `AXONHUB_SERVER_DISABLE_SSL_VERIFY`
 

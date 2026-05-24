@@ -1,8 +1,6 @@
 import {
-  IconAB2,
   IconActivity,
   IconAi,
-  IconBaselineDensityMedium,
   IconKey,
   IconLayoutDashboard,
   IconPlayerPlay,
@@ -83,16 +81,6 @@ export function useSidebarData(): SidebarData {
           title: t('sidebar.items.requests'),
           url: '/requests',
           icon: IconActivity,
-        } as NavLink,
-        {
-          title: t('sidebar.items.traces'),
-          url: '/traces',
-          icon: IconAB2,
-        } as NavLink,
-        {
-          title: t('sidebar.items.threads'),
-          url: '/threads',
-          icon: IconBaselineDensityMedium,
         } as NavLink,
         {
           title: t('sidebar.items.playground'),

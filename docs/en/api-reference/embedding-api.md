@@ -108,8 +108,6 @@ func main() {
     embedding, err := client.Embeddings.New(context.TODO(), openai.EmbeddingNewParams{
         Input: openai.Union[string](openai.String("Hello, world!")),
         Model: openai.String("text-embedding-3-small"),
-        option.WithHeader("AH-Trace-Id", "trace-example-123"),
-        option.WithHeader("AH-Thread-Id", "thread-example-abc"),
     })
     if err != nil {
         log.Fatal(err)
@@ -164,11 +162,10 @@ The API keys are managed through AxonHub's API Key management system.
 
 ## Best Practices
 
-1. **Use Tracing Headers**: Include `AH-Trace-Id` and `AH-Thread-Id` headers for better observability
-2. **Batch Requests**: When embedding multiple texts, send them in a single request for better performance
-3. **Choose Appropriate Dimensions**: Use the `dimensions` parameter to reduce embedding size if full dimensionality isn't needed
-4. **Select Proper Encoding**: Use `base64` encoding if you need to transmit embeddings over the network to reduce payload size
-5. **Jina Task Types**: When using Jina embeddings, select the appropriate `task` type for your use case to optimize retrieval quality
+1. **Batch Requests**: When embedding multiple texts, send them in a single request for better performance
+2. **Choose Appropriate Dimensions**: Use the `dimensions` parameter to reduce embedding size if full dimensionality isn't needed
+3. **Select Proper Encoding**: Use `base64` encoding if you need to transmit embeddings over the network to reduce payload size
+4. **Jina Task Types**: When using Jina embeddings, select the appropriate `task` type for your use case to optimize retrieval quality
 
 ## Related Resources
 

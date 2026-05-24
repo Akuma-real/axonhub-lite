@@ -36,7 +36,6 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.3.0
 	github.com/google/jsonschema-go v0.3.1-0.20251120200837-98a387e3b975
 	github.com/hashicorp/go-multierror v1.1.1
-	github.com/hashicorp/golang-lru/v2 v2.0.7
 	github.com/hokaccha/go-prettyjson v0.0.0-20211117102719-0474bc63780f
 	github.com/jackc/pgx/v5 v5.9.2
 	github.com/kaptinlin/jsonrepair v0.2.4
@@ -68,6 +67,7 @@ require (
 
 require (
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.7.8 // indirect
+	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 	github.com/klauspost/compress v1.18.0 // indirect
 	github.com/spf13/afero v1.15.0 // indirect
 	github.com/tmaxmax/go-sse v0.11.0 // indirect

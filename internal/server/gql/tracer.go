@@ -8,7 +8,7 @@ import (
 
 	"github.com/looplj/axonhub/internal/contexts"
 	"github.com/looplj/axonhub/internal/log"
-	"github.com/looplj/axonhub/internal/tracing"
+	"github.com/looplj/axonhub/internal/requestlog"
 )
 
 type loggingTracer struct{}
@@ -29,7 +29,7 @@ func (t *loggingTracer) Validate(schema graphql.ExecutableSchema) error {
 func (t *loggingTracer) InterceptResponse(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
 	if graphql.HasOperationContext(ctx) {
 		opCtx := graphql.GetOperationContext(ctx)
-		ctx = tracing.WithOperationName(ctx, opCtx.OperationName)
+		ctx = requestlog.WithOperationName(ctx, opCtx.OperationName)
 
 		if log.DebugEnabled(ctx) {
 			log.Debug(ctx, "received graphql request",

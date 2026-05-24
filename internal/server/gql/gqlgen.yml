@@ -110,6 +110,9 @@ models:
   CapabilityPolicy:
     model:
       - github.com/looplj/axonhub/internal/objects.CapabilityPolicy
+  CodexCompactMode:
+    model:
+      - github.com/looplj/axonhub/internal/objects.CodexCompactMode
   ChannelEndpoint:
     model:
       - github.com/looplj/axonhub/internal/objects.ChannelEndpoint
@@ -269,54 +272,6 @@ models:
   UserInfo:
     model:
       - github.com/looplj/axonhub/internal/objects.UserInfo
-  Segment:
-    model:
-      - github.com/looplj/axonhub/internal/server/biz.Segment
-  RequestMetadata:
-    model:
-      - github.com/looplj/axonhub/internal/server/biz.RequestMetadata
-  UsageMetadata:
-    model:
-      - github.com/looplj/axonhub/internal/server/biz.UsageMetadata
-  Span:
-    model:
-      - github.com/looplj/axonhub/internal/server/biz.Span
-  SpanValue:
-    model:
-      - github.com/looplj/axonhub/internal/server/biz.SpanValue
-  SpanUserQuery:
-    model:
-      - github.com/looplj/axonhub/internal/server/biz.SpanUserQuery
-  SpanUserImageURL:
-    model:
-      - github.com/looplj/axonhub/internal/server/biz.SpanUserImageURL
-  SpanThinking:
-    model:
-      - github.com/looplj/axonhub/internal/server/biz.SpanThinking
-  SpanText:
-    model:
-      - github.com/looplj/axonhub/internal/server/biz.SpanText
-  SpanImageURL:
-    model:
-      - github.com/looplj/axonhub/internal/server/biz.SpanImageURL
-  SpanFunctionCall:
-    model:
-      - github.com/looplj/axonhub/internal/server/biz.SpanFunctionCall
-  SpanFunctionResult:
-    model:
-      - github.com/looplj/axonhub/internal/server/biz.SpanFunctionResult
-  SpanToolUse:
-    model:
-      - github.com/looplj/axonhub/internal/server/biz.SpanToolUse
-  SpanToolResult:
-    model:
-      - github.com/looplj/axonhub/internal/server/biz.SpanToolResult
-  SpanSystemInstruction:
-    model:
-      - github.com/looplj/axonhub/internal/server/biz.SpanSystemInstruction
-  SpanType:
-    model:
-      - string
   ModelIdentityWithStatus:
     model:
       - github.com/looplj/axonhub/internal/server/biz.ModelIdentityWithStatus

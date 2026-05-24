@@ -269,38 +269,6 @@ func (r *queryResolver) Systems(ctx context.Context, after *entgql.Cursor[int], 
 	)
 }
 
-// Threads is the resolver for the threads field.
-func (r *queryResolver) Threads(ctx context.Context, after *entgql.Cursor[int], first *int, before *entgql.Cursor[int], last *int, orderBy *ent.ThreadOrder, where *ent.ThreadWhereInput) (*ent.ThreadConnection, error) {
-	if err := validatePaginationArgs(first, last); err != nil {
-		return nil, err
-	}
-
-	if orderBy != nil && orderBy.Field.String() == "CREATED_AT" {
-		orderBy.Field = ent.DefaultThreadOrder.Field
-	}
-
-	return r.client.Thread.Query().Paginate(ctx, after, first, before, last,
-		ent.WithThreadOrder(orderBy),
-		ent.WithThreadFilter(where.Filter),
-	)
-}
-
-// Traces is the resolver for the traces field.
-func (r *queryResolver) Traces(ctx context.Context, after *entgql.Cursor[int], first *int, before *entgql.Cursor[int], last *int, orderBy *ent.TraceOrder, where *ent.TraceWhereInput) (*ent.TraceConnection, error) {
-	if err := validatePaginationArgs(first, last); err != nil {
-		return nil, err
-	}
-
-	if orderBy != nil && orderBy.Field.String() == "CREATED_AT" {
-		orderBy.Field = ent.DefaultTraceOrder.Field
-	}
-
-	return r.client.Trace.Query().Paginate(ctx, after, first, before, last,
-		ent.WithTraceOrder(orderBy),
-		ent.WithTraceFilter(where.Filter),
-	)
-}
-
 // UsageLogs is the resolver for the usageLogs field.
 func (r *queryResolver) UsageLogs(ctx context.Context, after *entgql.Cursor[int], first *int, before *entgql.Cursor[int], last *int, orderBy *ent.UsageLogOrder, where *ent.UsageLogWhereInput) (*ent.UsageLogConnection, error) {
 	if err := validatePaginationArgs(first, last); err != nil {
@@ -330,14 +298,6 @@ func (r *requestResolver) APIKeyID(ctx context.Context, obj *ent.Request) (*obje
 	return &objects.GUID{
 		Type: ent.TypeAPIKey,
 		ID:   obj.APIKeyID,
-	}, nil
-}
-
-// TraceID is the resolver for the traceID field.
-func (r *requestResolver) TraceID(ctx context.Context, obj *ent.Request) (*objects.GUID, error) {
-	return &objects.GUID{
-		Type: ent.TypeTrace,
-		ID:   obj.TraceID,
 	}, nil
 }
 
@@ -473,30 +433,6 @@ func (r *systemResolver) ID(ctx context.Context, obj *ent.System) (*objects.GUID
 }
 
 // ID is the resolver for the id field.
-func (r *threadResolver) ID(ctx context.Context, obj *ent.Thread) (*objects.GUID, error) {
-	return &objects.GUID{
-		Type: ent.TypeThread,
-		ID:   obj.ID,
-	}, nil
-}
-
-// ID is the resolver for the id field.
-func (r *traceResolver) ID(ctx context.Context, obj *ent.Trace) (*objects.GUID, error) {
-	return &objects.GUID{
-		Type: ent.TypeTrace,
-		ID:   obj.ID,
-	}, nil
-}
-
-// ThreadID is the resolver for the threadID field.
-func (r *traceResolver) ThreadID(ctx context.Context, obj *ent.Trace) (*objects.GUID, error) {
-	return &objects.GUID{
-		Type: ent.TypeThread,
-		ID:   obj.ThreadID,
-	}, nil
-}
-
-// ID is the resolver for the id field.
 func (r *usageLogResolver) ID(ctx context.Context, obj *ent.UsageLog) (*objects.GUID, error) {
 	return &objects.GUID{
 		Type: ent.TypeUsageLog,
@@ -577,12 +513,6 @@ func (r *Resolver) RequestExecution() RequestExecutionResolver { return &request
 // System returns SystemResolver implementation.
 func (r *Resolver) System() SystemResolver { return &systemResolver{r} }
 
-// Thread returns ThreadResolver implementation.
-func (r *Resolver) Thread() ThreadResolver { return &threadResolver{r} }
-
-// Trace returns TraceResolver implementation.
-func (r *Resolver) Trace() TraceResolver { return &traceResolver{r} }
-
 // UsageLog returns UsageLogResolver implementation.
 func (r *Resolver) UsageLog() UsageLogResolver { return &usageLogResolver{r} }
 
@@ -601,7 +531,5 @@ type queryResolver struct{ *Resolver }
 type requestResolver struct{ *Resolver }
 type requestExecutionResolver struct{ *Resolver }
 type systemResolver struct{ *Resolver }
-type threadResolver struct{ *Resolver }
-type traceResolver struct{ *Resolver }
 type usageLogResolver struct{ *Resolver }
 type userResolver struct{ *Resolver }

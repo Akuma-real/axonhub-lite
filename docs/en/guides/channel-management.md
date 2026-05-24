@@ -65,7 +65,6 @@ sk-key-3
 
 ### Load Balancing
 
-- Same Trace ID always uses the same Key (session consistency)
 - Different requests randomly select from available Keys
 - If one Key fails, the system automatically switches to another
 

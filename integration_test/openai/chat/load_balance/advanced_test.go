@@ -31,8 +31,6 @@ func TestConnectionAwareLoadBalancing(t *testing.T) {
 			defer wg.Done()
 
 			helper := testutil.NewTestHelper(t, fmt.Sprintf("TestConnectionAware_Request%d", requestNum))
-			helper.Config.DisableTrace = true
-			helper.Config.DisableThread = true
 			ctx := helper.CreateTestContext()
 
 			// Use a longer prompt to keep connections active longer
@@ -91,8 +89,6 @@ func TestErrorAwareLoadBalancing(t *testing.T) {
 	t.Log("- Recent error penalty: -20 points per error in last 5 minutes")
 
 	helper := testutil.NewTestHelper(t, "TestErrorAwareLoadBalancing")
-	helper.Config.DisableTrace = true
-	helper.Config.DisableThread = true
 	ctx := helper.CreateTestContext()
 
 	// Make several requests to establish baseline
@@ -129,8 +125,6 @@ func TestLoadBalancingWithChannelFailover(t *testing.T) {
 	t.Log("based on the load balancing scores")
 
 	helper := testutil.NewTestHelper(t, "TestLoadBalancingWithChannelFailover")
-	helper.Config.DisableTrace = true
-	helper.Config.DisableThread = true
 	ctx := helper.CreateTestContext()
 
 	// Make requests that might trigger failover
@@ -177,8 +171,6 @@ func TestLoadBalancingTopKSelection(t *testing.T) {
 	t.Log("This optimization reduces overhead when many channels are available")
 
 	helper := testutil.NewTestHelper(t, "TestLoadBalancingTopKSelection")
-	helper.Config.DisableTrace = true
-	helper.Config.DisableThread = true
 	ctx := helper.CreateTestContext()
 
 	// Make a simple request
@@ -207,8 +199,6 @@ func TestLoadBalancingPriorityGroups(t *testing.T) {
 	t.Log("Higher priority groups are tried first, then lower priority groups")
 
 	helper := testutil.NewTestHelper(t, "TestLoadBalancingPriorityGroups")
-	helper.Config.DisableTrace = true
-	helper.Config.DisableThread = true
 	ctx := helper.CreateTestContext()
 
 	// Make requests to test priority-based selection
@@ -241,8 +231,6 @@ func TestLoadBalancingInactivityDecay(t *testing.T) {
 	t.Log("This prevents channels from being permanently penalized for past load")
 
 	helper := testutil.NewTestHelper(t, "TestLoadBalancingInactivityDecay")
-	helper.Config.DisableTrace = true
-	helper.Config.DisableThread = true
 	ctx := helper.CreateTestContext()
 
 	// First burst of requests
@@ -295,8 +283,6 @@ func TestLoadBalancingScalingFactor(t *testing.T) {
 	t.Log("Default scaling factor: 50.0")
 
 	helper := testutil.NewTestHelper(t, "TestLoadBalancingScalingFactor")
-	helper.Config.DisableTrace = true
-	helper.Config.DisableThread = true
 	ctx := helper.CreateTestContext()
 
 	// Send multiple requests to observe score changes
@@ -336,12 +322,9 @@ func TestLoadBalancingWeightNormalization(t *testing.T) {
 	t.Log("Formula: normalizedCount = effectiveCount / (weight / 100.0)")
 	t.Log("This ensures proportional distribution based on weight")
 
-	// Send requests across multiple traces to test weight distribution
 	requestCount := 30
 	for i := 0; i < requestCount; i++ {
 		helper := testutil.NewTestHelper(t, fmt.Sprintf("TestWeightNormalization_Request%d", i))
-		helper.Config.DisableTrace = true
-		helper.Config.DisableThread = true
 		ctx := helper.CreateTestContext()
 
 		response, err := helper.CreateChatCompletionWithHeaders(ctx, openai.ChatCompletionNewParams{
@@ -362,7 +345,7 @@ func TestLoadBalancingWeightNormalization(t *testing.T) {
 	}
 
 	t.Log("\n=== Weight normalization test completed ===")
-	t.Logf("Sent %d requests across different traces", requestCount)
+	t.Logf("Sent %d requests", requestCount)
 	t.Log("Expected distribution (assuming weights 80, 50, 20, 10):")
 	t.Log("- Weight 80 channel: ~50% of requests (80/160)")
 	t.Log("- Weight 50 channel: ~31% of requests (50/160)")
@@ -379,8 +362,6 @@ func TestLoadBalancingCompositeStrategy(t *testing.T) {
 	t.Log("This enables flexible load balancing configurations")
 
 	helper := testutil.NewTestHelper(t, "TestLoadBalancingCompositeStrategy")
-	helper.Config.DisableTrace = true
-	helper.Config.DisableThread = true
 	ctx := helper.CreateTestContext()
 
 	// Make requests to test composite strategy

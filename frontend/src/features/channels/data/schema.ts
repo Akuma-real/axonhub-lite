@@ -161,6 +161,7 @@ export const transformOptionsSchema = z.object({
   forceArrayInstructions: z.boolean().optional(),
   forceArrayInputs: z.boolean().optional(),
   replaceDeveloperRoleWithSystem: z.boolean().optional(),
+  codexCompactMode: z.enum(['emulated', 'native']).optional(),
 });
 export type TransformOptions = z.infer<typeof transformOptionsSchema>;
 

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/samber/lo"
@@ -20,8 +21,13 @@ import (
 )
 
 const (
-	codexBaseURL = "https://chatgpt.com/backend-api/codex#"
-	codexAPIURL  = "https://chatgpt.com/backend-api/codex/responses"
+	codexBaseURL                     = "https://chatgpt.com/backend-api/codex#"
+	codexAPIURL                      = "https://chatgpt.com/backend-api/codex/responses"
+	codexCompactEmulatedKey          = "codex_compact_emulated"
+	codexCompactInstructionsKey      = "codex_compact_instructions"
+	codexCompactOriginalAPIFormatKey = "codex_compact_original_api_format"
+	compactModeEmulated              = "emulated"
+	compactModeNative                = "native"
 )
 
 // OutboundTransformer implements transformer.Outbound for Codex proxy.
@@ -117,6 +123,9 @@ func (t *OutboundTransformer) TransformRequest(ctx context.Context, llmReq *llm.
 	switch reqCopy.RequestType {
 	case llm.RequestTypeCompact:
 		reqCopy.Stream = lo.ToPtr(false)
+		if compactModeFromRequest(&reqCopy) != compactModeNative {
+			prepareEmulatedCompactRequest(&reqCopy)
+		}
 	default:
 		reqCopy.Stream = lo.ToPtr(true)
 	}
@@ -155,7 +164,7 @@ func (t *OutboundTransformer) TransformRequest(ctx context.Context, llmReq *llm.
 
 	// Overwrite auth.
 	hreq.Auth = &httpclient.AuthConfig{Type: httpclient.AuthTypeBearer, APIKey: creds.AccessToken}
-	// Compact requests expect JSON response, others expect SSE stream.
+	// Compact requests are emulated through non-streaming Responses calls.
 	if llmReq.RequestType == llm.RequestTypeCompact {
 		hreq.Headers.Set("Accept", "application/json")
 	} else {
@@ -201,7 +210,22 @@ func (t *OutboundTransformer) TransformRequest(ctx context.Context, llmReq *llm.
 
 func (t *OutboundTransformer) TransformResponse(ctx context.Context, httpResp *httpclient.Response) (*llm.Response, error) {
 	// Codex upstream returns Responses API response.
-	return t.responsesOutbound.TransformResponse(ctx, httpResp)
+	llmResp, err := t.responsesOutbound.TransformResponse(ctx, httpResp)
+	if err != nil {
+		return nil, err
+	}
+
+	if httpResp == nil || httpResp.Request == nil || httpResp.Request.TransformerMetadata == nil {
+		return llmResp, nil
+	}
+
+	emulated, _ := httpResp.Request.TransformerMetadata[codexCompactEmulatedKey].(bool)
+	if !emulated {
+		return llmResp, nil
+	}
+
+	instructions, _ := httpResp.Request.TransformerMetadata[codexCompactInstructionsKey].(string)
+	return wrapEmulatedCompactResponse(llmResp, instructions), nil
 }
 
 func (t *OutboundTransformer) TransformStream(ctx context.Context, req *httpclient.Request, streamIn streams.Stream[*httpclient.StreamEvent]) (streams.Stream[*llm.Response], error) {
@@ -225,7 +249,7 @@ type codexExecutor struct {
 }
 
 func (e *codexExecutor) Do(ctx context.Context, request *httpclient.Request) (*httpclient.Response, error) {
-	if request.RequestType == string(llm.RequestTypeCompact) {
+	if request.RequestType == string(llm.RequestTypeCompact) || isEmulatedCompactRequest(request) {
 		return e.inner.Do(ctx, request)
 	}
 
@@ -274,4 +298,90 @@ func (e *codexExecutor) Do(ctx context.Context, request *httpclient.Request) (*h
 
 func (e *codexExecutor) DoStream(ctx context.Context, request *httpclient.Request) (streams.Stream[*httpclient.StreamEvent], error) {
 	return e.inner.DoStream(ctx, request)
+}
+
+func isEmulatedCompactRequest(request *httpclient.Request) bool {
+	if request == nil || request.TransformerMetadata == nil {
+		return false
+	}
+
+	emulated, _ := request.TransformerMetadata[codexCompactEmulatedKey].(bool)
+	return emulated
+}
+
+func compactModeFromRequest(req *llm.Request) string {
+	if req == nil || req.TransformerMetadata == nil {
+		return compactModeEmulated
+	}
+
+	mode, _ := req.TransformerMetadata["codex_compact_mode"].(string)
+	switch strings.ToLower(strings.TrimSpace(mode)) {
+	case compactModeNative:
+		return compactModeNative
+	default:
+		return compactModeEmulated
+	}
+}
+
+func prepareEmulatedCompactRequest(req *llm.Request) {
+	if req == nil || req.Compact == nil {
+		return
+	}
+
+	if req.TransformerMetadata == nil {
+		req.TransformerMetadata = map[string]any{}
+	}
+
+	req.TransformerMetadata[codexCompactEmulatedKey] = true
+	req.TransformerMetadata[codexCompactInstructionsKey] = req.Compact.Instructions
+	req.TransformerMetadata[codexCompactOriginalAPIFormatKey] = string(req.APIFormat)
+
+	req.Messages = append([]llm.Message(nil), req.Compact.Input...)
+	if req.Compact.Instructions != "" {
+		req.Messages = append([]llm.Message{{
+			Role: "system",
+			Content: llm.MessageContent{
+				Content: lo.ToPtr(req.Compact.Instructions),
+			},
+		}}, req.Messages...)
+	}
+	req.PromptCacheKey = lo.ToPtr(req.Compact.PromptCacheKey)
+	req.RequestType = llm.RequestTypeChat
+	req.APIFormat = llm.APIFormatOpenAIResponse
+	req.Compact = nil
+}
+
+func wrapEmulatedCompactResponse(resp *llm.Response, instructions string) *llm.Response {
+	if resp == nil {
+		return nil
+	}
+
+	output := make([]llm.Message, 0, len(resp.Choices))
+	for _, choice := range resp.Choices {
+		if choice.Message != nil {
+			output = append(output, *choice.Message)
+		}
+	}
+
+	if len(output) == 0 {
+		output = []llm.Message{{
+			Role: "assistant",
+			Content: llm.MessageContent{
+				Content: lo.ToPtr(""),
+			},
+		}}
+	}
+
+	resp.RequestType = llm.RequestTypeCompact
+	resp.APIFormat = llm.APIFormatOpenAIResponseCompact
+	resp.Object = "response.compaction"
+	resp.Compact = &llm.CompactResponse{
+		ID:           resp.ID,
+		CreatedAt:    resp.Created,
+		Object:       "response.compaction",
+		Instructions: instructions,
+		Output:       output,
+	}
+
+	return resp
 }

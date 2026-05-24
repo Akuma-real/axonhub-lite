@@ -98,23 +98,6 @@ func (m *mockSelectionTracker) IncrementChannelSelection(channelID int) {
 	m.selections[channelID]++
 }
 
-type mockTraceProvider struct {
-	lastSuccessChannel map[int]int
-	err                error
-}
-
-func (m *mockTraceProvider) GetLastSuccessfulChannelID(ctx context.Context, traceID int) (int, error) {
-	if m.err != nil {
-		return 0, m.err
-	}
-
-	if channelID, ok := m.lastSuccessChannel[traceID]; ok {
-		return channelID, nil
-	}
-
-	return 0, nil
-}
-
 type mockTransformer struct {
 	aggregatedResponse []byte
 	aggregatedMeta     llm.ResponseMeta
@@ -297,8 +280,9 @@ func newTestLoadBalancedSelector(
 	systemService *biz.SystemService,
 	requestService *biz.RequestService,
 ) CandidateSelector {
+	_ = requestService
+
 	strategies := []LoadBalanceStrategy{
-		NewTraceAwareStrategy(requestService),
 		NewErrorAwareStrategy(channelService),
 		NewWeightRoundRobinStrategy(channelService),
 		NewLatencyAwareStrategy(channelService),

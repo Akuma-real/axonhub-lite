@@ -15,7 +15,6 @@ import (
 	"github.com/looplj/axonhub/internal/ent/channel"
 	"github.com/looplj/axonhub/internal/ent/request"
 	"github.com/looplj/axonhub/internal/ent/requestexecution"
-	"github.com/looplj/axonhub/internal/ent/trace"
 	"github.com/looplj/axonhub/internal/ent/usagelog"
 	"github.com/looplj/axonhub/internal/objects"
 )
@@ -66,20 +65,6 @@ func (_c *RequestCreate) SetAPIKeyID(v int) *RequestCreate {
 func (_c *RequestCreate) SetNillableAPIKeyID(v *int) *RequestCreate {
 	if v != nil {
 		_c.SetAPIKeyID(*v)
-	}
-	return _c
-}
-
-// SetTraceID sets the "trace_id" field.
-func (_c *RequestCreate) SetTraceID(v int) *RequestCreate {
-	_c.mutation.SetTraceID(v)
-	return _c
-}
-
-// SetNillableTraceID sets the "trace_id" field if the given value is not nil.
-func (_c *RequestCreate) SetNillableTraceID(v *int) *RequestCreate {
-	if v != nil {
-		_c.SetTraceID(*v)
 	}
 	return _c
 }
@@ -263,11 +248,6 @@ func (_c *RequestCreate) SetNillableMetricsReasoningDurationMs(v *int64) *Reques
 // SetAPIKey sets the "api_key" edge to the APIKey entity.
 func (_c *RequestCreate) SetAPIKey(v *APIKey) *RequestCreate {
 	return _c.SetAPIKeyID(v.ID)
-}
-
-// SetTrace sets the "trace" edge to the Trace entity.
-func (_c *RequestCreate) SetTrace(v *Trace) *RequestCreate {
-	return _c.SetTraceID(v.ID)
 }
 
 // AddExecutionIDs adds the "executions" edge to the RequestExecution entity by IDs.
@@ -523,23 +503,6 @@ func (_c *RequestCreate) createSpec() (*Request, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.APIKeyID = nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.TraceIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   request.TraceTable,
-			Columns: []string{request.TraceColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(trace.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.TraceID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := _c.mutation.ExecutionsIDs(); len(nodes) > 0 {
@@ -845,9 +808,6 @@ func (u *RequestUpsertOne) UpdateNewValues() *RequestUpsertOne {
 		}
 		if _, exists := u.create.mutation.APIKeyID(); exists {
 			s.SetIgnore(request.FieldAPIKeyID)
-		}
-		if _, exists := u.create.mutation.TraceID(); exists {
-			s.SetIgnore(request.FieldTraceID)
 		}
 		if _, exists := u.create.mutation.Source(); exists {
 			s.SetIgnore(request.FieldSource)
@@ -1299,9 +1259,6 @@ func (u *RequestUpsertBulk) UpdateNewValues() *RequestUpsertBulk {
 			}
 			if _, exists := b.mutation.APIKeyID(); exists {
 				s.SetIgnore(request.FieldAPIKeyID)
-			}
-			if _, exists := b.mutation.TraceID(); exists {
-				s.SetIgnore(request.FieldTraceID)
 			}
 			if _, exists := b.mutation.Source(); exists {
 				s.SetIgnore(request.FieldSource)

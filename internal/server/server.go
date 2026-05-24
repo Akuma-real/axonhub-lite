@@ -11,6 +11,7 @@ import (
 	"go.uber.org/fx"
 
 	"github.com/looplj/axonhub/internal/log"
+	"github.com/looplj/axonhub/internal/requestlog"
 	"github.com/looplj/axonhub/internal/server/api"
 	"github.com/looplj/axonhub/internal/server/biz"
 	"github.com/looplj/axonhub/internal/server/dependencies"
@@ -19,7 +20,6 @@ import (
 	"github.com/looplj/axonhub/internal/server/middleware"
 	"github.com/looplj/axonhub/internal/server/orchestrator"
 	"github.com/looplj/axonhub/internal/server/scheduler"
-	"github.com/looplj/axonhub/internal/tracing"
 )
 
 func New(config Config) *Server {
@@ -94,7 +94,7 @@ func Run(opts ...fx.Option) {
 			fx.Provide(fx.Annotate(func(cfg Config) string { return cfg.PublicURL }, fx.ResultTags(`name:"public_url"`))),
 			fx.Invoke(func(cfg log.Config) {
 				log.SetGlobalConfig(cfg)
-				tracing.SetupLogger(log.GetGlobalLogger())
+				requestlog.SetupLogger(log.GetGlobalLogger())
 				slog.SetDefault(log.GetGlobalLogger().AsSlog())
 			}),
 			fx.Invoke(func(usageLogSvc *biz.UsageLogService) {

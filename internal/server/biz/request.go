@@ -9,8 +9,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/eko/gocache/lib/v4/store"
-
 	"github.com/looplj/axonhub/internal/authz"
 	"github.com/looplj/axonhub/internal/contexts"
 	"github.com/looplj/axonhub/internal/ent"
@@ -18,7 +16,6 @@ import (
 	"github.com/looplj/axonhub/internal/ent/requestexecution"
 	"github.com/looplj/axonhub/internal/log"
 	"github.com/looplj/axonhub/internal/objects"
-	"github.com/looplj/axonhub/internal/pkg/xcache"
 	"github.com/looplj/axonhub/internal/pkg/xjson"
 	"github.com/looplj/axonhub/llm"
 	"github.com/looplj/axonhub/llm/httpclient"
@@ -31,7 +28,6 @@ type RequestService struct {
 	SystemService      *SystemService
 	UsageLogService    *UsageLogService
 	LiveStreamRegistry *LiveStreamRegistry
-	channelCache       xcache.Cache[int]
 }
 
 // NewRequestService creates a new RequestService.
@@ -43,12 +39,6 @@ func NewRequestService(ent *ent.Client, systemService *SystemService, usageLogSe
 		SystemService:      systemService,
 		UsageLogService:    usageLogService,
 		LiveStreamRegistry: liveStreamRegistry,
-		channelCache: xcache.NewFromConfig[int](xcache.Config{
-			Mode: xcache.ModeMemory,
-			Memory: xcache.MemoryConfig{
-				Expiration: 30 * time.Minute,
-			},
-		}),
 	}
 }
 
@@ -123,10 +113,6 @@ func (s *RequestService) CreateRequest(
 
 	if apiKey, ok := contexts.GetAPIKey(ctx); ok && apiKey != nil {
 		mut = mut.SetAPIKeyID(apiKey.ID)
-	}
-
-	if trace, ok := contexts.GetTrace(ctx); ok && trace != nil {
-		mut = mut.SetTraceID(trace.ID)
 	}
 
 	// Create request
@@ -686,16 +672,11 @@ func (s *RequestService) ClearStaleProcessingOnStartup(ctx context.Context) erro
 func (s *RequestService) UpdateRequestChannelID(ctx context.Context, requestID int, channelID int) error {
 	client := s.entFromContext(ctx)
 
-	request, err := client.Request.UpdateOneID(requestID).
+	_, err := client.Request.UpdateOneID(requestID).
 		SetChannelID(channelID).
 		Save(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to update request channel ID: %w", err)
-	}
-
-	// Reset channel cache for this trace when request completes
-	if request.TraceID != 0 {
-		s.setLastSuccessfulChannelID(ctx, request.TraceID, channelID)
 	}
 
 	return nil
@@ -798,96 +779,4 @@ func (s *RequestService) LoadRequestExecutionResponseChunks(ctx context.Context,
 	}
 
 	return exec.ResponseChunks, nil
-}
-
-func (s *RequestService) GetTraceFirstRequest(ctx context.Context, traceID int) (*ent.Request, error) {
-	client := s.entFromContext(ctx)
-	if client == nil {
-		return nil, fmt.Errorf("ent client not found in context")
-	}
-
-	request, err := client.Request.Query().
-		Where(request.TraceIDEQ(traceID), request.StatusEQ(request.StatusCompleted)).
-		Order(ent.Asc(request.FieldCreatedAt)).
-		First(ctx)
-	if err != nil {
-		if ent.IsNotFound(err) {
-			return nil, nil
-		}
-
-		return nil, fmt.Errorf("failed to get first request for trace: %w", err)
-	}
-
-	return request, nil
-}
-
-func (s *RequestService) GetTraceFirstSegment(ctx context.Context, traceID int) (*Segment, error) {
-	request, err := s.GetTraceFirstRequest(ctx, traceID)
-	if err != nil {
-		return nil, err
-	}
-
-	if request == nil {
-		return nil, nil
-	}
-
-	body, err := s.LoadRequestBody(ctx, request)
-	if err != nil {
-		return nil, err
-	}
-
-	request.RequestBody = body
-
-	body, err = s.LoadResponseBody(ctx, request)
-	if err != nil {
-		return nil, err
-	}
-
-	request.ResponseBody = body
-
-	return requestToSegment(ctx, request)
-}
-
-// GetLastSuccessfulChannelID retrieves the last successful channel ID from a trace.
-// Returns 0 if no successful channel is found.
-func (s *RequestService) GetLastSuccessfulChannelID(ctx context.Context, traceID int) (int, error) {
-	// Try cache first
-	cacheKey := buildLastChannelCacheKey(traceID)
-	if channelID, err := s.channelCache.Get(ctx, cacheKey); err == nil {
-		return channelID, nil
-	}
-
-	req, err := s.entFromContext(ctx).Request.Query().
-		Where(
-			request.TraceIDEQ(traceID),
-			// Only successful requests
-			request.StatusEQ(request.StatusCompleted),
-			// Must have a channel
-			request.ChannelIDNotNil(),
-		).
-		Order(ent.Desc(request.FieldCreatedAt)).
-		First(ctx)
-	if err != nil {
-		if ent.IsNotFound(err) {
-			// Cache the zero result
-			_ = s.channelCache.Set(ctx, cacheKey, 0, store.WithExpiration(5*time.Second))
-			return 0, nil
-		}
-
-		return 0, fmt.Errorf("failed to query last successful request: %w", err)
-	}
-
-	// Cache the result
-	s.setLastSuccessfulChannelID(ctx, traceID, req.ChannelID)
-
-	return req.ChannelID, nil
-}
-
-func (s *RequestService) setLastSuccessfulChannelID(ctx context.Context, traceID, channelID int) {
-	cacheKey := buildLastChannelCacheKey(traceID)
-	_ = s.channelCache.Set(ctx, cacheKey, channelID, store.WithExpiration(1*time.Minute))
-}
-
-func buildLastChannelCacheKey(traceID int) string {
-	return fmt.Sprintf("last_channel:%d", traceID)
 }

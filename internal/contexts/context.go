@@ -53,24 +53,6 @@ func GetUser(ctx context.Context) (*ent.User, bool) {
 	return container.User, container.User != nil
 }
 
-// WithTraceID stores the trace id in the context.
-func WithTraceID(ctx context.Context, traceID string) context.Context {
-	container := getContainer(ctx)
-	container.TraceID = &traceID
-
-	return withContainer(ctx, container)
-}
-
-// GetTraceID retrieves the trace id from the context.
-func GetTraceID(ctx context.Context) (string, bool) {
-	container := getContainer(ctx)
-	if container.TraceID != nil {
-		return *container.TraceID, true
-	}
-
-	return "", false
-}
-
 // WithOperationName stores the operation name in the context.
 func WithOperationName(ctx context.Context, name string) context.Context {
 	container := getContainer(ctx)

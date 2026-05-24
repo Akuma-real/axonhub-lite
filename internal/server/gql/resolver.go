@@ -29,8 +29,6 @@ type Resolver struct {
 	systemService                  *biz.SystemService
 	channelService                 *biz.ChannelService
 	requestService                 *biz.RequestService
-	traceService                   *biz.TraceService
-	threadService                  *biz.ThreadService
 	channelOverrideTemplateService *biz.ChannelOverrideTemplateService
 	modelService                   *biz.ModelService
 	channelProbeService            *biz.ChannelProbeService
@@ -53,8 +51,6 @@ func NewSchema(
 	systemService *biz.SystemService,
 	channelService *biz.ChannelService,
 	requestService *biz.RequestService,
-	traceService *biz.TraceService,
-	threadService *biz.ThreadService,
 	usageLogService *biz.UsageLogService,
 	channelOverrideTemplateService *biz.ChannelOverrideTemplateService,
 	modelService *biz.ModelService,
@@ -78,8 +74,6 @@ func NewSchema(
 			systemService:                  systemService,
 			channelService:                 channelService,
 			requestService:                 requestService,
-			traceService:                   traceService,
-			threadService:                  threadService,
 			channelOverrideTemplateService: channelOverrideTemplateService,
 			modelService:                   modelService,
 			channelProbeService:            channelProbeService,

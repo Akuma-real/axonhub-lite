@@ -179,11 +179,10 @@ AxonHub supports **function tools** (custom function calling) through the Anthro
 
 ## Best Practices
 
-1. **Use Tracing Headers**: Include `AH-Trace-Id` and `AH-Thread-Id` headers for better observability
-2. **Model Selection**: Specify the target model explicitly in your requests
-3. **Error Handling**: Implement proper error handling for API responses
-4. **Streaming**: Use streaming for better user experience with long responses
-5. **Use Function Tools**: For tool calling, use generic function tools instead of provider-specific tools
+1. **Model Selection**: Specify the target model explicitly in your requests
+2. **Error Handling**: Implement proper error handling for API responses
+3. **Streaming**: Use streaming for better user experience with long responses
+4. **Use Function Tools**: For tool calling, use generic function tools instead of provider-specific tools
 
 ## Migration Guide
 

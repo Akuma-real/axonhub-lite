@@ -108,8 +108,6 @@ func main() {
     embedding, err := client.Embeddings.New(context.TODO(), openai.EmbeddingNewParams{
         Input: openai.Union[string](openai.String("Hello, world!")),
         Model: openai.String("text-embedding-3-small"),
-        option.WithHeader("AH-Trace-Id", "trace-example-123"),
-        option.WithHeader("AH-Thread-Id", "thread-example-abc"),
     })
     if err != nil {
         log.Fatal(err)
@@ -164,11 +162,10 @@ API 密钥通过 AxonHub 的 API 密钥管理系统进行管理。
 
 ## 最佳实践
 
-1. **使用追踪请求头**：包含 `AH-Trace-Id` 和 `AH-Thread-Id` 请求头以获得更好的可观测性
-2. **批量请求**：嵌入多个文本时，在单个请求中发送以提高性能
-3. **选择合适的维度**：如果不需要完整的维度，使用 `dimensions` 参数减少嵌入大小
-4. **选择合适的编码**：如果需要在网络上传输嵌入，使用 `base64` 编码以减少负载大小
-5. **Jina 任务类型**：使用 Jina 嵌入时，根据用例选择合适的 `task` 类型以优化检索质量
+1. **批量请求**：嵌入多个文本时，在单个请求中发送以提高性能
+2. **选择合适的维度**：如果不需要完整的维度，使用 `dimensions` 参数减少嵌入大小
+3. **选择合适的编码**：如果需要在网络上传输嵌入，使用 `base64` 编码以减少负载大小
+4. **Jina 任务类型**：使用 Jina 嵌入时，根据用例选择合适的 `task` 类型以优化检索质量
 
 ## 相关资源
 

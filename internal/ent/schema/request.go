@@ -28,8 +28,6 @@ func (Request) Indexes() []ent.Index {
 			StorageKey("requests_by_api_key_id_created_at"),
 		index.Fields("channel_id", "created_at").
 			StorageKey("requests_by_channel_id_created_at"),
-		index.Fields("trace_id", "created_at").
-			StorageKey("requests_by_trace_id_created_at"),
 		// Performance indexes for dashboard queries
 		index.Fields("created_at").
 			StorageKey("requests_by_created_at"),
@@ -42,10 +40,6 @@ func (Request) Fields() []ent.Field {
 			Optional().
 			Immutable().
 			Comment("API Key ID of the request, null for admin-originated requests."),
-		field.Int("trace_id").
-			Optional().
-			Immutable().
-			Comment("Trace ID that this request belongs to"),
 		field.Enum("source").Values("api", "playground", "test").Default("api").Immutable(),
 		field.String("model_id").Immutable(),
 		field.String("reasoning_effort").
@@ -97,11 +91,6 @@ func (Request) Fields() []ent.Field {
 func (Request) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("api_key", APIKey.Type).Ref("requests").Field("api_key_id").Immutable().Unique(),
-		edge.From("trace", Trace.Type).
-			Ref("requests").
-			Immutable().
-			Field("trace_id").
-			Unique(),
 		edge.To("executions", RequestExecution.Type).
 			Annotations(
 				entgql.Skip(entgql.SkipMutationCreateInput, entgql.SkipMutationUpdateInput),

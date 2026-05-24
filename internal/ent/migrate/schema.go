@@ -289,7 +289,6 @@ var (
 		{Name: "metrics_reasoning_duration_ms", Type: field.TypeInt64, Nullable: true},
 		{Name: "api_key_id", Type: field.TypeInt, Nullable: true},
 		{Name: "channel_id", Type: field.TypeInt, Nullable: true},
-		{Name: "trace_id", Type: field.TypeInt, Nullable: true},
 	}
 	// RequestsTable holds the schema information for the "requests" table.
 	RequestsTable = &schema.Table{
@@ -309,12 +308,6 @@ var (
 				RefColumns: []*schema.Column{ChannelsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
-			{
-				Symbol:     "requests_traces_requests",
-				Columns:    []*schema.Column{RequestsColumns[20]},
-				RefColumns: []*schema.Column{TracesColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
 		},
 		Indexes: []*schema.Index{
 			{
@@ -326,11 +319,6 @@ var (
 				Name:    "requests_by_channel_id_created_at",
 				Unique:  false,
 				Columns: []*schema.Column{RequestsColumns[19], RequestsColumns[1]},
-			},
-			{
-				Name:    "requests_by_trace_id_created_at",
-				Unique:  false,
-				Columns: []*schema.Column{RequestsColumns[20], RequestsColumns[1]},
 			},
 			{
 				Name:    "requests_by_created_at",
@@ -412,60 +400,6 @@ var (
 		Name:       "systems",
 		Columns:    SystemsColumns,
 		PrimaryKey: []*schema.Column{SystemsColumns[0]},
-	}
-	// ThreadsColumns holds the columns for the "threads" table.
-	ThreadsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "created_at", Type: field.TypeTime, Default: schema.Expr("CURRENT_TIMESTAMP")},
-		{Name: "updated_at", Type: field.TypeTime, Default: schema.Expr("CURRENT_TIMESTAMP")},
-		{Name: "thread_id", Type: field.TypeString, Unique: true},
-	}
-	// ThreadsTable holds the schema information for the "threads" table.
-	ThreadsTable = &schema.Table{
-		Name:       "threads",
-		Columns:    ThreadsColumns,
-		PrimaryKey: []*schema.Column{ThreadsColumns[0]},
-		Indexes: []*schema.Index{
-			{
-				Name:    "threads_by_thread_id",
-				Unique:  true,
-				Columns: []*schema.Column{ThreadsColumns[3]},
-			},
-		},
-	}
-	// TracesColumns holds the columns for the "traces" table.
-	TracesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "created_at", Type: field.TypeTime, Default: schema.Expr("CURRENT_TIMESTAMP")},
-		{Name: "updated_at", Type: field.TypeTime, Default: schema.Expr("CURRENT_TIMESTAMP")},
-		{Name: "trace_id", Type: field.TypeString, Unique: true},
-		{Name: "thread_id", Type: field.TypeInt, Nullable: true},
-	}
-	// TracesTable holds the schema information for the "traces" table.
-	TracesTable = &schema.Table{
-		Name:       "traces",
-		Columns:    TracesColumns,
-		PrimaryKey: []*schema.Column{TracesColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "traces_threads_traces",
-				Columns:    []*schema.Column{TracesColumns[4]},
-				RefColumns: []*schema.Column{ThreadsColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-		},
-		Indexes: []*schema.Index{
-			{
-				Name:    "traces_by_trace_id",
-				Unique:  true,
-				Columns: []*schema.Column{TracesColumns[3]},
-			},
-			{
-				Name:    "traces_by_thread_id",
-				Unique:  false,
-				Columns: []*schema.Column{TracesColumns[4]},
-			},
-		},
 	}
 	// UsageLogsColumns holds the columns for the "usage_logs" table.
 	UsageLogsColumns = []*schema.Column{
@@ -582,8 +516,6 @@ var (
 		RequestsTable,
 		RequestExecutionsTable,
 		SystemsTable,
-		ThreadsTable,
-		TracesTable,
 		UsageLogsTable,
 		UsersTable,
 	}
@@ -596,10 +528,8 @@ func init() {
 	ProviderQuotaStatusTable.ForeignKeys[0].RefTable = ChannelsTable
 	RequestsTable.ForeignKeys[0].RefTable = APIKeysTable
 	RequestsTable.ForeignKeys[1].RefTable = ChannelsTable
-	RequestsTable.ForeignKeys[2].RefTable = TracesTable
 	RequestExecutionsTable.ForeignKeys[0].RefTable = ChannelsTable
 	RequestExecutionsTable.ForeignKeys[1].RefTable = RequestsTable
-	TracesTable.ForeignKeys[0].RefTable = ThreadsTable
 	UsageLogsTable.ForeignKeys[0].RefTable = ChannelsTable
 	UsageLogsTable.ForeignKeys[1].RefTable = RequestsTable
 }

@@ -43,7 +43,7 @@ OpenAI SDK、Anthropic SDK、またはその他のAI SDKを使用している場
 **解決する課題：**
 - 🔒 **ベンダーロックイン** - GPT-4からClaudeやGeminiへ瞬時に切り替え
 - 🔧 **統合の複雑さ** - 10以上のプロバイダーに対して単一のAPIフォーマット
-- 📊 **オブザーバビリティの不足** - すぐに使えるリクエストトレーシング
+- 📊 **オブザーバビリティの不足** - すぐに使えるリクエスト記録と使用量ログ
 - 💸 **コスト管理** - リアルタイムの使用量追跡と予算管理
 
 <div align="center">
@@ -55,7 +55,6 @@ OpenAI SDK、Anthropic SDK、またはその他のAI SDKを使用している場
 | 機能 | 提供する価値 |
 |---------|-------------|
 | 🔄 [**あらゆるSDK → あらゆるモデル**](docs/en/api-reference/openai-api.md) | OpenAI SDKでClaudeを呼び出したり、Anthropic SDKでGPTを呼び出したり。コード変更不要。 |
-| 🔍 [**完全なリクエストトレーシング**](docs/en/guides/tracing.md) | スレッド対応のオブザーバビリティで完全なリクエストタイムラインを提供。デバッグを高速化。 |
 | 🔐 [**エンタープライズRBAC**](docs/en/guides/permissions.md) | きめ細かなアクセス制御、使用量クォータ、データ分離。 |
 | ⚡ [**スマートロードバランシング**](docs/en/guides/load-balance.md) | 100ms未満の自動フェイルオーバー。常に最も正常なチャネルにルーティング。 |
 | 💰 [**リアルタイムコスト追跡**](docs/en/guides/cost-tracking.md) | リクエストごとのコスト内訳。入力、出力、キャッシュトークン - すべて追跡。 |
@@ -120,13 +119,6 @@ AxonHubの動作画面をご覧ください：
       </a>
       <br/>
       モデル
-    </td>
-    <td align="center">
-      <a href="docs/screenshots/axonhub-trace.png">
-        <img src="docs/screenshots/axonhub-trace.png" alt="Trace Viewer" width="250"/>
-      </a>
-      <br/>
-      トレースビューア
     </td>
     <td align="center">
       <a href="docs/screenshots/axonhub-requests.png">

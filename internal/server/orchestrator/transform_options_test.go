@@ -93,6 +93,26 @@ func TestApplyTransformOptions_ForceArrayInputs(t *testing.T) {
 	require.Equal(t, lo.ToPtr(true), result.TransformOptions.ArrayInputs)
 }
 
+func TestApplyTransformOptions_CodexCompactModeCopiesMetadata(t *testing.T) {
+	req := &llm.Request{
+		Model:               "test-model",
+		TransformerMetadata: map[string]any{"existing": "value"},
+	}
+
+	settings := &objects.ChannelSettings{
+		TransformOptions: objects.TransformOptions{
+			CodexCompactMode: "native",
+		},
+	}
+
+	result := applyTransformOptions(req, settings)
+
+	require.NotSame(t, req, result)
+	require.Equal(t, "value", result.TransformerMetadata["existing"])
+	require.Equal(t, "native", result.TransformerMetadata["codex_compact_mode"])
+	require.NotContains(t, req.TransformerMetadata, "codex_compact_mode")
+}
+
 func TestReplaceDeveloperRoleWithSystem(t *testing.T) {
 	tests := []struct {
 		name     string

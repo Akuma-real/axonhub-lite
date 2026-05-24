@@ -127,56 +127,16 @@ func (h *TestHelper) MergeHTTPOptions(config *genai.GenerateContentConfig) *gena
 	return config
 }
 
-// GenerateContentWithHeaders generates content with trace headers passed at call time
+// GenerateContentWithHeaders generates content with configured headers passed at call time.
 func (h *TestHelper) GenerateContentWithHeaders(ctx context.Context, model string, contents []*genai.Content, config *genai.GenerateContentConfig) (*genai.GenerateContentResponse, error) {
 	config = h.MergeHTTPOptions(config)
 	return h.Client.Models.GenerateContent(ctx, model, contents, config)
 }
 
-// CreateChatWithHeaders creates a chat session with trace headers passed at call time
+// CreateChatWithHeaders creates a chat session with configured headers passed at call time.
 func (h *TestHelper) CreateChatWithHeaders(ctx context.Context, model string, config *genai.GenerateContentConfig, history []*genai.Content) (*genai.Chat, error) {
 	config = h.MergeHTTPOptions(config)
 	return h.Client.Chats.Create(ctx, model, config, history)
-}
-
-// CreateTestHelperWithNewTrace creates a new test helper with the same thread but new trace ID
-func CreateTestHelperWithNewTrace(t *testing.T, existingConfig *Config) *TestHelper {
-	t.Helper()
-
-	// Create a new config based on existing one
-	newConfig := &Config{
-		APIKey:        existingConfig.APIKey,
-		BaseURL:       existingConfig.BaseURL,
-		Timeout:       existingConfig.Timeout,
-		MaxRetries:    existingConfig.MaxRetries,
-		Model:         existingConfig.Model,
-		DisableTrace:  existingConfig.DisableTrace,
-		DisableThread: existingConfig.DisableThread,
-		ThreadID:      existingConfig.ThreadID, // Keep same thread ID
-	}
-
-	// Only generate new trace ID if not disabled
-	if !existingConfig.DisableTrace {
-		// Use existing trace ID prefix if available, otherwise default to "trace"
-		prefix := "trace"
-		if existingConfig.TraceID != "" {
-			// Extract prefix from existing trace ID (everything before the first hyphen)
-			if idx := strings.Index(existingConfig.TraceID, "-"); idx > 0 {
-				prefix = existingConfig.TraceID[:idx]
-			}
-		}
-		newConfig.TraceID = getRandomTraceIDWithPrefix(prefix)
-	}
-
-	client, err := newConfig.NewClient()
-	if err != nil {
-		t.Skipf("Skipping test due to client creation error: %v", err)
-	}
-
-	return &TestHelper{
-		Config: newConfig,
-		Client: client,
-	}
 }
 
 // ContainsCaseInsensitive checks if text contains substring (case insensitive)

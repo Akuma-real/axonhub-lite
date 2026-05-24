@@ -1,8 +1,8 @@
 v0.4.0
 
-- Introduced thread-aware tracing with zero-SDK integration and configurable trace headers
-- Added trace visualization interface for following end-to-end conversations
-- Added configurable data storage policies to keep or trim trace payloads based on compliance needs
+- Added request log correlation with configurable request headers
+- Added request record visibility for API traffic and usage review
+- Added configurable data storage policies for request payload retention
 
 v0.3.0
 

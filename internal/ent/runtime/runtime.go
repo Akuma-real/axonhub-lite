@@ -17,8 +17,6 @@ import (
 	"github.com/looplj/axonhub/internal/ent/requestexecution"
 	"github.com/looplj/axonhub/internal/ent/schema"
 	"github.com/looplj/axonhub/internal/ent/system"
-	"github.com/looplj/axonhub/internal/ent/thread"
-	"github.com/looplj/axonhub/internal/ent/trace"
 	"github.com/looplj/axonhub/internal/ent/usagelog"
 	"github.com/looplj/axonhub/internal/ent/user"
 	"github.com/looplj/axonhub/internal/objects"
@@ -344,19 +342,19 @@ func init() {
 	// request.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	request.UpdateDefaultUpdatedAt = requestDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// requestDescFormat is the schema descriptor for format field.
-	requestDescFormat := requestFields[5].Descriptor()
+	requestDescFormat := requestFields[4].Descriptor()
 	// request.DefaultFormat holds the default value on creation for the format field.
 	request.DefaultFormat = requestDescFormat.Default.(string)
 	// requestDescExternalID is the schema descriptor for external_id field.
-	requestDescExternalID := requestFields[11].Descriptor()
+	requestDescExternalID := requestFields[10].Descriptor()
 	// request.ExternalIDValidator is a validator for the "external_id" field. It is called by the builders before save.
 	request.ExternalIDValidator = requestDescExternalID.Validators[0].(func(string) error)
 	// requestDescStream is the schema descriptor for stream field.
-	requestDescStream := requestFields[13].Descriptor()
+	requestDescStream := requestFields[12].Descriptor()
 	// request.DefaultStream holds the default value on creation for the stream field.
 	request.DefaultStream = requestDescStream.Default.(bool)
 	// requestDescClientIP is the schema descriptor for client_ip field.
-	requestDescClientIP := requestFields[14].Descriptor()
+	requestDescClientIP := requestFields[13].Descriptor()
 	// request.DefaultClientIP holds the default value on creation for the client_ip field.
 	request.DefaultClientIP = requestDescClientIP.Default.(string)
 	requestexecutionMixin := schema.RequestExecution{}.Mixin()
@@ -421,54 +419,6 @@ func init() {
 	systemDescDeletedAt := systemMixinFields1[0].Descriptor()
 	// system.DefaultDeletedAt holds the default value on creation for the deleted_at field.
 	system.DefaultDeletedAt = systemDescDeletedAt.Default.(int)
-	threadMixin := schema.Thread{}.Mixin()
-	thread.Policy = privacy.NewPolicies(schema.Thread{})
-	thread.Hooks[0] = func(next ent.Mutator) ent.Mutator {
-		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-			if err := thread.Policy.EvalMutation(ctx, m); err != nil {
-				return nil, err
-			}
-			return next.Mutate(ctx, m)
-		})
-	}
-	threadMixinFields0 := threadMixin[0].Fields()
-	_ = threadMixinFields0
-	threadFields := schema.Thread{}.Fields()
-	_ = threadFields
-	// threadDescCreatedAt is the schema descriptor for created_at field.
-	threadDescCreatedAt := threadMixinFields0[0].Descriptor()
-	// thread.DefaultCreatedAt holds the default value on creation for the created_at field.
-	thread.DefaultCreatedAt = threadDescCreatedAt.Default.(func() time.Time)
-	// threadDescUpdatedAt is the schema descriptor for updated_at field.
-	threadDescUpdatedAt := threadMixinFields0[1].Descriptor()
-	// thread.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	thread.DefaultUpdatedAt = threadDescUpdatedAt.Default.(func() time.Time)
-	// thread.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	thread.UpdateDefaultUpdatedAt = threadDescUpdatedAt.UpdateDefault.(func() time.Time)
-	traceMixin := schema.Trace{}.Mixin()
-	trace.Policy = privacy.NewPolicies(schema.Trace{})
-	trace.Hooks[0] = func(next ent.Mutator) ent.Mutator {
-		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-			if err := trace.Policy.EvalMutation(ctx, m); err != nil {
-				return nil, err
-			}
-			return next.Mutate(ctx, m)
-		})
-	}
-	traceMixinFields0 := traceMixin[0].Fields()
-	_ = traceMixinFields0
-	traceFields := schema.Trace{}.Fields()
-	_ = traceFields
-	// traceDescCreatedAt is the schema descriptor for created_at field.
-	traceDescCreatedAt := traceMixinFields0[0].Descriptor()
-	// trace.DefaultCreatedAt holds the default value on creation for the created_at field.
-	trace.DefaultCreatedAt = traceDescCreatedAt.Default.(func() time.Time)
-	// traceDescUpdatedAt is the schema descriptor for updated_at field.
-	traceDescUpdatedAt := traceMixinFields0[1].Descriptor()
-	// trace.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	trace.DefaultUpdatedAt = traceDescUpdatedAt.Default.(func() time.Time)
-	// trace.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	trace.UpdateDefaultUpdatedAt = traceDescUpdatedAt.UpdateDefault.(func() time.Time)
 	usagelogMixin := schema.UsageLog{}.Mixin()
 	usagelog.Policy = privacy.NewPolicies(schema.UsageLog{})
 	usagelog.Hooks[0] = func(next ent.Mutator) ent.Mutator {

@@ -7,7 +7,7 @@ AxonHub can act as a drop-in replacement for Anthropic endpoints, letting Claude
 
 ### Key Points
 - AxonHub performs AI protocol/format transformation. You can configure multiple upstream channels (providers) and expose a single Anthropic-compatible interface for Claude Code.
-- You can aggregate Claude Code requests from the same session into one trace (see "Configure Claude Code").
+- AxonHub records Claude Code requests in the Requests page and usage logs.
 
 ### Prerequisites
 - AxonHub instance reachable from your development machine.
@@ -24,18 +24,7 @@ AxonHub can act as a drop-in replacement for Anthropic endpoints, letting Claude
    # export ANTHROPIC_BASE_URL="http://localhost:8090"
    ```
 2. Launch Claude Code. It will read the environment variables and route all Anthropic requests through AxonHub.
-3. (Optional) Confirm the integration by triggering a chat completion and checking AxonHub traces.
-
-#### Trace aggregation (important)
-To aggregate requests from the same Claude Code session into a single trace, enable the following in `config.yml`:
-
-```yaml
-server:
-  trace:
-    claude_code_trace_enabled: true
-```
-
-**Note**: Enabling this also ensures that requests from the same trace are prioritized to be sent to the same upstream channel, significantly improving provider-side cache hit rates (e.g., Anthropic Prompt Caching).
+3. (Optional) Confirm the integration by triggering a chat completion and checking the AxonHub Requests page.
 
 #### Tips
 - Keep your API key secret; store it in a shell profile or secret manager.
@@ -190,7 +179,6 @@ You can manually trigger a quota refresh by clicking the refresh icon in the quo
 ---
 
 ### Related Documentation
-- [Tracing Guide](tracing.md)
 - [OpenAI API](../api-reference/openai-api.md)
 - [Codex Integration Guide](codex-integration.md)
 - [Channel Management Guide](channel-management.md)

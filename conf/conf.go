@@ -152,12 +152,7 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("server.base_path", "")
 	v.SetDefault("server.request_timeout", "30s")
 	v.SetDefault("server.llm_request_timeout", "600s")
-	v.SetDefault("server.trace.thread_header", "AH-Thread-Id")
-	v.SetDefault("server.trace.trace_header", "AH-Trace-Id")
-	v.SetDefault("server.trace.extra_trace_headers", []string{})
-	v.SetDefault("server.trace.extra_trace_body_fields", []string{})
-	v.SetDefault("server.trace.claude_code_trace_enabled", false)
-	v.SetDefault("server.trace.codex_trace_enabled", false)
+	v.SetDefault("server.request_log.request_header", "AH-Request-Id")
 
 	// Dashboard defaults
 	v.SetDefault("server.dashboard.all_time_token_stats_soft_ttl", "1h")
@@ -171,7 +166,7 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("server.cors.debug", false)
 	v.SetDefault("server.cors.allowed_origins", []string{"http://localhost:8090"})
 	v.SetDefault("server.cors.allowed_methods", []string{"GET", "POST", "DELETE", "PATCH", "PUT", "OPTIONS", "HEAD"})
-	v.SetDefault("server.cors.allowed_headers", []string{"Content-Type", "Authorization", "X-API-Key", "X-Goog-Api-Key", "X-Thread-ID", "X-Trace-ID"})
+	v.SetDefault("server.cors.allowed_headers", []string{"Content-Type", "Authorization", "X-API-Key", "X-Goog-Api-Key", "AH-Request-Id"})
 	v.SetDefault("server.cors.exposed_headers", []string{})
 	v.SetDefault("server.cors.allow_credentials", false)
 	v.SetDefault("server.cors.max_age", "30m")

@@ -39,9 +39,7 @@ completion, err := client.Chat.Completions.New(ctx, openai.ChatCompletionNewPara
         openai.UserMessage("Hello, Claude!"),
     },
     Model: openai.ChatModel("claude-3-5-sonnet"),
-},
-    option.WithHeader("AH-Trace-Id", "trace-example-123"),
-    option.WithHeader("AH-Thread-Id", "thread-example-abc"))
+})
 if err != nil {
     // 适当处理错误
     panic(err)
@@ -93,9 +91,7 @@ params := responses.ResponseNewParams{
     },
 }
 
-response, err := client.Responses.New(ctx, params,
-        option.WithHeader("AH-Trace-Id", "trace-example-123"),
-        option.WithHeader("AH-Thread-Id", "thread-example-abc"))
+response, err := client.Responses.New(ctx, params)
 if err != nil {
     panic(err)
 }
@@ -130,9 +126,7 @@ params := responses.ResponseNewParams{
     },
 }
 
-stream := client.Responses.NewStreaming(ctx, params,
-        option.WithHeader("AH-Trace-Id", "trace-example-123"),
-        option.WithHeader("AH-Thread-Id", "thread-example-abc"))
+stream := client.Responses.NewStreaming(ctx, params)
 
 var fullContent strings.Builder
 for stream.Next() {
@@ -286,8 +280,6 @@ func main() {
     embedding, err := client.Embeddings.New(context.TODO(), openai.EmbeddingNewParams{
         Input: openai.Union[string](openai.String("你好，世界！")),
         Model: openai.String("text-embedding-3-small"),
-        option.WithHeader("AH-Trace-Id", "trace-example-123"),
-        option.WithHeader("AH-Thread-Id", "thread-example-abc"),
     })
     if err != nil {
         log.Fatal(err)
@@ -553,11 +545,10 @@ AxonHub 通过 OpenAI API 格式支持**函数工具**（自定义函数调用�
 
 ## 最佳实践
 
-1. **使用追踪头部**：包含 `AH-Trace-Id` 和 `AH-Thread-Id` 头部以获得更好的可观测性
-2. **模型选择**：在请求中明确指定目标模型
-3. **错误处理**：为 API 响应实现适当的错误处理
-4. **流式处理**：对于长响应使用流式处理以获得更好的用户体验
-5. **使用函数工具**：进行工具调用时，请使用通用函数工具而非提供商特有工具
+1. **模型选择**：在请求中明确指定目标模型
+2. **错误处理**：为 API 响应实现适当的错误处理
+3. **流式处理**：对于长响应使用流式处理以获得更好的用户体验
+4. **使用函数工具**：进行工具调用时，请使用通用函数工具而非提供商特有工具
 
 ## 迁移指南
 

@@ -20,7 +20,8 @@ func applyTransformOptions(req *llm.Request, channelSettings *objects.ChannelSet
 
 	if !transformOptions.ForceArrayInstructions &&
 		!transformOptions.ForceArrayInputs &&
-		!transformOptions.ReplaceDeveloperRoleWithSystem {
+		!transformOptions.ReplaceDeveloperRoleWithSystem &&
+		transformOptions.CodexCompactMode == "" {
 		return req
 	}
 
@@ -36,6 +37,14 @@ func applyTransformOptions(req *llm.Request, channelSettings *objects.ChannelSet
 
 	if transformOptions.ReplaceDeveloperRoleWithSystem {
 		newReq.Messages = replaceDeveloperRoleWithSystem(newReq.Messages)
+	}
+
+	if transformOptions.CodexCompactMode != "" {
+		newReq.TransformerMetadata = map[string]any{}
+		for key, value := range req.TransformerMetadata {
+			newReq.TransformerMetadata[key] = value
+		}
+		newReq.TransformerMetadata["codex_compact_mode"] = string(transformOptions.CodexCompactMode)
 	}
 
 	return &newReq

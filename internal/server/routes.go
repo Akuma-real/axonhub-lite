@@ -36,9 +36,7 @@ type Handlers struct {
 type Services struct {
 	fx.In
 
-	TraceService  *biz.TraceService
-	ThreadService *biz.ThreadService
-	AuthService   *biz.AuthService
+	AuthService *biz.AuthService
 }
 
 func SetupRoutes(server *Server, handlers Handlers, client *ent.Client, services Services) {
@@ -47,7 +45,7 @@ func SetupRoutes(server *Server, handlers Handlers, client *ent.Client, services
 
 	server.Use(middleware.AccessLog())
 	server.Use(middleware.WithEntClient(client))
-	server.Use(middleware.WithLoggingTracing(server.Config.Trace))
+	server.Use(middleware.WithRequestLogging(server.Config.RequestLog))
 	server.Use(middleware.WithMetrics())
 
 	// Setup CORS middleware at server level if enabled
@@ -119,8 +117,6 @@ func SetupRoutes(server *Server, handlers Handlers, client *ent.Client, services
 		middleware.WithTimeout(server.Config.LLMRequestTimeout),
 		middleware.WithAPIKeyConfig(services.AuthService, nil),
 		middleware.WithSource(request.SourceAPI),
-		middleware.WithThread(server.Config.Trace, services.ThreadService),
-		middleware.WithTrace(server.Config.Trace, services.TraceService),
 	)
 
 	{
@@ -176,8 +172,6 @@ func SetupRoutes(server *Server, handlers Handlers, client *ent.Client, services
 			middleware.WithTimeout(server.Config.LLMRequestTimeout),
 			middleware.WithGeminiKeyAuth(services.AuthService),
 			middleware.WithSource(request.SourceAPI),
-			middleware.WithThread(server.Config.Trace, services.ThreadService),
-			middleware.WithTrace(server.Config.Trace, services.TraceService),
 		)
 
 		registerGeminiRoutes(geminiGroup)
@@ -187,8 +181,6 @@ func SetupRoutes(server *Server, handlers Handlers, client *ent.Client, services
 			middleware.WithTimeout(server.Config.LLMRequestTimeout),
 			middleware.WithGeminiKeyAuth(services.AuthService),
 			middleware.WithSource(request.SourceAPI),
-			middleware.WithThread(server.Config.Trace, services.ThreadService),
-			middleware.WithTrace(server.Config.Trace, services.TraceService),
 		)
 
 		registerGeminiRoutes(geminiAliasGroup)

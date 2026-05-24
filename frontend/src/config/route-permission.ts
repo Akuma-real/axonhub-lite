@@ -25,8 +25,6 @@ export const routeConfigs: RouteGroup[] = [
       { path: '/models' },
       { path: '/api-keys' },
       { path: '/requests' },
-      { path: '/traces' },
-      { path: '/threads' },
       { path: '/playground' },
     ],
   },

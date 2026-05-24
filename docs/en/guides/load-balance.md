@@ -6,7 +6,6 @@ AxonHub provides an intelligent adaptive load balancing system that automaticall
 
 ### Intelligent Channel Selection
 - **Priority Grouping** - Candidates are first grouped by model association priority (Lower value = Higher priority)
-- **Session Consistency** - Requests from the same conversation are prioritized to route to previously successful channels
 - **Health Awareness** - Automatically avoids channels with high error rates
 - **Fair Distribution** - Uses Weighted Round Robin to distribute requests proportionally based on channel weights
 - **Latency Awareness** - Uses request-type-specific UX signals: streaming requests prioritize lower first-token latency and higher output throughput, while non-streaming requests prioritize lower end-to-end latency
@@ -18,11 +17,10 @@ Load balancing follows a hierarchical process: first by **Association Priority**
 | Level | Strategy | Score Range | Description |
 |-------|----------|-------------|-------------|
 | **1** | **Association Priority** | 0-N (Lower is better) | Hard grouping defined in model associations |
-| **2** | **Trace Aware** | 0-1000 points | Same session priority, ensures conversation continuity |
-| **3** | **Error Aware** | 0-200 points | Based on success rate and error history |
-| **4** | **Weight Round Robin** | 10-150 points | Proportional distribution based on weight and history |
-| **5** | **Latency Aware** | 0-80 points | Streaming requests use FTTL + TPS, non-streaming requests use end-to-end latency |
-| **6** | **Rate Limit Aware** | -10000-100 points | Respects RPM/TPM/concurrency limits and 429 Retry-After |
+| **2** | **Error Aware** | 0-200 points | Based on success rate and error history |
+| **3** | **Weight Round Robin** | 10-150 points | Proportional distribution based on weight and history |
+| **4** | **Latency Aware** | 0-80 points | Streaming requests use FTTL + TPS, non-streaming requests use end-to-end latency |
+| **5** | **Rate Limit Aware** | -10000-100 points | Respects RPM/TPM/concurrency limits and 429 Retry-After |
 
 ## 🚀 Quick Start
 
@@ -82,12 +80,6 @@ response = client.chat.completions.create(
 - **Mechanism**: Candidates are first sorted by the `priority` field in the Model Association.
 - **Rule**: Lower values have higher priority. All candidates in priority group `N` will be exhausted before any candidate in group `N+1` is considered.
 - **Use Case**: Primary/Secondary channel separation, A/B testing (by setting same priority).
-
-### Trace Aware Strategy
-- **Purpose**: Maintain channel consistency for multi-turn conversations
-- **Mechanism**: If request contains trace ID, prioritize previously successful channel
-- **Advantage**: Avoids initialization delays from channel switching
-- **Scoring**: Matching channel gets 1000 points, otherwise 0 points
 
 ### Error Aware Strategy
 - **Purpose**: Avoid unhealthy channels
@@ -158,7 +150,7 @@ tail -f axonhub.log | jq 'select(.msg | contains("Load balancing"))'
 ### Common Issues
 
 **Q: Why do requests always route to the same channel?**
-A: Check if session consistency is enabled. Requests with the same trace ID will prioritize the same channel.
+A: Check channel weights, recent request counts, latency data, and error-aware scoring in the load-balancer debug logs.
 
 **Q: What to do if channels don't switch?**
 A: Check Error Aware strategy scoring. The channel may still be healthy or needs time to recover.
@@ -180,7 +172,7 @@ A: Enable debug mode and view channel scoring and sorting in logs.
 
 ### 3. Performance Optimization
 - Adjust channel priorities based on cost considerations
-- Use session consistency to improve user experience
+- Tune latency and rate-limit settings based on real traffic
 
 ## 🔗 Related Documentation
 
@@ -189,4 +181,3 @@ A: Enable debug mode and view channel scoring and sorting in logs.
 - [Anthropic API](../api-reference/anthropic-api.md)
 - [Gemini API](../api-reference/gemini-api.md)
 - [Channel Management Guide](channel-management.md)
-- [Tracing and Debugging](tracing.md)

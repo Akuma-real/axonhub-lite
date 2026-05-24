@@ -43,7 +43,7 @@
 **它解决了什么问题：**
 - 🔒 **供应商锁定** - 从 GPT-4 瞬间切换到 Claude 或 Gemini
 - 🔧 **集成复杂性** - 一个 API 格式对接 10+ 供应商
-- 📊 **可观测性缺口** - 开箱即用的完整请求追踪
+- 📊 **可观测性缺口** - 开箱即用的请求记录和用量日志
 - 💸 **成本控制** - 实时用量追踪和预算管理
 
 <div align="center">
@@ -57,7 +57,6 @@
 | 特性 | 你能获得什么 |
 |------|-------------|
 | 🔄 [**任意 SDK → 任意模型**](docs/zh/api-reference/openai-api.md) | 用 OpenAI SDK 调用 Claude，或用 Anthropic SDK 调用 GPT。零代码改动。 |
-| 🔍 [**完整请求追踪**](docs/zh/guides/tracing.md) | 线程级可观测性的完整请求时间线。更快定位问题。 |
 | 🔐 [**企业级 RBAC**](docs/zh/guides/permissions.md) | 细粒度访问控制、用量配额和数据隔离。 |
 | ⚡ [**智能负载均衡**](docs/zh/guides/load-balance.md) | <100ms 自动故障转移。始终路由到最健康的渠道。 |
 | 💰 [**实时成本追踪**](docs/zh/guides/cost-tracking.md) | 每次请求的成本明细。输入、输出、缓存 Token——全部追踪。 |
@@ -127,13 +126,6 @@
       </a>
       <br/>
       模型
-    </td>
-    <td align="center">
-      <a href="docs/screenshots/axonhub-trace.png">
-        <img src="docs/screenshots/axonhub-trace.png" alt="追踪查看" width="250"/>
-      </a>
-      <br/>
-      追踪查看
     </td>
     <td align="center">
       <a href="docs/screenshots/axonhub-requests.png">

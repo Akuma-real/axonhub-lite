@@ -176,14 +176,6 @@ func (_m *Request) APIKey(ctx context.Context) (*APIKey, error) {
 	return result, MaskNotFound(err)
 }
 
-func (_m *Request) Trace(ctx context.Context) (*Trace, error) {
-	result, err := _m.Edges.TraceOrErr()
-	if IsNotLoaded(err) {
-		result, err = _m.QueryTrace().Only(ctx)
-	}
-	return result, MaskNotFound(err)
-}
-
 func (_m *Request) Executions(
 	ctx context.Context, after *Cursor, first *int, before *Cursor, last *int, orderBy *RequestExecutionOrder, where *RequestExecutionWhereInput,
 ) (*RequestExecutionConnection, error) {
@@ -192,7 +184,7 @@ func (_m *Request) Executions(
 		WithRequestExecutionFilter(where.Filter),
 	}
 	alias := graphql.GetFieldContext(ctx).Field.Alias
-	totalCount, hasTotalCount := _m.Edges.totalCount[2][alias]
+	totalCount, hasTotalCount := _m.Edges.totalCount[1][alias]
 	if nodes, err := _m.NamedExecutions(alias); err == nil || hasTotalCount {
 		pager, err := newRequestExecutionPager(opts, last != nil)
 		if err != nil {
@@ -221,7 +213,7 @@ func (_m *Request) UsageLogs(
 		WithUsageLogFilter(where.Filter),
 	}
 	alias := graphql.GetFieldContext(ctx).Field.Alias
-	totalCount, hasTotalCount := _m.Edges.totalCount[4][alias]
+	totalCount, hasTotalCount := _m.Edges.totalCount[3][alias]
 	if nodes, err := _m.NamedUsageLogs(alias); err == nil || hasTotalCount {
 		pager, err := newUsageLogPager(opts, last != nil)
 		if err != nil {
@@ -248,56 +240,6 @@ func (_m *RequestExecution) Channel(ctx context.Context) (*Channel, error) {
 		result, err = _m.QueryChannel().Only(ctx)
 	}
 	return result, MaskNotFound(err)
-}
-
-func (_m *Thread) Traces(
-	ctx context.Context, after *Cursor, first *int, before *Cursor, last *int, orderBy *TraceOrder, where *TraceWhereInput,
-) (*TraceConnection, error) {
-	opts := []TracePaginateOption{
-		WithTraceOrder(orderBy),
-		WithTraceFilter(where.Filter),
-	}
-	alias := graphql.GetFieldContext(ctx).Field.Alias
-	totalCount, hasTotalCount := _m.Edges.totalCount[0][alias]
-	if nodes, err := _m.NamedTraces(alias); err == nil || hasTotalCount {
-		pager, err := newTracePager(opts, last != nil)
-		if err != nil {
-			return nil, err
-		}
-		conn := &TraceConnection{Edges: []*TraceEdge{}, TotalCount: totalCount}
-		conn.build(nodes, pager, after, first, before, last)
-		return conn, nil
-	}
-	return _m.QueryTraces().Paginate(ctx, after, first, before, last, opts...)
-}
-
-func (_m *Trace) Thread(ctx context.Context) (*Thread, error) {
-	result, err := _m.Edges.ThreadOrErr()
-	if IsNotLoaded(err) {
-		result, err = _m.QueryThread().Only(ctx)
-	}
-	return result, MaskNotFound(err)
-}
-
-func (_m *Trace) Requests(
-	ctx context.Context, after *Cursor, first *int, before *Cursor, last *int, orderBy *RequestOrder, where *RequestWhereInput,
-) (*RequestConnection, error) {
-	opts := []RequestPaginateOption{
-		WithRequestOrder(orderBy),
-		WithRequestFilter(where.Filter),
-	}
-	alias := graphql.GetFieldContext(ctx).Field.Alias
-	totalCount, hasTotalCount := _m.Edges.totalCount[1][alias]
-	if nodes, err := _m.NamedRequests(alias); err == nil || hasTotalCount {
-		pager, err := newRequestPager(opts, last != nil)
-		if err != nil {
-			return nil, err
-		}
-		conn := &RequestConnection{Edges: []*RequestEdge{}, TotalCount: totalCount}
-		conn.build(nodes, pager, after, first, before, last)
-		return conn, nil
-	}
-	return _m.QueryRequests().Paginate(ctx, after, first, before, last, opts...)
 }
 
 func (_m *UsageLog) Request(ctx context.Context) (*Request, error) {

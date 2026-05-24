@@ -7,7 +7,6 @@ package gql
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	"github.com/looplj/axonhub/internal/contexts"
@@ -620,74 +619,11 @@ func (r *queryResolver) APIKeyQuotaUsages(ctx context.Context, apiKeyID objects.
 	return result, nil
 }
 
-// ID is the resolver for the id field.
-func (r *segmentResolver) ID(ctx context.Context, obj *biz.Segment) (*objects.GUID, error) {
-	return &objects.GUID{Type: ent.TypeRequest, ID: obj.ID}, nil
-}
-
-// ParentID is the resolver for the parentId field.
-func (r *segmentResolver) ParentID(ctx context.Context, obj *biz.Segment) (*objects.GUID, error) {
-	if obj.ParentID == nil {
-		return nil, nil
-	}
-
-	return &objects.GUID{Type: ent.TypeRequest, ID: *obj.ParentID}, nil
-}
-
-// FirstUserQuery is the resolver for the firstUserQuery field.
-func (r *threadResolver) FirstUserQuery(ctx context.Context, obj *ent.Thread) (*string, error) {
-	return r.threadService.FirstUserQuery(ctx, obj.ID)
-}
-
-// UsageMetadata is the resolver for the usageMetadata field.
-func (r *threadResolver) UsageMetadata(ctx context.Context, obj *ent.Thread) (*biz.UsageMetadata, error) {
-	return r.threadService.UsageMetadata(ctx, obj.ID)
-}
-
-// RootSegment is the resolver for the rootSegment field.
-func (r *traceResolver) RootSegment(ctx context.Context, obj *ent.Trace) (*biz.Segment, error) {
-	return r.traceService.GetRootSegment(ctx, obj.ID)
-}
-
-// RawRootSegment is the resolver for the rawRootSegment field.
-func (r *traceResolver) RawRootSegment(ctx context.Context, obj *ent.Trace) (objects.JSONRawMessage, error) {
-	segment, err := r.traceService.GetRootSegment(ctx, obj.ID)
-	if err != nil {
-		return nil, err
-	}
-
-	data, err := json.Marshal(segment)
-	if err != nil {
-		return nil, err
-	}
-
-	return objects.JSONRawMessage(data), nil
-}
-
-// FirstUserQuery is the resolver for the firstUserQuery field.
-func (r *traceResolver) FirstUserQuery(ctx context.Context, obj *ent.Trace) (*string, error) {
-	return r.traceService.FirstUserQuery(ctx, obj.ID)
-}
-
-// FirstText is the resolver for the firstText field.
-func (r *traceResolver) FirstText(ctx context.Context, obj *ent.Trace) (*string, error) {
-	return r.traceService.FirstText(ctx, obj.ID)
-}
-
-// UsageMetadata is the resolver for the usageMetadata field.
-func (r *traceResolver) UsageMetadata(ctx context.Context, obj *ent.Trace) (*biz.UsageMetadata, error) {
-	return r.traceService.UsageMetadata(ctx, obj.ID)
-}
-
 // ChannelSettings returns ChannelSettingsResolver implementation.
 func (r *Resolver) ChannelSettings() ChannelSettingsResolver { return &channelSettingsResolver{r} }
 
 // Mutation returns MutationResolver implementation.
 func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 
-// Segment returns SegmentResolver implementation.
-func (r *Resolver) Segment() SegmentResolver { return &segmentResolver{r} }
-
 type channelSettingsResolver struct{ *Resolver }
 type mutationResolver struct{ *Resolver }
-type segmentResolver struct{ *Resolver }

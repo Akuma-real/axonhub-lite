@@ -9,7 +9,7 @@ import (
 // Implementations can support single or multiple API keys with various selection strategies.
 type APIKeyProvider interface {
 	// Get returns an API key for the given context.
-	// The context may contain hints (e.g., trace ID, session ID) that implementations
+	// The context may contain hints (e.g., request ID, session ID) that implementations
 	// can use to ensure consistent key selection for related requests.
 	Get(ctx context.Context) string
 }

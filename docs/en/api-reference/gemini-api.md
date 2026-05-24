@@ -186,11 +186,10 @@ AxonHub supports **function tools** (custom function calling) through the Gemini
 
 ## Best Practices
 
-1. **Use Tracing Headers**: Include `AH-Trace-Id` and `AH-Thread-Id` headers for better observability
-2. **Model Selection**: Specify the target model explicitly in your requests
-3. **Error Handling**: Implement proper error handling for API responses
-4. **Streaming**: Use streaming for better user experience with long responses
-5. **Multi-modal Content**: Leverage Gemini API's multi-modal capabilities when working with images
+1. **Model Selection**: Specify the target model explicitly in your requests
+2. **Error Handling**: Implement proper error handling for API responses
+3. **Streaming**: Use streaming for better user experience with long responses
+4. **Multi-modal Content**: Leverage Gemini API's multi-modal capabilities when working with images
 
 ## Migration Guide
 
