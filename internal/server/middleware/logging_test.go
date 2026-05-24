@@ -31,7 +31,7 @@ func TestWithRequestLogging(t *testing.T) {
 	engine.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusOK, w.Code)
-	assert.NotEmpty(t, w.Header().Get("AH-Request-Id"))
+	assert.NotEmpty(t, w.Header().Get("Ah-Request-Id"))
 }
 
 func TestWithRequestLoggingCustomHeader(t *testing.T) {
@@ -55,6 +55,6 @@ func TestWithRequestLoggingCustomHeader(t *testing.T) {
 	engine.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusOK, w.Code)
-	assert.Empty(t, w.Header().Get("AH-Request-Id"))
+	assert.Empty(t, w.Header().Get("Ah-Request-Id"))
 	assert.NotEmpty(t, w.Header().Get("X-Custom-Request-Id"))
 }

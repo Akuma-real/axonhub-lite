@@ -1,6 +1,7 @@
 package orchestrator
 
 import (
+	"maps"
 	"strings"
 
 	"github.com/samber/lo"
@@ -41,9 +42,7 @@ func applyTransformOptions(req *llm.Request, channelSettings *objects.ChannelSet
 
 	if transformOptions.CodexCompactMode != "" {
 		newReq.TransformerMetadata = map[string]any{}
-		for key, value := range req.TransformerMetadata {
-			newReq.TransformerMetadata[key] = value
-		}
+		maps.Copy(newReq.TransformerMetadata, req.TransformerMetadata)
 		newReq.TransformerMetadata["codex_compact_mode"] = string(transformOptions.CodexCompactMode)
 	}
 
