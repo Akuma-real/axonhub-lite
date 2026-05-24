@@ -29,7 +29,8 @@ export function ChannelsBulkDisableDialog() {
       resetRowSelection();
       setSelectedChannels([]);
       setOpen(null);
-    } catch (error) {
+    } catch {
+      // Error already handled by mutation hook.
     }
   };
 

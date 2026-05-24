@@ -21,8 +21,6 @@ type AiSdkHandlersParams struct {
 	RequestService              *biz.RequestService
 	SystemService               *biz.SystemService
 	UsageLogService             *biz.UsageLogService
-	PromptService               *biz.PromptService
-	PromptProtectionRuleService *biz.PromptProtectionRuleService
 	QuotaService                *biz.QuotaService
 	HttpClient                  *httpclient.HttpClient
 	LiveStreamRegistry          *biz.LiveStreamRegistry
@@ -45,9 +43,7 @@ func NewAiSDKHandlers(params AiSdkHandlersParams) *AiSDKHandlers {
 				aisdk.NewDataStreamTransformer(),
 				params.SystemService,
 				params.UsageLogService,
-				params.PromptService,
 				params.QuotaService,
-				params.PromptProtectionRuleService,
 				params.LiveStreamRegistry,
 				params.ChannelLimiterManager,
 				params.ProviderQuotaStatusProvider,

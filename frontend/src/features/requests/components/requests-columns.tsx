@@ -526,7 +526,7 @@ export function useRequestsColumns(options?: UseRequestsColumnsOptions): ColumnD
           size='sm'
           onClick={() =>
             navigateWithSearch({
-              to: '/project/requests/$requestId',
+              to: '/requests/$requestId',
               params: { requestId: row.original.id },
             })
           }

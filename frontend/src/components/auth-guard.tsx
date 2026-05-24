@@ -23,9 +23,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
       // Don't redirect if already on auth pages
       if (
         !currentPath.startsWith('/sign-in') &&
-        !currentPath.startsWith('/sign-up') &&
         !currentPath.startsWith('/initialization') &&
-        !currentPath.startsWith('/forgot-password') &&
         !currentPath.startsWith('/otp')
       ) {
         router.navigate({ to: '/sign-in' });
@@ -47,9 +45,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
     // Don't show loading on auth pages
     if (
       currentPath.startsWith('/sign-in') ||
-      currentPath.startsWith('/sign-up') ||
       currentPath.startsWith('/initialization') ||
-      currentPath.startsWith('/forgot-password') ||
       currentPath.startsWith('/otp')
     ) {
       return <>{children}</>;

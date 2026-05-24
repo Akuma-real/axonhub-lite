@@ -29,7 +29,8 @@ export function ModelsBulkEnableDialog() {
       resetRowSelection?.();
       setSelectedModels([]);
       setOpen(null);
-    } catch (error) {
+    } catch {
+      // Error handled by mutation hook.
     }
   };
 

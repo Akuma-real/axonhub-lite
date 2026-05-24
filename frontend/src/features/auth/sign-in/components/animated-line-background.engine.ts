@@ -243,7 +243,7 @@ export function renderParticles(
     const dot = particles[index];
 
     if (hasMouseArea) {
-      drawConnection(ctx, canvasWidth, bounds, dot, mouseArea.x, mouseArea.y, mouseArea.max);
+      drawConnection(ctx, canvasWidth, bounds, dot, mouseArea.x ?? 0, mouseArea.y ?? 0, mouseArea.max);
     }
 
     for (let nextIndex = index + 1; nextIndex < particles.length; nextIndex += 1) {

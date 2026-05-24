@@ -78,12 +78,9 @@ export function ModelsBatchCreateDialog() {
   const iconOptions = useMemo(() => {
     return (
       Object.entries(toc)
-        // @ts-ignore
-        .filter(([_, value]) => value.group == 'provider' || value.group == 'model')
-        .map(([_, value]) => ({
-          // @ts-ignore
+        .filter(([, value]) => value.group == 'provider' || value.group == 'model')
+        .map(([, value]) => ({
           value: value.id,
-          // @ts-ignore
           label: value.id,
         }))
     );
@@ -242,6 +239,12 @@ export function ModelsBatchCreateDialog() {
     [validationErrors]
   );
 
+  const handleClose = useCallback(() => {
+    setOpen(null);
+    setRows([]);
+    setValidationErrors({});
+  }, [setOpen]);
+
   const handleSubmit = useCallback(async () => {
     const errors: ValidationErrors = {};
     rows.forEach((row) => {
@@ -285,10 +288,12 @@ export function ModelsBatchCreateDialog() {
         limit: { context: 0, output: 0 },
       },
       settings: {
+        disableDeveloperSettingsInheritance: false,
         associations: [
           {
             type: 'model',
             priority: 0,
+            disabled: false,
             modelId: {
               modelId: row.modelId,
             },
@@ -303,13 +308,7 @@ export function ModelsBatchCreateDialog() {
     } catch (_error) {
       // Error is handled by mutation
     }
-  }, [rows, bulkCreateModels, t]);
-
-  const handleClose = useCallback(() => {
-    setOpen(null);
-    setRows([]);
-    setValidationErrors({});
-  }, [setOpen]);
+  }, [rows, bulkCreateModels, handleClose]);
 
   const getModelIdOptions = useCallback(
     (developer: string) => {

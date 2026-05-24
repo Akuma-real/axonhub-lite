@@ -28,16 +28,11 @@ export function useVersionCheck() {
     return timeSinceLastCheck >= VERSION_CHECK_INTERVAL;
   }, [isOwner]);
 
-  const { data: updateCheck } = useQuery({
+  const { data: updateCheck } = useQuery<VersionCheck>({
     queryKey: ['versionCheck'],
     queryFn: async () => {
       const data = await graphqlRequest<{ checkForUpdate: VersionCheck }>(CHECK_FOR_UPDATE_QUERY);
       return data.checkForUpdate;
-    },
-    //@ts-ignore
-    onSuccess: () => {
-      // Store the timestamp after successful check
-      localStorage.setItem(VERSION_CHECK_TIMESTAMP_KEY, Date.now().toString());
     },
     enabled: shouldCheckVersion(),
     retry: false,
@@ -46,6 +41,11 @@ export function useVersionCheck() {
     refetchOnMount: false,
     refetchOnReconnect: false,
   });
+
+  useEffect(() => {
+    if (!updateCheck) return;
+    localStorage.setItem(VERSION_CHECK_TIMESTAMP_KEY, Date.now().toString());
+  }, [updateCheck]);
 
   const showUpdateToast = useCallback((latestVersion: string, releaseUrl: string) => {
     toast.info(i18n.t('system.about.updateCheck.newVersionAvailable'), {

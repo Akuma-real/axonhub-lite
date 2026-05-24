@@ -157,6 +157,8 @@
   "models.unassociated.noUnassociated": "所有渠道模型都已正确关联",
   "models.unassociated.searchPlaceholder": "搜索模型...",
   "models.unassociated.noSearchResults": "未找到匹配的模型",
+  "models.unassociated.quickAssociate": "快捷关联",
+  "models.unassociated.noConfiguredModel": "未找到模型 {{model}} 的配置，请先创建模型配置",
   "models.modelCard.title": "模型卡片",
   "models.modelCard.capabilities": "能力",
   "models.modelCard.reasoning": "推理",

@@ -3,40 +3,21 @@
 package ent
 
 import (
-	"time"
-
-	"github.com/looplj/axonhub/internal/ent/apikey"
 	"github.com/looplj/axonhub/internal/ent/channel"
-	"github.com/looplj/axonhub/internal/ent/datastorage"
 	"github.com/looplj/axonhub/internal/ent/model"
-	"github.com/looplj/axonhub/internal/ent/project"
-	"github.com/looplj/axonhub/internal/ent/prompt"
-	"github.com/looplj/axonhub/internal/ent/promptprotectionrule"
 	"github.com/looplj/axonhub/internal/ent/request"
-	"github.com/looplj/axonhub/internal/ent/role"
 	"github.com/looplj/axonhub/internal/ent/usagelog"
-	"github.com/looplj/axonhub/internal/ent/user"
 	"github.com/looplj/axonhub/internal/objects"
 )
 
 // CreateAPIKeyInput represents a mutation input for creating apikeys.
 type CreateAPIKeyInput struct {
-	Name      string
-	Type      *apikey.Type
-	Scopes    []string
-	ProjectID int
+	Name string
 }
 
 // Mutate applies the CreateAPIKeyInput on the APIKeyMutation builder.
 func (i *CreateAPIKeyInput) Mutate(m *APIKeyMutation) {
 	m.SetName(i.Name)
-	if v := i.Type; v != nil {
-		m.SetType(*v)
-	}
-	if v := i.Scopes; v != nil {
-		m.SetScopes(v)
-	}
-	m.SetProjectID(i.ProjectID)
 }
 
 // SetInput applies the change-set in the CreateAPIKeyInput on the APIKeyCreate builder.
@@ -47,25 +28,13 @@ func (c *APIKeyCreate) SetInput(i CreateAPIKeyInput) *APIKeyCreate {
 
 // UpdateAPIKeyInput represents a mutation input for updating apikeys.
 type UpdateAPIKeyInput struct {
-	Name         *string
-	ClearScopes  bool
-	Scopes       []string
-	AppendScopes []string
+	Name *string
 }
 
 // Mutate applies the UpdateAPIKeyInput on the APIKeyMutation builder.
 func (i *UpdateAPIKeyInput) Mutate(m *APIKeyMutation) {
 	if v := i.Name; v != nil {
 		m.SetName(*v)
-	}
-	if i.ClearScopes {
-		m.ClearScopes()
-	}
-	if v := i.Scopes; v != nil {
-		m.SetScopes(v)
-	}
-	if i.AppendScopes != nil {
-		m.AppendScopes(i.Scopes)
 	}
 }
 
@@ -77,56 +46,6 @@ func (c *APIKeyUpdate) SetInput(i UpdateAPIKeyInput) *APIKeyUpdate {
 
 // SetInput applies the change-set in the UpdateAPIKeyInput on the APIKeyUpdateOne builder.
 func (c *APIKeyUpdateOne) SetInput(i UpdateAPIKeyInput) *APIKeyUpdateOne {
-	i.Mutate(c.Mutation())
-	return c
-}
-
-// CreateAPIKeyProfileTemplateInput represents a mutation input for creating apikeyprofiletemplates.
-type CreateAPIKeyProfileTemplateInput struct {
-	Name        string
-	Description *string
-	ProjectID   int
-}
-
-// Mutate applies the CreateAPIKeyProfileTemplateInput on the APIKeyProfileTemplateMutation builder.
-func (i *CreateAPIKeyProfileTemplateInput) Mutate(m *APIKeyProfileTemplateMutation) {
-	m.SetName(i.Name)
-	if v := i.Description; v != nil {
-		m.SetDescription(*v)
-	}
-	m.SetProjectID(i.ProjectID)
-}
-
-// SetInput applies the change-set in the CreateAPIKeyProfileTemplateInput on the APIKeyProfileTemplateCreate builder.
-func (c *APIKeyProfileTemplateCreate) SetInput(i CreateAPIKeyProfileTemplateInput) *APIKeyProfileTemplateCreate {
-	i.Mutate(c.Mutation())
-	return c
-}
-
-// UpdateAPIKeyProfileTemplateInput represents a mutation input for updating apikeyprofiletemplates.
-type UpdateAPIKeyProfileTemplateInput struct {
-	Name        *string
-	Description *string
-}
-
-// Mutate applies the UpdateAPIKeyProfileTemplateInput on the APIKeyProfileTemplateMutation builder.
-func (i *UpdateAPIKeyProfileTemplateInput) Mutate(m *APIKeyProfileTemplateMutation) {
-	if v := i.Name; v != nil {
-		m.SetName(*v)
-	}
-	if v := i.Description; v != nil {
-		m.SetDescription(*v)
-	}
-}
-
-// SetInput applies the change-set in the UpdateAPIKeyProfileTemplateInput on the APIKeyProfileTemplateUpdate builder.
-func (c *APIKeyProfileTemplateUpdate) SetInput(i UpdateAPIKeyProfileTemplateInput) *APIKeyProfileTemplateUpdate {
-	i.Mutate(c.Mutation())
-	return c
-}
-
-// SetInput applies the change-set in the UpdateAPIKeyProfileTemplateInput on the APIKeyProfileTemplateUpdateOne builder.
-func (c *APIKeyProfileTemplateUpdateOne) SetInput(i UpdateAPIKeyProfileTemplateInput) *APIKeyProfileTemplateUpdateOne {
 	i.Mutate(c.Mutation())
 	return c
 }
@@ -421,70 +340,6 @@ func (c *ChannelOverrideTemplateUpdateOne) SetInput(i UpdateChannelOverrideTempl
 	return c
 }
 
-// CreateDataStorageInput represents a mutation input for creating datastorages.
-type CreateDataStorageInput struct {
-	Name        string
-	Description string
-	Type        datastorage.Type
-	Settings    *objects.DataStorageSettings
-	Status      *datastorage.Status
-}
-
-// Mutate applies the CreateDataStorageInput on the DataStorageMutation builder.
-func (i *CreateDataStorageInput) Mutate(m *DataStorageMutation) {
-	m.SetName(i.Name)
-	m.SetDescription(i.Description)
-	m.SetType(i.Type)
-	if v := i.Settings; v != nil {
-		m.SetSettings(v)
-	}
-	if v := i.Status; v != nil {
-		m.SetStatus(*v)
-	}
-}
-
-// SetInput applies the change-set in the CreateDataStorageInput on the DataStorageCreate builder.
-func (c *DataStorageCreate) SetInput(i CreateDataStorageInput) *DataStorageCreate {
-	i.Mutate(c.Mutation())
-	return c
-}
-
-// UpdateDataStorageInput represents a mutation input for updating datastorages.
-type UpdateDataStorageInput struct {
-	Name        *string
-	Description *string
-	Settings    *objects.DataStorageSettings
-	Status      *datastorage.Status
-}
-
-// Mutate applies the UpdateDataStorageInput on the DataStorageMutation builder.
-func (i *UpdateDataStorageInput) Mutate(m *DataStorageMutation) {
-	if v := i.Name; v != nil {
-		m.SetName(*v)
-	}
-	if v := i.Description; v != nil {
-		m.SetDescription(*v)
-	}
-	if v := i.Settings; v != nil {
-		m.SetSettings(v)
-	}
-	if v := i.Status; v != nil {
-		m.SetStatus(*v)
-	}
-}
-
-// SetInput applies the change-set in the UpdateDataStorageInput on the DataStorageUpdate builder.
-func (c *DataStorageUpdate) SetInput(i UpdateDataStorageInput) *DataStorageUpdate {
-	i.Mutate(c.Mutation())
-	return c
-}
-
-// SetInput applies the change-set in the UpdateDataStorageInput on the DataStorageUpdateOne builder.
-func (c *DataStorageUpdateOne) SetInput(i UpdateDataStorageInput) *DataStorageUpdateOne {
-	i.Mutate(c.Mutation())
-	return c
-}
-
 // CreateModelInput represents a mutation input for creating models.
 type CreateModelInput struct {
 	Developer string
@@ -589,324 +444,6 @@ func (c *ModelUpdateOne) SetInput(i UpdateModelInput) *ModelUpdateOne {
 	return c
 }
 
-// CreateOIDCIdentityInput represents a mutation input for creating oidcidentities.
-type CreateOIDCIdentityInput struct {
-	Issuer      string
-	Subject     string
-	Email       *string
-	IdpName     *string
-	LastLoginAt *time.Time
-}
-
-// Mutate applies the CreateOIDCIdentityInput on the OIDCIdentityMutation builder.
-func (i *CreateOIDCIdentityInput) Mutate(m *OIDCIdentityMutation) {
-	m.SetIssuer(i.Issuer)
-	m.SetSubject(i.Subject)
-	if v := i.Email; v != nil {
-		m.SetEmail(*v)
-	}
-	if v := i.IdpName; v != nil {
-		m.SetIdpName(*v)
-	}
-	if v := i.LastLoginAt; v != nil {
-		m.SetLastLoginAt(*v)
-	}
-}
-
-// SetInput applies the change-set in the CreateOIDCIdentityInput on the OIDCIdentityCreate builder.
-func (c *OIDCIdentityCreate) SetInput(i CreateOIDCIdentityInput) *OIDCIdentityCreate {
-	i.Mutate(c.Mutation())
-	return c
-}
-
-// UpdateOIDCIdentityInput represents a mutation input for updating oidcidentities.
-type UpdateOIDCIdentityInput struct {
-	Issuer           *string
-	Subject          *string
-	ClearEmail       bool
-	Email            *string
-	ClearIdpName     bool
-	IdpName          *string
-	ClearLastLoginAt bool
-	LastLoginAt      *time.Time
-}
-
-// Mutate applies the UpdateOIDCIdentityInput on the OIDCIdentityMutation builder.
-func (i *UpdateOIDCIdentityInput) Mutate(m *OIDCIdentityMutation) {
-	if v := i.Issuer; v != nil {
-		m.SetIssuer(*v)
-	}
-	if v := i.Subject; v != nil {
-		m.SetSubject(*v)
-	}
-	if i.ClearEmail {
-		m.ClearEmail()
-	}
-	if v := i.Email; v != nil {
-		m.SetEmail(*v)
-	}
-	if i.ClearIdpName {
-		m.ClearIdpName()
-	}
-	if v := i.IdpName; v != nil {
-		m.SetIdpName(*v)
-	}
-	if i.ClearLastLoginAt {
-		m.ClearLastLoginAt()
-	}
-	if v := i.LastLoginAt; v != nil {
-		m.SetLastLoginAt(*v)
-	}
-}
-
-// SetInput applies the change-set in the UpdateOIDCIdentityInput on the OIDCIdentityUpdate builder.
-func (c *OIDCIdentityUpdate) SetInput(i UpdateOIDCIdentityInput) *OIDCIdentityUpdate {
-	i.Mutate(c.Mutation())
-	return c
-}
-
-// SetInput applies the change-set in the UpdateOIDCIdentityInput on the OIDCIdentityUpdateOne builder.
-func (c *OIDCIdentityUpdateOne) SetInput(i UpdateOIDCIdentityInput) *OIDCIdentityUpdateOne {
-	i.Mutate(c.Mutation())
-	return c
-}
-
-// CreateProjectInput represents a mutation input for creating projects.
-type CreateProjectInput struct {
-	Name        string
-	Description *string
-	Status      *project.Status
-	UserIDs     []int
-}
-
-// Mutate applies the CreateProjectInput on the ProjectMutation builder.
-func (i *CreateProjectInput) Mutate(m *ProjectMutation) {
-	m.SetName(i.Name)
-	if v := i.Description; v != nil {
-		m.SetDescription(*v)
-	}
-	if v := i.Status; v != nil {
-		m.SetStatus(*v)
-	}
-	if v := i.UserIDs; len(v) > 0 {
-		m.AddUserIDs(v...)
-	}
-}
-
-// SetInput applies the change-set in the CreateProjectInput on the ProjectCreate builder.
-func (c *ProjectCreate) SetInput(i CreateProjectInput) *ProjectCreate {
-	i.Mutate(c.Mutation())
-	return c
-}
-
-// UpdateProjectInput represents a mutation input for updating projects.
-type UpdateProjectInput struct {
-	Name          *string
-	Description   *string
-	Status        *project.Status
-	ClearUsers    bool
-	AddUserIDs    []int
-	RemoveUserIDs []int
-}
-
-// Mutate applies the UpdateProjectInput on the ProjectMutation builder.
-func (i *UpdateProjectInput) Mutate(m *ProjectMutation) {
-	if v := i.Name; v != nil {
-		m.SetName(*v)
-	}
-	if v := i.Description; v != nil {
-		m.SetDescription(*v)
-	}
-	if v := i.Status; v != nil {
-		m.SetStatus(*v)
-	}
-	if i.ClearUsers {
-		m.ClearUsers()
-	}
-	if v := i.AddUserIDs; len(v) > 0 {
-		m.AddUserIDs(v...)
-	}
-	if v := i.RemoveUserIDs; len(v) > 0 {
-		m.RemoveUserIDs(v...)
-	}
-}
-
-// SetInput applies the change-set in the UpdateProjectInput on the ProjectUpdate builder.
-func (c *ProjectUpdate) SetInput(i UpdateProjectInput) *ProjectUpdate {
-	i.Mutate(c.Mutation())
-	return c
-}
-
-// SetInput applies the change-set in the UpdateProjectInput on the ProjectUpdateOne builder.
-func (c *ProjectUpdateOne) SetInput(i UpdateProjectInput) *ProjectUpdateOne {
-	i.Mutate(c.Mutation())
-	return c
-}
-
-// CreatePromptInput represents a mutation input for creating prompts.
-type CreatePromptInput struct {
-	Name        string
-	Description *string
-	Role        string
-	Content     string
-	Status      *prompt.Status
-	Order       *int
-	Settings    objects.PromptSettings
-	ProjectIDs  []int
-}
-
-// Mutate applies the CreatePromptInput on the PromptMutation builder.
-func (i *CreatePromptInput) Mutate(m *PromptMutation) {
-	m.SetName(i.Name)
-	if v := i.Description; v != nil {
-		m.SetDescription(*v)
-	}
-	m.SetRole(i.Role)
-	m.SetContent(i.Content)
-	if v := i.Status; v != nil {
-		m.SetStatus(*v)
-	}
-	if v := i.Order; v != nil {
-		m.SetOrder(*v)
-	}
-	m.SetSettings(i.Settings)
-	if v := i.ProjectIDs; len(v) > 0 {
-		m.AddProjectIDs(v...)
-	}
-}
-
-// SetInput applies the change-set in the CreatePromptInput on the PromptCreate builder.
-func (c *PromptCreate) SetInput(i CreatePromptInput) *PromptCreate {
-	i.Mutate(c.Mutation())
-	return c
-}
-
-// UpdatePromptInput represents a mutation input for updating prompts.
-type UpdatePromptInput struct {
-	Name             *string
-	Description      *string
-	Role             *string
-	Content          *string
-	Status           *prompt.Status
-	Order            *int
-	Settings         *objects.PromptSettings
-	ClearProjects    bool
-	AddProjectIDs    []int
-	RemoveProjectIDs []int
-}
-
-// Mutate applies the UpdatePromptInput on the PromptMutation builder.
-func (i *UpdatePromptInput) Mutate(m *PromptMutation) {
-	if v := i.Name; v != nil {
-		m.SetName(*v)
-	}
-	if v := i.Description; v != nil {
-		m.SetDescription(*v)
-	}
-	if v := i.Role; v != nil {
-		m.SetRole(*v)
-	}
-	if v := i.Content; v != nil {
-		m.SetContent(*v)
-	}
-	if v := i.Status; v != nil {
-		m.SetStatus(*v)
-	}
-	if v := i.Order; v != nil {
-		m.SetOrder(*v)
-	}
-	if v := i.Settings; v != nil {
-		m.SetSettings(*v)
-	}
-	if i.ClearProjects {
-		m.ClearProjects()
-	}
-	if v := i.AddProjectIDs; len(v) > 0 {
-		m.AddProjectIDs(v...)
-	}
-	if v := i.RemoveProjectIDs; len(v) > 0 {
-		m.RemoveProjectIDs(v...)
-	}
-}
-
-// SetInput applies the change-set in the UpdatePromptInput on the PromptUpdate builder.
-func (c *PromptUpdate) SetInput(i UpdatePromptInput) *PromptUpdate {
-	i.Mutate(c.Mutation())
-	return c
-}
-
-// SetInput applies the change-set in the UpdatePromptInput on the PromptUpdateOne builder.
-func (c *PromptUpdateOne) SetInput(i UpdatePromptInput) *PromptUpdateOne {
-	i.Mutate(c.Mutation())
-	return c
-}
-
-// CreatePromptProtectionRuleInput represents a mutation input for creating promptprotectionrules.
-type CreatePromptProtectionRuleInput struct {
-	Name        string
-	Description *string
-	Pattern     string
-	Settings    *objects.PromptProtectionSettings
-}
-
-// Mutate applies the CreatePromptProtectionRuleInput on the PromptProtectionRuleMutation builder.
-func (i *CreatePromptProtectionRuleInput) Mutate(m *PromptProtectionRuleMutation) {
-	m.SetName(i.Name)
-	if v := i.Description; v != nil {
-		m.SetDescription(*v)
-	}
-	m.SetPattern(i.Pattern)
-	if v := i.Settings; v != nil {
-		m.SetSettings(v)
-	}
-}
-
-// SetInput applies the change-set in the CreatePromptProtectionRuleInput on the PromptProtectionRuleCreate builder.
-func (c *PromptProtectionRuleCreate) SetInput(i CreatePromptProtectionRuleInput) *PromptProtectionRuleCreate {
-	i.Mutate(c.Mutation())
-	return c
-}
-
-// UpdatePromptProtectionRuleInput represents a mutation input for updating promptprotectionrules.
-type UpdatePromptProtectionRuleInput struct {
-	Name        *string
-	Description *string
-	Pattern     *string
-	Status      *promptprotectionrule.Status
-	Settings    *objects.PromptProtectionSettings
-}
-
-// Mutate applies the UpdatePromptProtectionRuleInput on the PromptProtectionRuleMutation builder.
-func (i *UpdatePromptProtectionRuleInput) Mutate(m *PromptProtectionRuleMutation) {
-	if v := i.Name; v != nil {
-		m.SetName(*v)
-	}
-	if v := i.Description; v != nil {
-		m.SetDescription(*v)
-	}
-	if v := i.Pattern; v != nil {
-		m.SetPattern(*v)
-	}
-	if v := i.Status; v != nil {
-		m.SetStatus(*v)
-	}
-	if v := i.Settings; v != nil {
-		m.SetSettings(v)
-	}
-}
-
-// SetInput applies the change-set in the UpdatePromptProtectionRuleInput on the PromptProtectionRuleUpdate builder.
-func (c *PromptProtectionRuleUpdate) SetInput(i UpdatePromptProtectionRuleInput) *PromptProtectionRuleUpdate {
-	i.Mutate(c.Mutation())
-	return c
-}
-
-// SetInput applies the change-set in the UpdatePromptProtectionRuleInput on the PromptProtectionRuleUpdateOne builder.
-func (c *PromptProtectionRuleUpdateOne) SetInput(i UpdatePromptProtectionRuleInput) *PromptProtectionRuleUpdateOne {
-	i.Mutate(c.Mutation())
-	return c
-}
-
 // CreateRequestInput represents a mutation input for creating requests.
 type CreateRequestInput struct {
 	Source                     *request.Source
@@ -924,14 +461,8 @@ type CreateRequestInput struct {
 	MetricsLatencyMs           *int64
 	MetricsFirstTokenLatencyMs *int64
 	MetricsReasoningDurationMs *int64
-	ContentSaved               *bool
-	ContentStorageID           *int
-	ContentStorageKey          *string
-	ContentSavedAt             *time.Time
 	APIKeyID                   *int
-	ProjectID                  int
 	TraceID                    *int
-	DataStorageID              *int
 	ChannelID                  *int
 }
 
@@ -978,27 +509,11 @@ func (i *CreateRequestInput) Mutate(m *RequestMutation) {
 	if v := i.MetricsReasoningDurationMs; v != nil {
 		m.SetMetricsReasoningDurationMs(*v)
 	}
-	if v := i.ContentSaved; v != nil {
-		m.SetContentSaved(*v)
-	}
-	if v := i.ContentStorageID; v != nil {
-		m.SetContentStorageID(*v)
-	}
-	if v := i.ContentStorageKey; v != nil {
-		m.SetContentStorageKey(*v)
-	}
-	if v := i.ContentSavedAt; v != nil {
-		m.SetContentSavedAt(*v)
-	}
 	if v := i.APIKeyID; v != nil {
 		m.SetAPIKeyID(*v)
 	}
-	m.SetProjectID(i.ProjectID)
 	if v := i.TraceID; v != nil {
 		m.SetTraceID(*v)
-	}
-	if v := i.DataStorageID; v != nil {
-		m.SetDataStorageID(*v)
 	}
 	if v := i.ChannelID; v != nil {
 		m.SetChannelID(*v)
@@ -1031,13 +546,6 @@ type UpdateRequestInput struct {
 	MetricsFirstTokenLatencyMs      *int64
 	ClearMetricsReasoningDurationMs bool
 	MetricsReasoningDurationMs      *int64
-	ContentSaved                    *bool
-	ClearContentStorageID           bool
-	ContentStorageID                *int
-	ClearContentStorageKey          bool
-	ContentStorageKey               *string
-	ClearContentSavedAt             bool
-	ContentSavedAt                  *time.Time
 	ClearChannel                    bool
 	ChannelID                       *int
 }
@@ -1098,27 +606,6 @@ func (i *UpdateRequestInput) Mutate(m *RequestMutation) {
 	if v := i.MetricsReasoningDurationMs; v != nil {
 		m.SetMetricsReasoningDurationMs(*v)
 	}
-	if v := i.ContentSaved; v != nil {
-		m.SetContentSaved(*v)
-	}
-	if i.ClearContentStorageID {
-		m.ClearContentStorageID()
-	}
-	if v := i.ContentStorageID; v != nil {
-		m.SetContentStorageID(*v)
-	}
-	if i.ClearContentStorageKey {
-		m.ClearContentStorageKey()
-	}
-	if v := i.ContentStorageKey; v != nil {
-		m.SetContentStorageKey(*v)
-	}
-	if i.ClearContentSavedAt {
-		m.ClearContentSavedAt()
-	}
-	if v := i.ContentSavedAt; v != nil {
-		m.SetContentSavedAt(*v)
-	}
 	if i.ClearChannel {
 		m.ClearChannel()
 	}
@@ -1135,94 +622,6 @@ func (c *RequestUpdate) SetInput(i UpdateRequestInput) *RequestUpdate {
 
 // SetInput applies the change-set in the UpdateRequestInput on the RequestUpdateOne builder.
 func (c *RequestUpdateOne) SetInput(i UpdateRequestInput) *RequestUpdateOne {
-	i.Mutate(c.Mutation())
-	return c
-}
-
-// CreateRoleInput represents a mutation input for creating roles.
-type CreateRoleInput struct {
-	Name      string
-	Level     *role.Level
-	Scopes    []string
-	UserIDs   []int
-	ProjectID *int
-}
-
-// Mutate applies the CreateRoleInput on the RoleMutation builder.
-func (i *CreateRoleInput) Mutate(m *RoleMutation) {
-	m.SetName(i.Name)
-	if v := i.Level; v != nil {
-		m.SetLevel(*v)
-	}
-	if v := i.Scopes; v != nil {
-		m.SetScopes(v)
-	}
-	if v := i.UserIDs; len(v) > 0 {
-		m.AddUserIDs(v...)
-	}
-	if v := i.ProjectID; v != nil {
-		m.SetProjectID(*v)
-	}
-}
-
-// SetInput applies the change-set in the CreateRoleInput on the RoleCreate builder.
-func (c *RoleCreate) SetInput(i CreateRoleInput) *RoleCreate {
-	i.Mutate(c.Mutation())
-	return c
-}
-
-// UpdateRoleInput represents a mutation input for updating roles.
-type UpdateRoleInput struct {
-	Name          *string
-	ClearScopes   bool
-	Scopes        []string
-	AppendScopes  []string
-	ClearUsers    bool
-	AddUserIDs    []int
-	RemoveUserIDs []int
-	ClearProject  bool
-	ProjectID     *int
-}
-
-// Mutate applies the UpdateRoleInput on the RoleMutation builder.
-func (i *UpdateRoleInput) Mutate(m *RoleMutation) {
-	if v := i.Name; v != nil {
-		m.SetName(*v)
-	}
-	if i.ClearScopes {
-		m.ClearScopes()
-	}
-	if v := i.Scopes; v != nil {
-		m.SetScopes(v)
-	}
-	if i.AppendScopes != nil {
-		m.AppendScopes(i.Scopes)
-	}
-	if i.ClearUsers {
-		m.ClearUsers()
-	}
-	if v := i.AddUserIDs; len(v) > 0 {
-		m.AddUserIDs(v...)
-	}
-	if v := i.RemoveUserIDs; len(v) > 0 {
-		m.RemoveUserIDs(v...)
-	}
-	if i.ClearProject {
-		m.ClearProject()
-	}
-	if v := i.ProjectID; v != nil {
-		m.SetProjectID(*v)
-	}
-}
-
-// SetInput applies the change-set in the UpdateRoleInput on the RoleUpdate builder.
-func (c *RoleUpdate) SetInput(i UpdateRoleInput) *RoleUpdate {
-	i.Mutate(c.Mutation())
-	return c
-}
-
-// SetInput applies the change-set in the UpdateRoleInput on the RoleUpdateOne builder.
-func (c *RoleUpdateOne) SetInput(i UpdateRoleInput) *RoleUpdateOne {
 	i.Mutate(c.Mutation())
 	return c
 }
@@ -1275,14 +674,12 @@ func (c *SystemUpdateOne) SetInput(i UpdateSystemInput) *SystemUpdateOne {
 
 // CreateThreadInput represents a mutation input for creating threads.
 type CreateThreadInput struct {
-	ThreadID  string
-	ProjectID int
+	ThreadID string
 }
 
 // Mutate applies the CreateThreadInput on the ThreadMutation builder.
 func (i *CreateThreadInput) Mutate(m *ThreadMutation) {
 	m.SetThreadID(i.ThreadID)
-	m.SetProjectID(i.ProjectID)
 }
 
 // SetInput applies the change-set in the CreateThreadInput on the ThreadCreate builder.
@@ -1317,15 +714,13 @@ func (c *ThreadUpdateOne) SetInput(i UpdateThreadInput) *ThreadUpdateOne {
 
 // CreateTraceInput represents a mutation input for creating traces.
 type CreateTraceInput struct {
-	TraceID   string
-	ProjectID int
-	ThreadID  *int
+	TraceID  string
+	ThreadID *int
 }
 
 // Mutate applies the CreateTraceInput on the TraceMutation builder.
 func (i *CreateTraceInput) Mutate(m *TraceMutation) {
 	m.SetTraceID(i.TraceID)
-	m.SetProjectID(i.ProjectID)
 	if v := i.ThreadID; v != nil {
 		m.SetThreadID(*v)
 	}
@@ -1383,7 +778,6 @@ type CreateUsageLogInput struct {
 	CostItems                          []objects.CostItem
 	CostPriceReferenceID               *string
 	RequestID                          int
-	ProjectID                          int
 	ChannelID                          *int
 }
 
@@ -1445,7 +839,6 @@ func (i *CreateUsageLogInput) Mutate(m *UsageLogMutation) {
 		m.SetCostPriceReferenceID(*v)
 	}
 	m.SetRequestID(i.RequestID)
-	m.SetProjectID(i.ProjectID)
 	if v := i.ChannelID; v != nil {
 		m.SetChannelID(*v)
 	}
@@ -1585,152 +978,6 @@ func (c *UsageLogUpdate) SetInput(i UpdateUsageLogInput) *UsageLogUpdate {
 
 // SetInput applies the change-set in the UpdateUsageLogInput on the UsageLogUpdateOne builder.
 func (c *UsageLogUpdateOne) SetInput(i UpdateUsageLogInput) *UsageLogUpdateOne {
-	i.Mutate(c.Mutation())
-	return c
-}
-
-// CreateUserInput represents a mutation input for creating users.
-type CreateUserInput struct {
-	Email          string
-	Status         *user.Status
-	PreferLanguage *string
-	Password       string
-	FirstName      *string
-	LastName       *string
-	Avatar         *string
-	IsOwner        *bool
-	Scopes         []string
-	ProjectIDs     []int
-	RoleIDs        []int
-}
-
-// Mutate applies the CreateUserInput on the UserMutation builder.
-func (i *CreateUserInput) Mutate(m *UserMutation) {
-	m.SetEmail(i.Email)
-	if v := i.Status; v != nil {
-		m.SetStatus(*v)
-	}
-	if v := i.PreferLanguage; v != nil {
-		m.SetPreferLanguage(*v)
-	}
-	m.SetPassword(i.Password)
-	if v := i.FirstName; v != nil {
-		m.SetFirstName(*v)
-	}
-	if v := i.LastName; v != nil {
-		m.SetLastName(*v)
-	}
-	if v := i.Avatar; v != nil {
-		m.SetAvatar(*v)
-	}
-	if v := i.IsOwner; v != nil {
-		m.SetIsOwner(*v)
-	}
-	if v := i.Scopes; v != nil {
-		m.SetScopes(v)
-	}
-	if v := i.ProjectIDs; len(v) > 0 {
-		m.AddProjectIDs(v...)
-	}
-	if v := i.RoleIDs; len(v) > 0 {
-		m.AddRoleIDs(v...)
-	}
-}
-
-// SetInput applies the change-set in the CreateUserInput on the UserCreate builder.
-func (c *UserCreate) SetInput(i CreateUserInput) *UserCreate {
-	i.Mutate(c.Mutation())
-	return c
-}
-
-// UpdateUserInput represents a mutation input for updating users.
-type UpdateUserInput struct {
-	Email            *string
-	Status           *user.Status
-	PreferLanguage   *string
-	Password         *string
-	FirstName        *string
-	LastName         *string
-	ClearAvatar      bool
-	Avatar           *string
-	IsOwner          *bool
-	ClearScopes      bool
-	Scopes           []string
-	AppendScopes     []string
-	ClearProjects    bool
-	AddProjectIDs    []int
-	RemoveProjectIDs []int
-	ClearRoles       bool
-	AddRoleIDs       []int
-	RemoveRoleIDs    []int
-}
-
-// Mutate applies the UpdateUserInput on the UserMutation builder.
-func (i *UpdateUserInput) Mutate(m *UserMutation) {
-	if v := i.Email; v != nil {
-		m.SetEmail(*v)
-	}
-	if v := i.Status; v != nil {
-		m.SetStatus(*v)
-	}
-	if v := i.PreferLanguage; v != nil {
-		m.SetPreferLanguage(*v)
-	}
-	if v := i.Password; v != nil {
-		m.SetPassword(*v)
-	}
-	if v := i.FirstName; v != nil {
-		m.SetFirstName(*v)
-	}
-	if v := i.LastName; v != nil {
-		m.SetLastName(*v)
-	}
-	if i.ClearAvatar {
-		m.ClearAvatar()
-	}
-	if v := i.Avatar; v != nil {
-		m.SetAvatar(*v)
-	}
-	if v := i.IsOwner; v != nil {
-		m.SetIsOwner(*v)
-	}
-	if i.ClearScopes {
-		m.ClearScopes()
-	}
-	if v := i.Scopes; v != nil {
-		m.SetScopes(v)
-	}
-	if i.AppendScopes != nil {
-		m.AppendScopes(i.Scopes)
-	}
-	if i.ClearProjects {
-		m.ClearProjects()
-	}
-	if v := i.AddProjectIDs; len(v) > 0 {
-		m.AddProjectIDs(v...)
-	}
-	if v := i.RemoveProjectIDs; len(v) > 0 {
-		m.RemoveProjectIDs(v...)
-	}
-	if i.ClearRoles {
-		m.ClearRoles()
-	}
-	if v := i.AddRoleIDs; len(v) > 0 {
-		m.AddRoleIDs(v...)
-	}
-	if v := i.RemoveRoleIDs; len(v) > 0 {
-		m.RemoveRoleIDs(v...)
-	}
-}
-
-// SetInput applies the change-set in the UpdateUserInput on the UserUpdate builder.
-func (c *UserUpdate) SetInput(i UpdateUserInput) *UserUpdate {
-	i.Mutate(c.Mutation())
-	return c
-}
-
-// SetInput applies the change-set in the UpdateUserInput on the UserUpdateOne builder.
-func (c *UserUpdateOne) SetInput(i UpdateUserInput) *UserUpdateOne {
 	i.Mutate(c.Mutation())
 	return c
 }

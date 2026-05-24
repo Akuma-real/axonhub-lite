@@ -1,7 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { graphqlRequest } from '@/gql/graphql';
-import { useSelectedProjectId } from '@/stores/projectStore';
 import { useErrorHandler } from '@/hooks/use-error-handler';
 import { useUsageLogPermissions } from '../../../gql/useUsageLogPermissions';
 import { UsageLog, UsageLogConnection, usageLogConnectionSchema, usageLogSchema } from './usage-logs-schema';
@@ -112,25 +111,21 @@ export function useUsageLogs(variables?: {
     source?: string;
     modelID?: string;
     channelID?: string;
-    projectID?: string;
     requestID?: string;
     [key: string]: any;
   };
-}, options?: { projectId?: string | null; enabled?: boolean }) {
+}, options?: { enabled?: boolean }) {
   const { handleError } = useErrorHandler();
   const { t } = useTranslation();
   const permissions = useUsageLogPermissions();
-  const selectedProjectId = useSelectedProjectId();
-  const projectId = options?.projectId !== undefined ? options.projectId : selectedProjectId;
-  const enabled = options?.enabled ?? !!projectId;
+  const enabled = options?.enabled ?? true;
 
   return useQuery({
-    queryKey: ['usageLogs', variables, permissions, projectId],
+    queryKey: ['usageLogs', variables, permissions],
     queryFn: async () => {
       try {
         const query = buildUsageLogsQuery(permissions);
-        const headers = projectId ? { 'X-Project-ID': projectId } : undefined;
-        const data = await graphqlRequest<{ usageLogs: UsageLogConnection }>(query, variables, headers);
+        const data = await graphqlRequest<{ usageLogs: UsageLogConnection }>(query, variables);
         return usageLogConnectionSchema.parse(data?.usageLogs);
       } catch (error) {
         handleError(error, t('common.errors.internalServerError'));
@@ -145,15 +140,13 @@ export function useUsageLog(id: string) {
   const { handleError } = useErrorHandler();
   const { t } = useTranslation();
   const permissions = useUsageLogPermissions();
-  const selectedProjectId = useSelectedProjectId();
 
   return useQuery({
-    queryKey: ['usageLog', id, permissions, selectedProjectId],
+    queryKey: ['usageLog', id, permissions],
     queryFn: async () => {
       try {
         const query = buildUsageLogDetailQuery(permissions);
-        const headers = selectedProjectId ? { 'X-Project-ID': selectedProjectId } : undefined;
-        const data = await graphqlRequest<{ node: UsageLog }>(query, { id }, headers);
+        const data = await graphqlRequest<{ node: UsageLog }>(query, { id });
         if (!data.node) {
           throw new Error('Usage log not found');
         }

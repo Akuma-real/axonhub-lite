@@ -16,7 +16,7 @@ const utcTimezone = {
 };
 
 const ALL_VALID_TIMEZONES = tzGetTimeZones();
-// @ts-ignore
+// @ts-expect-error local UTC entry intentionally matches the runtime shape used by tzdb consumers.
 ALL_VALID_TIMEZONES.push(utcTimezone);
 
 export const getTimeZones = () => {

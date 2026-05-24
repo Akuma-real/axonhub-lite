@@ -11,7 +11,6 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/looplj/axonhub/internal/ent/channeloverridetemplate"
-	"github.com/looplj/axonhub/internal/ent/user"
 	"github.com/looplj/axonhub/internal/objects"
 )
 
@@ -26,9 +25,7 @@ type ChannelOverrideTemplate struct {
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// DeletedAt holds the value of the "deleted_at" field.
 	DeletedAt int `json:"deleted_at,omitempty"`
-	// Owner of this template
-	UserID int `json:"user_id,omitempty"`
-	// Template name, unique per user
+	// Template name
 	Name string `json:"name,omitempty"`
 	// Template description
 	Description string `json:"description,omitempty"`
@@ -44,32 +41,7 @@ type ChannelOverrideTemplate struct {
 	HeaderOverrideOperations []objects.OverrideOperation `json:"header_override_operations,omitempty"`
 	// Override request body parameters
 	BodyOverrideOperations []objects.OverrideOperation `json:"body_override_operations,omitempty"`
-	// Edges holds the relations/edges for other nodes in the graph.
-	// The values are being populated by the ChannelOverrideTemplateQuery when eager-loading is set.
-	Edges        ChannelOverrideTemplateEdges `json:"edges"`
-	selectValues sql.SelectValues
-}
-
-// ChannelOverrideTemplateEdges holds the relations/edges for other nodes in the graph.
-type ChannelOverrideTemplateEdges struct {
-	// User holds the value of the user edge.
-	User *User `json:"user,omitempty"`
-	// loadedTypes holds the information for reporting if a
-	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
-	// totalCount holds the count of the edges above.
-	totalCount [1]map[string]int
-}
-
-// UserOrErr returns the User value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e ChannelOverrideTemplateEdges) UserOrErr() (*User, error) {
-	if e.User != nil {
-		return e.User, nil
-	} else if e.loadedTypes[0] {
-		return nil, &NotFoundError{label: user.Label}
-	}
-	return nil, &NotLoadedError{edge: "user"}
+	selectValues           sql.SelectValues
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -79,7 +51,7 @@ func (*ChannelOverrideTemplate) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case channeloverridetemplate.FieldOverrideHeaders, channeloverridetemplate.FieldHeaderOverrideOperations, channeloverridetemplate.FieldBodyOverrideOperations:
 			values[i] = new([]byte)
-		case channeloverridetemplate.FieldID, channeloverridetemplate.FieldDeletedAt, channeloverridetemplate.FieldUserID:
+		case channeloverridetemplate.FieldID, channeloverridetemplate.FieldDeletedAt:
 			values[i] = new(sql.NullInt64)
 		case channeloverridetemplate.FieldName, channeloverridetemplate.FieldDescription, channeloverridetemplate.FieldOverrideParameters:
 			values[i] = new(sql.NullString)
@@ -123,12 +95,6 @@ func (_m *ChannelOverrideTemplate) assignValues(columns []string, values []any) 
 				return fmt.Errorf("unexpected type %T for field deleted_at", values[i])
 			} else if value.Valid {
 				_m.DeletedAt = int(value.Int64)
-			}
-		case channeloverridetemplate.FieldUserID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field user_id", values[i])
-			} else if value.Valid {
-				_m.UserID = int(value.Int64)
 			}
 		case channeloverridetemplate.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -185,11 +151,6 @@ func (_m *ChannelOverrideTemplate) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
 }
 
-// QueryUser queries the "user" edge of the ChannelOverrideTemplate entity.
-func (_m *ChannelOverrideTemplate) QueryUser() *UserQuery {
-	return NewChannelOverrideTemplateClient(_m.config).QueryUser(_m)
-}
-
 // Update returns a builder for updating this ChannelOverrideTemplate.
 // Note that you need to call ChannelOverrideTemplate.Unwrap() before calling this method if this ChannelOverrideTemplate
 // was returned from a transaction, and the transaction was committed or rolled back.
@@ -221,9 +182,6 @@ func (_m *ChannelOverrideTemplate) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("deleted_at=")
 	builder.WriteString(fmt.Sprintf("%v", _m.DeletedAt))
-	builder.WriteString(", ")
-	builder.WriteString("user_id=")
-	builder.WriteString(fmt.Sprintf("%v", _m.UserID))
 	builder.WriteString(", ")
 	builder.WriteString("name=")
 	builder.WriteString(_m.Name)

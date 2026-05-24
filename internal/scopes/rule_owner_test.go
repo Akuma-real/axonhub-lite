@@ -5,10 +5,22 @@ import (
 	"errors"
 	"testing"
 
+	"entgo.io/ent/dialect/sql"
+
 	"github.com/looplj/axonhub/internal/contexts"
 	"github.com/looplj/axonhub/internal/ent"
 	"github.com/looplj/axonhub/internal/ent/privacy"
 )
+
+type mockQuery struct {
+	ent.Query
+}
+
+func (m *mockQuery) WhereP(...func(*sql.Selector)) {}
+
+type mockMutation struct {
+	ent.Mutation
+}
 
 func TestOwnerRule(t *testing.T) {
 	tests := []struct {

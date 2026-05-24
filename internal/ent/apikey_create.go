@@ -12,9 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/looplj/axonhub/internal/ent/apikey"
-	"github.com/looplj/axonhub/internal/ent/project"
 	"github.com/looplj/axonhub/internal/ent/request"
-	"github.com/looplj/axonhub/internal/ent/user"
 	"github.com/looplj/axonhub/internal/objects"
 )
 
@@ -68,34 +66,6 @@ func (_c *APIKeyCreate) SetNillableDeletedAt(v *int) *APIKeyCreate {
 	return _c
 }
 
-// SetUserID sets the "user_id" field.
-func (_c *APIKeyCreate) SetUserID(v int) *APIKeyCreate {
-	_c.mutation.SetUserID(v)
-	return _c
-}
-
-// SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (_c *APIKeyCreate) SetNillableUserID(v *int) *APIKeyCreate {
-	if v != nil {
-		_c.SetUserID(*v)
-	}
-	return _c
-}
-
-// SetProjectID sets the "project_id" field.
-func (_c *APIKeyCreate) SetProjectID(v int) *APIKeyCreate {
-	_c.mutation.SetProjectID(v)
-	return _c
-}
-
-// SetNillableProjectID sets the "project_id" field if the given value is not nil.
-func (_c *APIKeyCreate) SetNillableProjectID(v *int) *APIKeyCreate {
-	if v != nil {
-		_c.SetProjectID(*v)
-	}
-	return _c
-}
-
 // SetKey sets the "key" field.
 func (_c *APIKeyCreate) SetKey(v string) *APIKeyCreate {
 	_c.mutation.SetKey(v)
@@ -105,20 +75,6 @@ func (_c *APIKeyCreate) SetKey(v string) *APIKeyCreate {
 // SetName sets the "name" field.
 func (_c *APIKeyCreate) SetName(v string) *APIKeyCreate {
 	_c.mutation.SetName(v)
-	return _c
-}
-
-// SetType sets the "type" field.
-func (_c *APIKeyCreate) SetType(v apikey.Type) *APIKeyCreate {
-	_c.mutation.SetType(v)
-	return _c
-}
-
-// SetNillableType sets the "type" field if the given value is not nil.
-func (_c *APIKeyCreate) SetNillableType(v *apikey.Type) *APIKeyCreate {
-	if v != nil {
-		_c.SetType(*v)
-	}
 	return _c
 }
 
@@ -136,26 +92,10 @@ func (_c *APIKeyCreate) SetNillableStatus(v *apikey.Status) *APIKeyCreate {
 	return _c
 }
 
-// SetScopes sets the "scopes" field.
-func (_c *APIKeyCreate) SetScopes(v []string) *APIKeyCreate {
-	_c.mutation.SetScopes(v)
-	return _c
-}
-
 // SetProfiles sets the "profiles" field.
 func (_c *APIKeyCreate) SetProfiles(v *objects.APIKeyProfiles) *APIKeyCreate {
 	_c.mutation.SetProfiles(v)
 	return _c
-}
-
-// SetUser sets the "user" edge to the User entity.
-func (_c *APIKeyCreate) SetUser(v *User) *APIKeyCreate {
-	return _c.SetUserID(v.ID)
-}
-
-// SetProject sets the "project" edge to the Project entity.
-func (_c *APIKeyCreate) SetProject(v *Project) *APIKeyCreate {
-	return _c.SetProjectID(v.ID)
 }
 
 // AddRequestIDs adds the "requests" edge to the Request entity by IDs.
@@ -228,21 +168,9 @@ func (_c *APIKeyCreate) defaults() error {
 		v := apikey.DefaultDeletedAt
 		_c.mutation.SetDeletedAt(v)
 	}
-	if _, ok := _c.mutation.ProjectID(); !ok {
-		v := apikey.DefaultProjectID
-		_c.mutation.SetProjectID(v)
-	}
-	if _, ok := _c.mutation.GetType(); !ok {
-		v := apikey.DefaultType
-		_c.mutation.SetType(v)
-	}
 	if _, ok := _c.mutation.Status(); !ok {
 		v := apikey.DefaultStatus
 		_c.mutation.SetStatus(v)
-	}
-	if _, ok := _c.mutation.Scopes(); !ok {
-		v := apikey.DefaultScopes
-		_c.mutation.SetScopes(v)
 	}
 	if _, ok := _c.mutation.Profiles(); !ok {
 		v := apikey.DefaultProfiles
@@ -256,22 +184,11 @@ func (_c *APIKeyCreate) check() error {
 	if _, ok := _c.mutation.DeletedAt(); !ok {
 		return &ValidationError{Name: "deleted_at", err: errors.New(`ent: missing required field "APIKey.deleted_at"`)}
 	}
-	if _, ok := _c.mutation.ProjectID(); !ok {
-		return &ValidationError{Name: "project_id", err: errors.New(`ent: missing required field "APIKey.project_id"`)}
-	}
 	if _, ok := _c.mutation.Key(); !ok {
 		return &ValidationError{Name: "key", err: errors.New(`ent: missing required field "APIKey.key"`)}
 	}
 	if _, ok := _c.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "APIKey.name"`)}
-	}
-	if _, ok := _c.mutation.GetType(); !ok {
-		return &ValidationError{Name: "type", err: errors.New(`ent: missing required field "APIKey.type"`)}
-	}
-	if v, ok := _c.mutation.GetType(); ok {
-		if err := apikey.TypeValidator(v); err != nil {
-			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "APIKey.type": %w`, err)}
-		}
 	}
 	if _, ok := _c.mutation.Status(); !ok {
 		return &ValidationError{Name: "status", err: errors.New(`ent: missing required field "APIKey.status"`)}
@@ -280,9 +197,6 @@ func (_c *APIKeyCreate) check() error {
 		if err := apikey.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "APIKey.status": %w`, err)}
 		}
-	}
-	if len(_c.mutation.ProjectIDs()) == 0 {
-		return &ValidationError{Name: "project", err: errors.New(`ent: missing required edge "APIKey.project"`)}
 	}
 	return nil
 }
@@ -331,55 +245,13 @@ func (_c *APIKeyCreate) createSpec() (*APIKey, *sqlgraph.CreateSpec) {
 		_spec.SetField(apikey.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
-	if value, ok := _c.mutation.GetType(); ok {
-		_spec.SetField(apikey.FieldType, field.TypeEnum, value)
-		_node.Type = value
-	}
 	if value, ok := _c.mutation.Status(); ok {
 		_spec.SetField(apikey.FieldStatus, field.TypeEnum, value)
 		_node.Status = value
 	}
-	if value, ok := _c.mutation.Scopes(); ok {
-		_spec.SetField(apikey.FieldScopes, field.TypeJSON, value)
-		_node.Scopes = value
-	}
 	if value, ok := _c.mutation.Profiles(); ok {
 		_spec.SetField(apikey.FieldProfiles, field.TypeJSON, value)
 		_node.Profiles = value
-	}
-	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   apikey.UserTable,
-			Columns: []string{apikey.UserColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.UserID = nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.ProjectIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   apikey.ProjectTable,
-			Columns: []string{apikey.ProjectColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(project.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.ProjectID = nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := _c.mutation.RequestsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -503,18 +375,6 @@ func (u *APIKeyUpsert) UpdateName() *APIKeyUpsert {
 	return u
 }
 
-// SetType sets the "type" field.
-func (u *APIKeyUpsert) SetType(v apikey.Type) *APIKeyUpsert {
-	u.Set(apikey.FieldType, v)
-	return u
-}
-
-// UpdateType sets the "type" field to the value that was provided on create.
-func (u *APIKeyUpsert) UpdateType() *APIKeyUpsert {
-	u.SetExcluded(apikey.FieldType)
-	return u
-}
-
 // SetStatus sets the "status" field.
 func (u *APIKeyUpsert) SetStatus(v apikey.Status) *APIKeyUpsert {
 	u.Set(apikey.FieldStatus, v)
@@ -524,24 +384,6 @@ func (u *APIKeyUpsert) SetStatus(v apikey.Status) *APIKeyUpsert {
 // UpdateStatus sets the "status" field to the value that was provided on create.
 func (u *APIKeyUpsert) UpdateStatus() *APIKeyUpsert {
 	u.SetExcluded(apikey.FieldStatus)
-	return u
-}
-
-// SetScopes sets the "scopes" field.
-func (u *APIKeyUpsert) SetScopes(v []string) *APIKeyUpsert {
-	u.Set(apikey.FieldScopes, v)
-	return u
-}
-
-// UpdateScopes sets the "scopes" field to the value that was provided on create.
-func (u *APIKeyUpsert) UpdateScopes() *APIKeyUpsert {
-	u.SetExcluded(apikey.FieldScopes)
-	return u
-}
-
-// ClearScopes clears the value of the "scopes" field.
-func (u *APIKeyUpsert) ClearScopes() *APIKeyUpsert {
-	u.SetNull(apikey.FieldScopes)
 	return u
 }
 
@@ -576,12 +418,6 @@ func (u *APIKeyUpsertOne) UpdateNewValues() *APIKeyUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
 		if _, exists := u.create.mutation.CreatedAt(); exists {
 			s.SetIgnore(apikey.FieldCreatedAt)
-		}
-		if _, exists := u.create.mutation.UserID(); exists {
-			s.SetIgnore(apikey.FieldUserID)
-		}
-		if _, exists := u.create.mutation.ProjectID(); exists {
-			s.SetIgnore(apikey.FieldProjectID)
 		}
 	}))
 	return u
@@ -677,20 +513,6 @@ func (u *APIKeyUpsertOne) UpdateName() *APIKeyUpsertOne {
 	})
 }
 
-// SetType sets the "type" field.
-func (u *APIKeyUpsertOne) SetType(v apikey.Type) *APIKeyUpsertOne {
-	return u.Update(func(s *APIKeyUpsert) {
-		s.SetType(v)
-	})
-}
-
-// UpdateType sets the "type" field to the value that was provided on create.
-func (u *APIKeyUpsertOne) UpdateType() *APIKeyUpsertOne {
-	return u.Update(func(s *APIKeyUpsert) {
-		s.UpdateType()
-	})
-}
-
 // SetStatus sets the "status" field.
 func (u *APIKeyUpsertOne) SetStatus(v apikey.Status) *APIKeyUpsertOne {
 	return u.Update(func(s *APIKeyUpsert) {
@@ -702,27 +524,6 @@ func (u *APIKeyUpsertOne) SetStatus(v apikey.Status) *APIKeyUpsertOne {
 func (u *APIKeyUpsertOne) UpdateStatus() *APIKeyUpsertOne {
 	return u.Update(func(s *APIKeyUpsert) {
 		s.UpdateStatus()
-	})
-}
-
-// SetScopes sets the "scopes" field.
-func (u *APIKeyUpsertOne) SetScopes(v []string) *APIKeyUpsertOne {
-	return u.Update(func(s *APIKeyUpsert) {
-		s.SetScopes(v)
-	})
-}
-
-// UpdateScopes sets the "scopes" field to the value that was provided on create.
-func (u *APIKeyUpsertOne) UpdateScopes() *APIKeyUpsertOne {
-	return u.Update(func(s *APIKeyUpsert) {
-		s.UpdateScopes()
-	})
-}
-
-// ClearScopes clears the value of the "scopes" field.
-func (u *APIKeyUpsertOne) ClearScopes() *APIKeyUpsertOne {
-	return u.Update(func(s *APIKeyUpsert) {
-		s.ClearScopes()
 	})
 }
 
@@ -926,12 +727,6 @@ func (u *APIKeyUpsertBulk) UpdateNewValues() *APIKeyUpsertBulk {
 			if _, exists := b.mutation.CreatedAt(); exists {
 				s.SetIgnore(apikey.FieldCreatedAt)
 			}
-			if _, exists := b.mutation.UserID(); exists {
-				s.SetIgnore(apikey.FieldUserID)
-			}
-			if _, exists := b.mutation.ProjectID(); exists {
-				s.SetIgnore(apikey.FieldProjectID)
-			}
 		}
 	}))
 	return u
@@ -1027,20 +822,6 @@ func (u *APIKeyUpsertBulk) UpdateName() *APIKeyUpsertBulk {
 	})
 }
 
-// SetType sets the "type" field.
-func (u *APIKeyUpsertBulk) SetType(v apikey.Type) *APIKeyUpsertBulk {
-	return u.Update(func(s *APIKeyUpsert) {
-		s.SetType(v)
-	})
-}
-
-// UpdateType sets the "type" field to the value that was provided on create.
-func (u *APIKeyUpsertBulk) UpdateType() *APIKeyUpsertBulk {
-	return u.Update(func(s *APIKeyUpsert) {
-		s.UpdateType()
-	})
-}
-
 // SetStatus sets the "status" field.
 func (u *APIKeyUpsertBulk) SetStatus(v apikey.Status) *APIKeyUpsertBulk {
 	return u.Update(func(s *APIKeyUpsert) {
@@ -1052,27 +833,6 @@ func (u *APIKeyUpsertBulk) SetStatus(v apikey.Status) *APIKeyUpsertBulk {
 func (u *APIKeyUpsertBulk) UpdateStatus() *APIKeyUpsertBulk {
 	return u.Update(func(s *APIKeyUpsert) {
 		s.UpdateStatus()
-	})
-}
-
-// SetScopes sets the "scopes" field.
-func (u *APIKeyUpsertBulk) SetScopes(v []string) *APIKeyUpsertBulk {
-	return u.Update(func(s *APIKeyUpsert) {
-		s.SetScopes(v)
-	})
-}
-
-// UpdateScopes sets the "scopes" field to the value that was provided on create.
-func (u *APIKeyUpsertBulk) UpdateScopes() *APIKeyUpsertBulk {
-	return u.Update(func(s *APIKeyUpsert) {
-		s.UpdateScopes()
-	})
-}
-
-// ClearScopes clears the value of the "scopes" field.
-func (u *APIKeyUpsertBulk) ClearScopes() *APIKeyUpsertBulk {
-	return u.Update(func(s *APIKeyUpsert) {
-		s.ClearScopes()
 	})
 }
 

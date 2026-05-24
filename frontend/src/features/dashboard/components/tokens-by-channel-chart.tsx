@@ -2,7 +2,7 @@
 
 
 import { useTranslation } from 'react-i18next';
-import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis, type TooltipProps } from 'recharts';
+import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis, type TooltipContentProps } from 'recharts';
 import { Loader2 } from 'lucide-react';
 import { formatNumber } from '@/utils/format-number';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -59,22 +59,16 @@ export function TokensByChannelChart({ timePeriod }: TokensByChannelChartProps) 
     };
   });
 
-  type TokenTooltipProps = TooltipProps<number, string> & {
-    payload?: Array<{
-      payload: {
-        name: string;
-        inputTokens: number;
-        outputTokens: number;
-        cachedTokens: number;
-        totalTokens: number;
-      };
-    }>;
-  };
-
-  const tooltipContent = (props: TokenTooltipProps) => {
+  const tooltipContent = (props: TooltipContentProps) => {
     if (!props.active || !props.payload?.length) return null;
 
-    const data = props.payload[0].payload;
+    const data = props.payload[0].payload as {
+      name: string;
+      inputTokens: number;
+      outputTokens: number;
+      cachedTokens: number;
+      totalTokens: number;
+    };
     const percent = totalAllChannels ? ((data.totalTokens ?? 0) / totalAllChannels) * 100 : 0;
 
     return (

@@ -352,7 +352,8 @@ export const PromptInput = ({
 }: PromptInputProps) => {
   // Try to use a provider controller if present
   const controller = useOptionalPromptInputController();
-  const usingProvider = !!controller;
+  const providerAttachments = controller?.attachments;
+  const usingProvider = !!providerAttachments;
 
   // Refs
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -369,7 +370,7 @@ export const PromptInput = ({
 
   // ----- Local attachments (only used when no provider)
   const [items, setItems] = useState<(FileUIPart & { id: string })[]>([]);
-  const files = usingProvider ? controller.attachments.files : items;
+  const files = providerAttachments ? providerAttachments.files : items;
 
   const openFileDialogLocal = useCallback(() => {
     inputRef.current?.click();
@@ -435,38 +436,52 @@ export const PromptInput = ({
     [matchesAccept, maxFiles, maxFileSize, onError]
   );
 
-  const add = usingProvider ? (files: File[] | FileList) => controller.attachments.add(files) : addLocal;
+  const add = useMemo(
+    () => (providerAttachments ? (files: File[] | FileList) => providerAttachments.add(files) : addLocal),
+    [providerAttachments, addLocal]
+  );
 
-  const remove = usingProvider
-    ? (id: string) => controller.attachments.remove(id)
-    : (id: string) =>
-        setItems((prev) => {
-          const found = prev.find((file) => file.id === id);
-          if (found?.url) {
-            URL.revokeObjectURL(found.url);
-          }
-          return prev.filter((file) => file.id !== id);
-        });
+  const remove = useMemo(
+    () =>
+      providerAttachments
+        ? (id: string) => providerAttachments.remove(id)
+        : (id: string) =>
+            setItems((prev) => {
+              const found = prev.find((file) => file.id === id);
+              if (found?.url) {
+                URL.revokeObjectURL(found.url);
+              }
+              return prev.filter((file) => file.id !== id);
+            }),
+    [providerAttachments]
+  );
 
-  const clear = usingProvider
-    ? () => controller.attachments.clear()
-    : () =>
-        setItems((prev) => {
-          for (const file of prev) {
-            if (file.url) {
-              URL.revokeObjectURL(file.url);
-            }
-          }
-          return [];
-        });
+  const clear = useMemo(
+    () =>
+      providerAttachments
+        ? () => providerAttachments.clear()
+        : () =>
+            setItems((prev) => {
+              for (const file of prev) {
+                if (file.url) {
+                  URL.revokeObjectURL(file.url);
+                }
+              }
+              return [];
+            }),
+    [providerAttachments]
+  );
 
-  const openFileDialog = usingProvider ? () => controller.attachments.openFileDialog() : openFileDialogLocal;
+  const openFileDialog = useMemo(
+    () => (providerAttachments ? () => providerAttachments.openFileDialog() : openFileDialogLocal),
+    [providerAttachments, openFileDialogLocal]
+  );
 
   // Let provider know about our hidden file input so external menus can call openFileDialog()
   useEffect(() => {
-    if (!usingProvider) return;
+    if (!controller) return;
     controller.__registerFileInput(inputRef, () => inputRef.current?.click());
-  }, [usingProvider, controller]);
+  }, [controller]);
 
   // Note: File input cannot be programmatically set for security reasons
   // The syncHiddenInput prop is no longer functional
@@ -617,7 +632,7 @@ export const PromptInput = ({
             controller.textInput.clear();
           }
         }
-      } catch (error) {
+      } catch {
         // Don't clear on error - user may want to retry
       }
     });
@@ -922,7 +937,7 @@ export const PromptInputSpeechButton = ({ className, textareaRef, onTranscriptio
         }
       };
 
-      speechRecognition.onerror = (event) => {
+      speechRecognition.onerror = () => {
         setIsListening(false);
       };
 

@@ -133,14 +133,6 @@ func (_u *ThreadUpdate) defaults() error {
 	return nil
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (_u *ThreadUpdate) check() error {
-	if _u.mutation.ProjectCleared() && len(_u.mutation.ProjectIDs()) > 0 {
-		return errors.New(`ent: clearing a required unique edge "Thread.project"`)
-	}
-	return nil
-}
-
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
 func (_u *ThreadUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *ThreadUpdate {
 	_u.modifiers = append(_u.modifiers, modifiers...)
@@ -148,9 +140,6 @@ func (_u *ThreadUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *ThreadU
 }
 
 func (_u *ThreadUpdate) sqlSave(ctx context.Context) (_node int, err error) {
-	if err := _u.check(); err != nil {
-		return _node, err
-	}
 	_spec := sqlgraph.NewUpdateSpec(thread.Table, thread.Columns, sqlgraph.NewFieldSpec(thread.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -348,14 +337,6 @@ func (_u *ThreadUpdateOne) defaults() error {
 	return nil
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (_u *ThreadUpdateOne) check() error {
-	if _u.mutation.ProjectCleared() && len(_u.mutation.ProjectIDs()) > 0 {
-		return errors.New(`ent: clearing a required unique edge "Thread.project"`)
-	}
-	return nil
-}
-
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
 func (_u *ThreadUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *ThreadUpdateOne {
 	_u.modifiers = append(_u.modifiers, modifiers...)
@@ -363,9 +344,6 @@ func (_u *ThreadUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *Thre
 }
 
 func (_u *ThreadUpdateOne) sqlSave(ctx context.Context) (_node *Thread, err error) {
-	if err := _u.check(); err != nil {
-		return _node, err
-	}
 	_spec := sqlgraph.NewUpdateSpec(thread.Table, thread.Columns, sqlgraph.NewFieldSpec(thread.FieldID, field.TypeInt))
 	id, ok := _u.mutation.ID()
 	if !ok {

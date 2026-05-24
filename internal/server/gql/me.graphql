@@ -7,35 +7,11 @@ type UserInfo {
   isOwner: Boolean!
   preferLanguage: String!
   avatar: String
-  scopes: [String!]!
-  roles: [RoleInfo!]!
-  projects: [UserProjectInfo!]!
-  oidcIdentities: [OIDCIdentityInfo!]!
   hasPassword: Boolean!
-}
-
-type OIDCIdentityInfo {
-  id: ID!
-  idpName: String!
-  issuer: String!
-  subject: String!
-  email: String!
-}
-
-type RoleInfo {
-  name: String!
-}
-
-type UserProjectInfo {
-  projectID: ID!
-  isOwner: Boolean!
-  scopes: [String!]!
-  roles: [RoleInfo!]!
 }
 
 extend type Query {
     me: UserInfo!
-    myProjects: [Project!]!
 }
 
 input UpdateMeInput {
@@ -48,7 +24,6 @@ input UpdateMeInput {
 extend type Mutation {
     updateMe(input: UpdateMeInput!): User!
     updateMyPassword(input: UpdateMyPasswordInput!): Boolean!
-    unlinkOIDCIdentity(id: ID!): Boolean!
 }
 
 input UpdateMyPasswordInput {

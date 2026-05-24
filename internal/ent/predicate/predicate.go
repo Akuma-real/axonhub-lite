@@ -9,9 +9,6 @@ import (
 // APIKey is the predicate function for apikey builders.
 type APIKey func(*sql.Selector)
 
-// APIKeyProfileTemplate is the predicate function for apikeyprofiletemplate builders.
-type APIKeyProfileTemplate func(*sql.Selector)
-
 // Channel is the predicate function for channel builders.
 type Channel func(*sql.Selector)
 
@@ -27,23 +24,8 @@ type ChannelOverrideTemplate func(*sql.Selector)
 // ChannelProbe is the predicate function for channelprobe builders.
 type ChannelProbe func(*sql.Selector)
 
-// DataStorage is the predicate function for datastorage builders.
-type DataStorage func(*sql.Selector)
-
 // Model is the predicate function for model builders.
 type Model func(*sql.Selector)
-
-// OIDCIdentity is the predicate function for oidcidentity builders.
-type OIDCIdentity func(*sql.Selector)
-
-// Project is the predicate function for project builders.
-type Project func(*sql.Selector)
-
-// Prompt is the predicate function for prompt builders.
-type Prompt func(*sql.Selector)
-
-// PromptProtectionRule is the predicate function for promptprotectionrule builders.
-type PromptProtectionRule func(*sql.Selector)
 
 // ProviderQuotaStatus is the predicate function for providerquotastatus builders.
 type ProviderQuotaStatus func(*sql.Selector)
@@ -53,9 +35,6 @@ type Request func(*sql.Selector)
 
 // RequestExecution is the predicate function for requestexecution builders.
 type RequestExecution func(*sql.Selector)
-
-// Role is the predicate function for role builders.
-type Role func(*sql.Selector)
 
 // System is the predicate function for system builders.
 type System func(*sql.Selector)
@@ -71,9 +50,3 @@ type UsageLog func(*sql.Selector)
 
 // User is the predicate function for user builders.
 type User func(*sql.Selector)
-
-// UserProject is the predicate function for userproject builders.
-type UserProject func(*sql.Selector)
-
-// UserRole is the predicate function for userrole builders.
-type UserRole func(*sql.Selector)

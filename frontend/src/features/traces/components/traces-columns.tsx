@@ -1,6 +1,5 @@
 'use client';
 
-import { useCallback } from 'react';
 import { format } from 'date-fns';
 import { ColumnDef } from '@tanstack/react-table';
 import { zhCN, enUS } from 'date-fns/locale';
@@ -23,12 +22,12 @@ export function useTracesColumns(): ColumnDef<Trace>[] {
       accessorKey: 'id',
       header: ({ column }) => <DataTableColumnHeader column={column} title={t('common.columns.id')} />,
       cell: ({ row }) => {
-        const handleClick = useCallback(() => {
+        const handleClick = () => {
           navigateWithSearch({
-            to: '/project/traces/$traceId',
+            to: '/traces/$traceId',
             params: { traceId: row.original.id },
           });
-        }, [row.original.id, navigateWithSearch]);
+        };
 
         return (
           <button onClick={handleClick} className='text-primary cursor-pointer font-mono text-xs hover:underline'>
@@ -87,7 +86,7 @@ export function useTracesColumns(): ColumnDef<Trace>[] {
 
         const handleNavigate = () => {
           navigateWithSearch({
-            to: '/project/threads/$threadId',
+            to: '/threads/$threadId',
             params: { threadId: thread.id },
           });
         };
@@ -116,7 +115,7 @@ export function useTracesColumns(): ColumnDef<Trace>[] {
       header: ({ column }) => <DataTableColumnHeader column={column} title={t('traces.columns.details')} />,
       cell: ({ row }) => {
         const handleViewDetails = () => {
-          navigateWithSearch({ to: '/project/traces/$traceId', params: { traceId: row.original.id } });
+          navigateWithSearch({ to: '/traces/$traceId', params: { traceId: row.original.id } });
         };
 
         return (
@@ -159,7 +158,7 @@ export function useTracesColumns(): ColumnDef<Trace>[] {
     //         </DropdownMenuTrigger>
     //         <DropdownMenuContent align='end'>
     //           <DropdownMenuItem onClick={() => {
-    //             navigate({ to: '/project/traces/$traceId', params: { traceId: trace.id } })
+    //             navigate({ to: '/traces/$traceId', params: { traceId: trace.id } })
     //           }}>
     //             <Eye className='mr-2 h-4 w-4' />
     //             {t('traces.actions.viewDetails')}

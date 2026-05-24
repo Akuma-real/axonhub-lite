@@ -4,7 +4,6 @@ import (
 	"entgo.io/contrib/entgql"
 	"entgo.io/ent"
 	"entgo.io/ent/schema"
-	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 
@@ -27,26 +26,17 @@ func (ChannelOverrideTemplate) Mixin() []ent.Mixin {
 
 func (ChannelOverrideTemplate) Indexes() []ent.Index {
 	return []ent.Index{
-		// Unique template name per user, channel type, and deleted_at
-		// This ensures template names are unique within a user's templates for the same channel type
-		index.Fields("user_id", "name", "deleted_at").
-			StorageKey("channel_override_templates_by_user_name").
+		index.Fields("name", "deleted_at").
+			StorageKey("channel_override_templates_by_name").
 			Unique(),
 	}
 }
 
 func (ChannelOverrideTemplate) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("user_id").
-			Optional().
-			Immutable().
-			Comment("Owner of this template").
-			Annotations(
-				entgql.Skip(entgql.SkipMutationUpdateInput),
-			),
 		field.String("name").
 			NotEmpty().
-			Comment("Template name, unique per user"),
+			Comment("Template name"),
 		field.String("description").
 			Optional().
 			Comment("Template description"),
@@ -85,17 +75,7 @@ func (ChannelOverrideTemplate) Fields() []ent.Field {
 }
 
 func (ChannelOverrideTemplate) Edges() []ent.Edge {
-	return []ent.Edge{
-		edge.From("user", User.Type).
-			Ref("channel_override_templates").
-			Field("user_id").
-			Unique().
-			Immutable().
-			Annotations(
-				entgql.Skip(entgql.SkipMutationCreateInput, entgql.SkipMutationUpdateInput),
-				entgql.Directives(forceResolver()),
-			),
-	}
+	return []ent.Edge{}
 }
 
 func (ChannelOverrideTemplate) Annotations() []schema.Annotation {
@@ -113,11 +93,9 @@ func (ChannelOverrideTemplate) Policy() ent.Policy {
 	return scopes.Policy{
 		Query: scopes.QueryPolicy{
 			scopes.OwnerRule(),
-			scopes.UserOwnedQueryRule(),
 		},
 		Mutation: scopes.MutationPolicy{
 			scopes.OwnerRule(),
-			scopes.UserOwnedMutationRule(),
 		},
 	}
 }

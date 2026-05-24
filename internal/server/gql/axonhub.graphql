@@ -318,34 +318,6 @@ input APIKeyProfileInput {
   loadBalanceStrategy: String
 }
 
-input UpdateProjectProfilesInput {
-  activeProfile: String!
-  profiles: [ProjectProfileInput!]
-}
-
-input ProjectProfileInput {
-  name: String!
-  channelIDs: [Int!]
-  channelTags: [String!]
-  channelTagsMatchMode: ChannelTagsMatchMode
-}
-
-type ProjectProfiles {
-  activeProfile: String!
-  profiles: [ProjectProfile!]
-}
-
-type ProjectProfile {
-  name: String!
-  channelIDs: [Int!]
-  channelTags: [String!]
-  channelTagsMatchMode: ChannelTagsMatchMode
-}
-
-input UpdateAPIKeyScopesInput {
-  scopes: [String!]!
-}
-
 type APIKeyProfiles {
   activeProfile: String!
   profiles: [APIKeyProfile!]
@@ -366,16 +338,6 @@ enum ChannelTagsMatchMode {
   any
   all
   none
-}
-
-# ApiKeyProfileTemplate uses the Ent-generated type and input types from ent.graphql
-
-
-
-# Load template input - custom input for loading template to API key
-input LoadApiKeyProfileTemplateInput {
-  templateID: ID!
-  apiKeyID: ID!
 }
 
 input APIKeyQuotaInput {
@@ -488,85 +450,6 @@ input QueryModelsInput {
 type ChannelTypeCount {
   type: String!
   count: Int!
-}
-
-input AddUserToProjectInput {
-  projectId: ID!
-  userId: ID!
-  isOwner: Boolean
-  scopes: [String!]
-  roleIDs: [ID!]
-}
-
-input UpdateProjectUserInput {
-  projectId: ID!
-  userId: ID!
-  isOwner: Boolean
-  scopes: [String!]
-  addRoleIDs: [ID!]
-  removeRoleIDs: [ID!]
-}
-
-input RemoveUserFromProjectInput {
-  projectId: ID!
-  userId: ID!
-}
-
-input DataStorageSettingsInput {
-  dsn: String
-  directory: String
-  s3: S3Input
-  gcs: GCSInput
-  webdav: WebDAVInput
-}
-
-input WebDAVInput {
-  url: String!
-  username: String
-  password: String
-  insecure_skip_tls: Boolean
-  path: String
-}
-
-input S3Input {
-  bucketName: String!
-  endpoint: String
-  region: String
-  accessKey: String
-  secretKey: String
-  pathStyle: Boolean
-}
-
-input GCSInput {
-  bucketName: String!
-  credential: String
-}
-
-type DataStorageSettings {
-  dsn: String
-  directory: String
-  s3: S3
-  gcs: GCS
-  webdav: WebDAV
-}
-
-type WebDAV {
-  url: String!
-  username: String
-  password: String
-  insecure_skip_tls: Boolean
-  path: String
-}
-
-type S3 {
-  bucketName: String!
-  endpoint: String!
-  region: String!
-  pathStyle: Boolean!
-}
-
-type GCS {
-  bucketName: String!
 }
 
 type UsageMetadata {
@@ -790,29 +673,6 @@ type Mutation {
   bulkEnableAPIKeys(ids: [ID!]!): Boolean!
   bulkArchiveAPIKeys(ids: [ID!]!): Boolean!
 
-  createUser(input: CreateUserInput!): User!
-  updateUser(id: ID!, input: UpdateUserInput!): User!
-  updateUserStatus(id: ID!, status: UserStatus!): User!
-  deleteUser(id: ID!): Boolean!
-
-  createRole(input: CreateRoleInput!): Role!
-  updateRole(id: ID!, input: UpdateRoleInput!): Role!
-  deleteRole(id: ID!): Boolean!
-  bulkDeleteRoles(ids: [ID!]!): Boolean!
-
-  createProject(input: CreateProjectInput!): Project!
-  updateProject(id: ID!, input: UpdateProjectInput!): Project!
-  updateProjectStatus(id: ID!, status: ProjectStatus!): Project!
-  updateProjectProfiles(id: ID!, input: UpdateProjectProfilesInput!): Project!
-  deleteProject(id: ID!): Boolean!
-
-  addUserToProject(input: AddUserToProjectInput!): UserProject!
-  removeUserFromProject(input: RemoveUserFromProjectInput!): Boolean!
-  updateProjectUser(input: UpdateProjectUserInput!): UserProject!
-
-  createDataStorage(input: CreateDataStorageInput!): DataStorage!
-  updateDataStorage(id: ID!, input: UpdateDataStorageInput!): DataStorage!
-
   # Channel Override Template Mutations
   createChannelOverrideTemplate(
     input: CreateChannelOverrideTemplateInput!
@@ -831,21 +691,6 @@ type Mutation {
 
   # Trigger immediate model sync for a channel
   syncChannelModels(channelID: ID!, pattern: String): SyncChannelModelsPayload!
-
-  # API Key Profile Template Mutations
-  createApiKeyProfileTemplate(
-    input: CreateAPIKeyProfileTemplateInput!
-    profile: APIKeyProfileInput!
-  ): APIKeyProfileTemplate!
-  updateApiKeyProfileTemplate(
-    id: ID!
-    input: UpdateAPIKeyProfileTemplateInput!
-    profile: APIKeyProfileInput
-  ): APIKeyProfileTemplate!
-  deleteApiKeyProfileTemplate(id: ID!): APIKeyProfileTemplate!
-  loadApiKeyProfileTemplate(
-    input: LoadApiKeyProfileTemplateInput!
-  ): APIKey!
 }
 
 input QueryChannelInput {

@@ -26,8 +26,6 @@ func (Request) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("api_key_id", "created_at").
 			StorageKey("requests_by_api_key_id_created_at"),
-		index.Fields("project_id", "created_at").
-			StorageKey("requests_by_project_id_created_at"),
 		index.Fields("channel_id", "created_at").
 			StorageKey("requests_by_channel_id_created_at"),
 		index.Fields("trace_id", "created_at").
@@ -43,19 +41,11 @@ func (Request) Fields() []ent.Field {
 		field.Int("api_key_id").
 			Optional().
 			Immutable().
-			Comment("API Key ID of the request, null for the request from the Admin."),
-		field.Int("project_id").
-			Immutable().
-			Default(1).
-			Comment("Project ID, default to 1 for backward compatibility"),
+			Comment("API Key ID of the request, null for admin-originated requests."),
 		field.Int("trace_id").
 			Optional().
 			Immutable().
 			Comment("Trace ID that this request belongs to"),
-		field.Int("data_storage_id").
-			Optional().
-			Immutable().
-			Comment("Data Storage ID that this request belongs to"),
 		field.Enum("source").Values("api", "playground", "test").Default("api").Immutable(),
 		field.String("model_id").Immutable(),
 		field.String("reasoning_effort").
@@ -101,46 +91,16 @@ func (Request) Fields() []ent.Field {
 		// Reasoning/thinking duration in milliseconds
 		field.Int64("metrics_reasoning_duration_ms").Optional().Nillable().Comment("Reasoning/thinking duration in milliseconds"),
 
-		// ContentSaved indicates whether the generated content (e.g. video, audio) has been downloaded and saved to external storage.
-		field.Bool("content_saved").
-			Default(false).
-			Comment("whether the generated content has been saved to external storage"),
-		// ContentStorageID is the data storage ID used to save the generated content file.
-		field.Int("content_storage_id").
-			Optional().
-			Nillable().
-			Comment("data storage id used to save the content file"),
-		// ContentStorageKey is the object key/path of the saved content in the data storage.
-		field.String("content_storage_key").
-			Optional().
-			Nillable().
-			Comment("storage key/path of the saved content file"),
-		// ContentSavedAt is the timestamp when the content file is saved.
-		field.Time("content_saved_at").
-			Optional().
-			Nillable().
-			Comment("when the content file was saved"),
 	}
 }
 
 func (Request) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("api_key", APIKey.Type).Ref("requests").Field("api_key_id").Immutable().Unique(),
-		edge.From("project", Project.Type).
-			Ref("requests").
-			Field("project_id").
-			Immutable().
-			Required().
-			Unique(),
 		edge.From("trace", Trace.Type).
 			Ref("requests").
 			Immutable().
 			Field("trace_id").
-			Unique(),
-		edge.From("data_storage", DataStorage.Type).
-			Ref("requests").
-			Field("data_storage_id").
-			Immutable().
 			Unique(),
 		edge.To("executions", RequestExecution.Type).
 			Annotations(
@@ -175,15 +135,11 @@ func (Request) Policy() ent.Policy {
 	return scopes.Policy{
 		Query: scopes.QueryPolicy{
 			scopes.APIKeyScopeQueryRule(scopes.ScopeWriteRequests),
-			scopes.UserProjectScopeReadRule(scopes.ScopeReadRequests),
 			scopes.OwnerRule(),
-			scopes.UserReadScopeRule(scopes.ScopeReadRequests),
 		},
 		Mutation: scopes.MutationPolicy{
 			scopes.APIKeyScopeMutationRule(scopes.ScopeWriteRequests),
-			scopes.UserProjectScopeWriteRule(scopes.ScopeWriteRequests),
 			scopes.OwnerRule(),
-			scopes.UserWriteScopeRule(scopes.ScopeWriteRequests),
 		},
 	}
 }

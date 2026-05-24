@@ -24,12 +24,8 @@ const (
 	FieldUpdatedAt = "updated_at"
 	// FieldAPIKeyID holds the string denoting the api_key_id field in the database.
 	FieldAPIKeyID = "api_key_id"
-	// FieldProjectID holds the string denoting the project_id field in the database.
-	FieldProjectID = "project_id"
 	// FieldTraceID holds the string denoting the trace_id field in the database.
 	FieldTraceID = "trace_id"
-	// FieldDataStorageID holds the string denoting the data_storage_id field in the database.
-	FieldDataStorageID = "data_storage_id"
 	// FieldSource holds the string denoting the source field in the database.
 	FieldSource = "source"
 	// FieldModelID holds the string denoting the model_id field in the database.
@@ -62,22 +58,10 @@ const (
 	FieldMetricsFirstTokenLatencyMs = "metrics_first_token_latency_ms"
 	// FieldMetricsReasoningDurationMs holds the string denoting the metrics_reasoning_duration_ms field in the database.
 	FieldMetricsReasoningDurationMs = "metrics_reasoning_duration_ms"
-	// FieldContentSaved holds the string denoting the content_saved field in the database.
-	FieldContentSaved = "content_saved"
-	// FieldContentStorageID holds the string denoting the content_storage_id field in the database.
-	FieldContentStorageID = "content_storage_id"
-	// FieldContentStorageKey holds the string denoting the content_storage_key field in the database.
-	FieldContentStorageKey = "content_storage_key"
-	// FieldContentSavedAt holds the string denoting the content_saved_at field in the database.
-	FieldContentSavedAt = "content_saved_at"
 	// EdgeAPIKey holds the string denoting the api_key edge name in mutations.
 	EdgeAPIKey = "api_key"
-	// EdgeProject holds the string denoting the project edge name in mutations.
-	EdgeProject = "project"
 	// EdgeTrace holds the string denoting the trace edge name in mutations.
 	EdgeTrace = "trace"
-	// EdgeDataStorage holds the string denoting the data_storage edge name in mutations.
-	EdgeDataStorage = "data_storage"
 	// EdgeExecutions holds the string denoting the executions edge name in mutations.
 	EdgeExecutions = "executions"
 	// EdgeChannel holds the string denoting the channel edge name in mutations.
@@ -93,13 +77,6 @@ const (
 	APIKeyInverseTable = "api_keys"
 	// APIKeyColumn is the table column denoting the api_key relation/edge.
 	APIKeyColumn = "api_key_id"
-	// ProjectTable is the table that holds the project relation/edge.
-	ProjectTable = "requests"
-	// ProjectInverseTable is the table name for the Project entity.
-	// It exists in this package in order to avoid circular dependency with the "project" package.
-	ProjectInverseTable = "projects"
-	// ProjectColumn is the table column denoting the project relation/edge.
-	ProjectColumn = "project_id"
 	// TraceTable is the table that holds the trace relation/edge.
 	TraceTable = "requests"
 	// TraceInverseTable is the table name for the Trace entity.
@@ -107,13 +84,6 @@ const (
 	TraceInverseTable = "traces"
 	// TraceColumn is the table column denoting the trace relation/edge.
 	TraceColumn = "trace_id"
-	// DataStorageTable is the table that holds the data_storage relation/edge.
-	DataStorageTable = "requests"
-	// DataStorageInverseTable is the table name for the DataStorage entity.
-	// It exists in this package in order to avoid circular dependency with the "datastorage" package.
-	DataStorageInverseTable = "data_storages"
-	// DataStorageColumn is the table column denoting the data_storage relation/edge.
-	DataStorageColumn = "data_storage_id"
 	// ExecutionsTable is the table that holds the executions relation/edge.
 	ExecutionsTable = "request_executions"
 	// ExecutionsInverseTable is the table name for the RequestExecution entity.
@@ -143,9 +113,7 @@ var Columns = []string{
 	FieldCreatedAt,
 	FieldUpdatedAt,
 	FieldAPIKeyID,
-	FieldProjectID,
 	FieldTraceID,
-	FieldDataStorageID,
 	FieldSource,
 	FieldModelID,
 	FieldReasoningEffort,
@@ -162,10 +130,6 @@ var Columns = []string{
 	FieldMetricsLatencyMs,
 	FieldMetricsFirstTokenLatencyMs,
 	FieldMetricsReasoningDurationMs,
-	FieldContentSaved,
-	FieldContentStorageID,
-	FieldContentStorageKey,
-	FieldContentSavedAt,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -192,8 +156,6 @@ var (
 	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
 	UpdateDefaultUpdatedAt func() time.Time
-	// DefaultProjectID holds the default value on creation for the "project_id" field.
-	DefaultProjectID int
 	// DefaultFormat holds the default value on creation for the "format" field.
 	DefaultFormat string
 	// ExternalIDValidator is a validator for the "external_id" field. It is called by the builders before save.
@@ -202,8 +164,6 @@ var (
 	DefaultStream bool
 	// DefaultClientIP holds the default value on creation for the "client_ip" field.
 	DefaultClientIP string
-	// DefaultContentSaved holds the default value on creation for the "content_saved" field.
-	DefaultContentSaved bool
 )
 
 // Source defines the type for the "source" enum field.
@@ -282,19 +242,9 @@ func ByAPIKeyID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldAPIKeyID, opts...).ToFunc()
 }
 
-// ByProjectID orders the results by the project_id field.
-func ByProjectID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldProjectID, opts...).ToFunc()
-}
-
 // ByTraceID orders the results by the trace_id field.
 func ByTraceID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldTraceID, opts...).ToFunc()
-}
-
-// ByDataStorageID orders the results by the data_storage_id field.
-func ByDataStorageID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldDataStorageID, opts...).ToFunc()
 }
 
 // BySource orders the results by the source field.
@@ -357,26 +307,6 @@ func ByMetricsReasoningDurationMs(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldMetricsReasoningDurationMs, opts...).ToFunc()
 }
 
-// ByContentSaved orders the results by the content_saved field.
-func ByContentSaved(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldContentSaved, opts...).ToFunc()
-}
-
-// ByContentStorageID orders the results by the content_storage_id field.
-func ByContentStorageID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldContentStorageID, opts...).ToFunc()
-}
-
-// ByContentStorageKey orders the results by the content_storage_key field.
-func ByContentStorageKey(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldContentStorageKey, opts...).ToFunc()
-}
-
-// ByContentSavedAt orders the results by the content_saved_at field.
-func ByContentSavedAt(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldContentSavedAt, opts...).ToFunc()
-}
-
 // ByAPIKeyField orders the results by api_key field.
 func ByAPIKeyField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -384,24 +314,10 @@ func ByAPIKeyField(field string, opts ...sql.OrderTermOption) OrderOption {
 	}
 }
 
-// ByProjectField orders the results by project field.
-func ByProjectField(field string, opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newProjectStep(), sql.OrderByField(field, opts...))
-	}
-}
-
 // ByTraceField orders the results by trace field.
 func ByTraceField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newTraceStep(), sql.OrderByField(field, opts...))
-	}
-}
-
-// ByDataStorageField orders the results by data_storage field.
-func ByDataStorageField(field string, opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newDataStorageStep(), sql.OrderByField(field, opts...))
 	}
 }
 
@@ -446,25 +362,11 @@ func newAPIKeyStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.M2O, true, APIKeyTable, APIKeyColumn),
 	)
 }
-func newProjectStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(ProjectInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, ProjectTable, ProjectColumn),
-	)
-}
 func newTraceStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(TraceInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, true, TraceTable, TraceColumn),
-	)
-}
-func newDataStorageStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(DataStorageInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, DataStorageTable, DataStorageColumn),
 	)
 }
 func newExecutionsStep() *sqlgraph.Step {

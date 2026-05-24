@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { IconShield, IconEye, IconEyeOff, IconLock, IconLockOpen, IconRefresh } from '@tabler/icons-react';
+import { IconShield, IconEyeOff, IconLock, IconLockOpen, IconRefresh } from '@tabler/icons-react';
 import { routeConfigs } from '@/config/route-permission';
 import { useAuthStore } from '@/stores/authStore';
 import { useRoutePermissions } from '@/hooks/useRoutePermissions';
@@ -52,14 +52,14 @@ export default function PermissionDemo() {
         setDemoScopes(demoUser.scopes || []);
         setIsDemoMode(true);
         setUser(demoUser);
-      } catch (error) {
+      } catch {
         localStorage.removeItem(DEMO_USER_KEY);
         localStorage.removeItem(DEMO_ORIGINAL_USER_KEY);
       }
     } else if (user) {
       setDemoScopes(user.scopes || []);
     }
-  }, []);
+  }, [setUser, user]);
 
   // 进入演示模式
   const enterDemoMode = () => {

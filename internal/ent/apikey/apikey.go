@@ -25,44 +25,18 @@ const (
 	FieldUpdatedAt = "updated_at"
 	// FieldDeletedAt holds the string denoting the deleted_at field in the database.
 	FieldDeletedAt = "deleted_at"
-	// FieldUserID holds the string denoting the user_id field in the database.
-	FieldUserID = "user_id"
-	// FieldProjectID holds the string denoting the project_id field in the database.
-	FieldProjectID = "project_id"
 	// FieldKey holds the string denoting the key field in the database.
 	FieldKey = "key"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
-	// FieldType holds the string denoting the type field in the database.
-	FieldType = "type"
 	// FieldStatus holds the string denoting the status field in the database.
 	FieldStatus = "status"
-	// FieldScopes holds the string denoting the scopes field in the database.
-	FieldScopes = "scopes"
 	// FieldProfiles holds the string denoting the profiles field in the database.
 	FieldProfiles = "profiles"
-	// EdgeUser holds the string denoting the user edge name in mutations.
-	EdgeUser = "user"
-	// EdgeProject holds the string denoting the project edge name in mutations.
-	EdgeProject = "project"
 	// EdgeRequests holds the string denoting the requests edge name in mutations.
 	EdgeRequests = "requests"
 	// Table holds the table name of the apikey in the database.
 	Table = "api_keys"
-	// UserTable is the table that holds the user relation/edge.
-	UserTable = "api_keys"
-	// UserInverseTable is the table name for the User entity.
-	// It exists in this package in order to avoid circular dependency with the "user" package.
-	UserInverseTable = "users"
-	// UserColumn is the table column denoting the user relation/edge.
-	UserColumn = "user_id"
-	// ProjectTable is the table that holds the project relation/edge.
-	ProjectTable = "api_keys"
-	// ProjectInverseTable is the table name for the Project entity.
-	// It exists in this package in order to avoid circular dependency with the "project" package.
-	ProjectInverseTable = "projects"
-	// ProjectColumn is the table column denoting the project relation/edge.
-	ProjectColumn = "project_id"
 	// RequestsTable is the table that holds the requests relation/edge.
 	RequestsTable = "requests"
 	// RequestsInverseTable is the table name for the Request entity.
@@ -78,13 +52,9 @@ var Columns = []string{
 	FieldCreatedAt,
 	FieldUpdatedAt,
 	FieldDeletedAt,
-	FieldUserID,
-	FieldProjectID,
 	FieldKey,
 	FieldName,
-	FieldType,
 	FieldStatus,
-	FieldScopes,
 	FieldProfiles,
 }
 
@@ -115,40 +85,9 @@ var (
 	UpdateDefaultUpdatedAt func() time.Time
 	// DefaultDeletedAt holds the default value on creation for the "deleted_at" field.
 	DefaultDeletedAt int
-	// DefaultProjectID holds the default value on creation for the "project_id" field.
-	DefaultProjectID int
-	// DefaultScopes holds the default value on creation for the "scopes" field.
-	DefaultScopes []string
 	// DefaultProfiles holds the default value on creation for the "profiles" field.
 	DefaultProfiles *objects.APIKeyProfiles
 )
-
-// Type defines the type for the "type" enum field.
-type Type string
-
-// TypeUser is the default value of the Type enum.
-const DefaultType = TypeUser
-
-// Type values.
-const (
-	TypeUser           Type = "user"
-	TypeServiceAccount Type = "service_account"
-	TypeNoauth         Type = "noauth"
-)
-
-func (_type Type) String() string {
-	return string(_type)
-}
-
-// TypeValidator is a validator for the "type" field enum values. It is called by the builders before save.
-func TypeValidator(_type Type) error {
-	switch _type {
-	case TypeUser, TypeServiceAccount, TypeNoauth:
-		return nil
-	default:
-		return fmt.Errorf("apikey: invalid enum value for type field: %q", _type)
-	}
-}
 
 // Status defines the type for the "status" enum field.
 type Status string
@@ -200,16 +139,6 @@ func ByDeletedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDeletedAt, opts...).ToFunc()
 }
 
-// ByUserID orders the results by the user_id field.
-func ByUserID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldUserID, opts...).ToFunc()
-}
-
-// ByProjectID orders the results by the project_id field.
-func ByProjectID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldProjectID, opts...).ToFunc()
-}
-
 // ByKey orders the results by the key field.
 func ByKey(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldKey, opts...).ToFunc()
@@ -220,28 +149,9 @@ func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
 }
 
-// ByType orders the results by the type field.
-func ByType(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldType, opts...).ToFunc()
-}
-
 // ByStatus orders the results by the status field.
 func ByStatus(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldStatus, opts...).ToFunc()
-}
-
-// ByUserField orders the results by user field.
-func ByUserField(field string, opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newUserStep(), sql.OrderByField(field, opts...))
-	}
-}
-
-// ByProjectField orders the results by project field.
-func ByProjectField(field string, opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newProjectStep(), sql.OrderByField(field, opts...))
-	}
 }
 
 // ByRequestsCount orders the results by requests count.
@@ -257,44 +167,12 @@ func ByRequests(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newRequestsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
-func newUserStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(UserInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, UserTable, UserColumn),
-	)
-}
-func newProjectStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(ProjectInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, ProjectTable, ProjectColumn),
-	)
-}
 func newRequestsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(RequestsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, RequestsTable, RequestsColumn),
 	)
-}
-
-// MarshalGQL implements graphql.Marshaler interface.
-func (e Type) MarshalGQL(w io.Writer) {
-	io.WriteString(w, strconv.Quote(e.String()))
-}
-
-// UnmarshalGQL implements graphql.Unmarshaler interface.
-func (e *Type) UnmarshalGQL(val interface{}) error {
-	str, ok := val.(string)
-	if !ok {
-		return fmt.Errorf("enum %T must be a string", val)
-	}
-	*e = Type(str)
-	if err := TypeValidator(*e); err != nil {
-		return fmt.Errorf("%s is not a valid Type", str)
-	}
-	return nil
 }
 
 // MarshalGQL implements graphql.Marshaler interface.

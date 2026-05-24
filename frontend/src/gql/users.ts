@@ -6,28 +6,9 @@ export const ME_QUERY = `
       firstName
       lastName
       isOwner
-      scopes
       preferLanguage
       avatar
       hasPassword
-      oidcIdentities {
-        id
-        idpName
-        issuer
-        subject
-        email
-      }
-      roles {
-        name
-      }
-      projects {
-        projectID
-        isOwner
-        scopes
-        roles {
-          name
-        }
-      }
     }
   }
 `;
@@ -224,11 +205,5 @@ export const UPDATE_ME_MUTATION = `
 export const UPDATE_MY_PASSWORD_MUTATION = `
   mutation UpdateMyPassword($input: UpdateMyPasswordInput!) {
     updateMyPassword(input: $input)
-  }
-`;
-
-export const UNLINK_OIDC_IDENTITY_MUTATION = `
-  mutation UnlinkOIDCIdentity($id: ID!) {
-    unlinkOIDCIdentity(id: $id)
   }
 `;

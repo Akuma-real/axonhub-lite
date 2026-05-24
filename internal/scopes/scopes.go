@@ -2,8 +2,7 @@ package scopes
 
 import "slices"
 
-// ScopeSlug represents a permission scope to view or manage the data of the system.
-// Every user can view and manage their own data, and manage data of other users if they have the appropriate scopes.
+// ScopeSlug represents an admin permission scope.
 type ScopeSlug string
 
 // Available scopes in the system.
@@ -16,58 +15,28 @@ const (
 	// ScopeWriteChannels manage the channels/models of the system.
 	ScopeWriteChannels ScopeSlug = "write_channels"
 
-	// ScopeReadDataStorages read the data storages of the system.
-	ScopeReadDataStorages ScopeSlug = "read_data_storages"
-	// ScopeWriteDataStorages manage the data storages of the system.
-	ScopeWriteDataStorages ScopeSlug = "write_data_storages"
-
-	// ScopeReadUsers read the users of the system or project.
-	ScopeReadUsers ScopeSlug = "read_users"
-	// ScopeWriteUsers manage the users of the system or project.
-	ScopeWriteUsers ScopeSlug = "write_users"
-
-	// ScopeReadSettings read the settings of the project.
+	// ScopeReadSettings read the system settings.
 	ScopeReadSettings ScopeSlug = "read_settings"
-	// ScopeWriteSettings manage the settings of the project.
+	// ScopeWriteSettings manage the system settings.
 	ScopeWriteSettings ScopeSlug = "write_settings"
 
-	// ScopeReadRoles read the roles of the system or project.
-	ScopeReadRoles ScopeSlug = "read_roles"
-	// ScopeWriteRoles manage the roles of the system or project.
-	ScopeWriteRoles ScopeSlug = "write_roles"
-
-	// ScopeReadProjects read the projects of the system.
-	ScopeReadProjects ScopeSlug = "read_projects"
-	// ScopeWriteProjects manage the projects of the system.
-	ScopeWriteProjects ScopeSlug = "write_projects"
-
-	// ScopeReadAPIKeys read the api keys of the project.
+	// ScopeReadAPIKeys read the API keys.
 	//nolint:gosec // False positive.
 	ScopeReadAPIKeys ScopeSlug = "read_api_keys"
-	// ScopeWriteAPIKeys manage the api keys of the project.
+	// ScopeWriteAPIKeys manage the API keys.
 	ScopeWriteAPIKeys ScopeSlug = "write_api_keys"
 
-	// ScopeReadRequests read the requests of the project.
+	// ScopeReadRequests read request records.
 	ScopeReadRequests ScopeSlug = "read_requests"
-	// ScopeWriteRequests manage the requests of the project.
+	// ScopeWriteRequests manage request records.
 	ScopeWriteRequests ScopeSlug = "write_requests"
-
-	// ScopeReadPrompts read the prompts of the project.
-	ScopeReadPrompts ScopeSlug = "read_prompts"
-	// ScopeWritePrompts manage the prompts of the project.
-	ScopeWritePrompts ScopeSlug = "write_prompts"
 )
 
 type ScopeLevel string
 
 const (
 	// ScopeLevelSystem is the scope level for system-wide operations.
-	// If a user has a scope with ScopeLevelSystem, they can perform operations on the entire system.
 	ScopeLevelSystem ScopeLevel = "system"
-
-	// ScopeLevelProject is the scope level for project-specific operations.
-	// If a user has a scope with ScopeLevelProject, they can perform operations on the project they are associated with.
-	ScopeLevelProject ScopeLevel = "project"
 )
 
 type Scope struct {
@@ -104,74 +73,24 @@ var scopeConfigs = []Scope{
 		Levels:      []ScopeLevel{ScopeLevelSystem},
 	},
 	{
-		Slug:        ScopeReadDataStorages,
-		Description: "View data storage information",
-		Levels:      []ScopeLevel{ScopeLevelSystem},
-	},
-	{
-		Slug:        ScopeWriteDataStorages,
-		Description: "Manage data storages (create, edit, delete)",
-		Levels:      []ScopeLevel{ScopeLevelSystem},
-	},
-	{
-		Slug:        ScopeReadUsers,
-		Description: "View user information",
-		Levels:      []ScopeLevel{ScopeLevelSystem, ScopeLevelProject},
-	},
-	{
-		Slug:        ScopeWriteUsers,
-		Description: "Manage users (create, edit, delete)",
-		Levels:      []ScopeLevel{ScopeLevelSystem, ScopeLevelProject},
-	},
-	{
-		Slug:        ScopeReadRoles,
-		Description: "View role information",
-		Levels:      []ScopeLevel{ScopeLevelSystem, ScopeLevelProject},
-	},
-	{
-		Slug:        ScopeWriteRoles,
-		Description: "Manage roles (create, edit, delete)",
-		Levels:      []ScopeLevel{ScopeLevelSystem, ScopeLevelProject},
-	},
-	{
-		Slug:        ScopeReadProjects,
-		Description: "View project information",
-		Levels:      []ScopeLevel{ScopeLevelSystem},
-	},
-	{
-		Slug:        ScopeWriteProjects,
-		Description: "Manage projects (create, edit, delete)",
-		Levels:      []ScopeLevel{ScopeLevelSystem},
-	},
-	{
 		Slug:        ScopeReadAPIKeys,
 		Description: "View API keys",
-		Levels:      []ScopeLevel{ScopeLevelSystem, ScopeLevelProject},
+		Levels:      []ScopeLevel{ScopeLevelSystem},
 	},
 	{
 		Slug:        ScopeWriteAPIKeys,
 		Description: "Manage API keys (create, edit, delete)",
-		Levels:      []ScopeLevel{ScopeLevelSystem, ScopeLevelProject},
+		Levels:      []ScopeLevel{ScopeLevelSystem},
 	},
 	{
 		Slug:        ScopeReadRequests,
 		Description: "View request records",
-		Levels:      []ScopeLevel{ScopeLevelSystem, ScopeLevelProject},
+		Levels:      []ScopeLevel{ScopeLevelSystem},
 	},
 	{
 		Slug:        ScopeWriteRequests,
 		Description: "Manage request records",
-		Levels:      []ScopeLevel{ScopeLevelSystem, ScopeLevelProject},
-	},
-	{
-		Slug:        ScopeReadPrompts,
-		Description: "View prompts",
-		Levels:      []ScopeLevel{ScopeLevelSystem, ScopeLevelProject},
-	},
-	{
-		Slug:        ScopeWritePrompts,
-		Description: "Manage prompts (create, edit, delete)",
-		Levels:      []ScopeLevel{ScopeLevelSystem, ScopeLevelProject},
+		Levels:      []ScopeLevel{ScopeLevelSystem},
 	},
 }
 

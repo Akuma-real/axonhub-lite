@@ -72,7 +72,6 @@ func TestThreadWithMultipleValues(t *testing.T) {
 	ctx = WithAPIKey(ctx, &ent.APIKey{ID: 1, Key: "test-key"})
 	ctx = WithUser(ctx, &ent.User{ID: 123, Email: "test@example.com"})
 	ctx = WithThread(ctx, &ent.Thread{ID: 1, ThreadID: "thread-123"})
-	ctx = WithProjectID(ctx, 456)
 
 	// Test retrieving all values
 	apiKey, ok := GetAPIKey(ctx)
@@ -90,10 +89,6 @@ func TestThreadWithMultipleValues(t *testing.T) {
 		t.Error("Thread should be stored and retrievable")
 	}
 
-	projectID, ok := GetProjectID(ctx)
-	if !ok || projectID != 456 {
-		t.Error("Project ID should be stored and retrievable")
-	}
 }
 
 func TestThreadOverwrite(t *testing.T) {

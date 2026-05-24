@@ -18,12 +18,10 @@
 | [渠道管理](guides/channel-management.md) | 配置和管理 AI 提供商渠道 |
 | [模型管理](guides/model-management.md) | 模型映射、关联和优先级配置 |
 | [API Key 配置文件](guides/api-key-profiles.md) | 创建和管理 API Key 配置文件 |
-| [权限管理](guides/permissions.md) | 企业级 RBAC 访问控制配置 |
 | [负载均衡](guides/load-balance.md) | 智能路由和故障转移设置 |
 | [成本追踪](guides/cost-tracking.md) | 实时监控和用量分析 |
 | [请求追踪](guides/tracing.md) | 完整的请求链路追踪 |
 | [请求覆盖](guides/request-override.md) | 动态修改请求参数 |
-| [提示词保护规则](guides/prompt-protection-rules.md) | 敏感信息过滤和保护 |
 
 ### 🤖 AI 编程工具集成
 

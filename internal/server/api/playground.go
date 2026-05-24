@@ -9,7 +9,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.uber.org/fx"
 
-	"github.com/looplj/axonhub/internal/contexts"
 	"github.com/looplj/axonhub/internal/log"
 	"github.com/looplj/axonhub/internal/objects"
 	"github.com/looplj/axonhub/internal/pkg/xerrors"
@@ -38,11 +37,9 @@ type PlaygroundHandlersParams struct {
 	RequestService  *biz.RequestService
 	SystemService   *biz.SystemService
 	UsageLogService *biz.UsageLogService
-	PromptService   *biz.PromptService
-	PromptProtectionRuleService *biz.PromptProtectionRuleService
 	QuotaService    *biz.QuotaService
 	HttpClient      *httpclient.HttpClient
-	LiveStreamRegistry *biz.LiveStreamRegistry
+	LiveStreamRegistry          *biz.LiveStreamRegistry
 	ChannelLimiterManager       *orchestrator.ChannelLimiterManager
 	ProviderQuotaStatusProvider orchestrator.ProviderQuotaStatusProvider
 }
@@ -63,9 +60,7 @@ func NewPlaygroundHandlers(params PlaygroundHandlersParams) *PlaygroundHandlers 
 			aisdk.NewDataStreamTransformer(),
 			params.SystemService,
 			params.UsageLogService,
-			params.PromptService,
 			params.QuotaService,
-			params.PromptProtectionRuleService,
 			params.LiveStreamRegistry,
 			params.ChannelLimiterManager,
 			params.ProviderQuotaStatusProvider,
@@ -234,36 +229,7 @@ func (handlers *PlaygroundHandlers) ChatCompletion(c *gin.Context) {
 		channelIDStr = c.GetHeader("X-Channel-ID")
 	}
 
-	// Extract project ID from header
-	projectIDStr := c.Query("project_id")
-	if projectIDStr == "" {
-		projectIDStr = c.GetHeader("X-Project-ID")
-	}
-
-	// Parse and set project ID in context if provided
-	if projectIDStr != "" {
-		projectID, err := objects.ParseGUID(projectIDStr)
-		if err != nil {
-			log.Error(ctx, "Error parsing project ID", log.Cause(err))
-			c.JSON(http.StatusBadRequest, PlaygroundResponseError{
-				Error: struct {
-					Code    int    `json:"code,omitempty"`
-					Message string `json:"message"`
-				}{
-					Code:    http.StatusBadRequest,
-					Message: "Invalid project ID: " + err.Error(),
-				},
-			})
-
-			return
-		}
-
-		ctx = contexts.WithProjectID(ctx, projectID.ID)
-		// Update the request context
-		c.Request = c.Request.WithContext(ctx)
-	}
-
-	log.Debug(ctx, "Received request", log.Any("request", genericReq), log.String("channel_id", channelIDStr), log.String("project_id", projectIDStr))
+	log.Debug(ctx, "Received request", log.Any("request", genericReq), log.String("channel_id", channelIDStr))
 
 	processor := handlers.ChatCompletionOrchestrator
 

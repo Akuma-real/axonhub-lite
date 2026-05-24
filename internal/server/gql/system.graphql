@@ -201,10 +201,6 @@ input DeveloperModelSettingsInput {
   associations: [ModelAssociationInput!]!
 }
 
-input UpdateDefaultDataStorageInput {
-  dataStorageID: ID!
-}
-
 type SystemModelSettingOnboarding {
   onboarded: Boolean!
   completedAt: Time
@@ -285,19 +281,6 @@ input UpdateSystemGeneralSettingsInput {
   timezone: String
 }
 
-type VideoStorageSettings {
-  enabled: Boolean!
-  dataStorageID: Int!
-  scanIntervalMinutes: Int!
-  scanLimit: Int!
-}
-
-input UpdateVideoStorageSettingsInput {
-  enabled: Boolean
-  dataStorageID: Int
-  scanIntervalMinutes: Int
-  scanLimit: Int
-}
 type UserAgentPassThroughSettings {
   enabled: Boolean!
 }
@@ -347,13 +330,11 @@ extend type Mutation {
   updateRetryPolicy(input: UpdateRetryPolicyInput!): Boolean!
   updateWebhookNotifierConfig(input: WebhookNotifierConfigInput!): Boolean!
   updateSystemModelSettings(input: UpdateSystemModelSettingsInput!): Boolean!
-  updateDefaultDataStorage(input: UpdateDefaultDataStorageInput!): Boolean!
   completeOnboarding(input: CompleteOnboardingInput!): Boolean!
   completeSystemModelSettingOnboarding(input: CompleteSystemModelSettingOnboardingInput!): Boolean!
   completeAutoDisableChannelOnboarding(input: CompleteAutoDisableChannelOnboardingInput!): Boolean!
   updateSystemChannelSettings(input: UpdateSystemChannelSettingsInput!): Boolean!
   updateSystemGeneralSettings(input: UpdateSystemGeneralSettingsInput!): Boolean!
-  updateVideoStorageSettings(input: UpdateVideoStorageSettingsInput!): Boolean!
   updateQuotaEnforcementSettings(input: UpdateQuotaEnforcementSettingsInput!): Boolean!
   checkProviderQuotas: Boolean!
   triggerGcCleanup(input: TriggerGcCleanupInput!): Boolean!
@@ -414,13 +395,11 @@ extend type Query {
   retryPolicy: RetryPolicy!
   webhookNotifierConfig: WebhookNotifierConfig!
   systemModelSettings: SystemModelSettings!
-  defaultDataStorageID: ID
   onboardingInfo: OnboardingInfo
   systemVersion: SystemVersion!
   checkForUpdate: VersionCheck!
   systemChannelSettings: SystemChannelSettings!
   systemGeneralSettings: SystemGeneralSettings!
-  videoStorageSettings: VideoStorageSettings!
   quotaEnforcementSettings: QuotaEnforcementSettings!
   proxyPresets: [ProxyPreset!]!
   userAgentPassThroughSettings: UserAgentPassThroughSettings!

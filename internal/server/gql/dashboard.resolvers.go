@@ -18,7 +18,6 @@ import (
 	"github.com/looplj/axonhub/internal/ent"
 	"github.com/looplj/axonhub/internal/ent/apikey"
 	"github.com/looplj/axonhub/internal/ent/channel"
-	"github.com/looplj/axonhub/internal/ent/project"
 	"github.com/looplj/axonhub/internal/ent/request"
 	"github.com/looplj/axonhub/internal/ent/requestexecution"
 	"github.com/looplj/axonhub/internal/ent/schema/schematype"
@@ -583,74 +582,6 @@ func (r *queryResolver) DailyRequestStats(ctx context.Context) ([]*DailyRequestS
 				Count:  0,
 				Tokens: 0,
 				Cost:   0,
-			})
-		}
-	}
-
-	return response, nil
-}
-
-// TopRequestsProjects is the resolver for the topRequestsProjects field.
-// Note: Uses usage_logs table for project-level request statistics.
-// Provides result-only request counts per project.
-func (r *queryResolver) TopRequestsProjects(ctx context.Context) ([]*TopRequestsProjects, error) {
-	ctx = authz.WithScopeDecision(ctx, scopes.ScopeReadDashboard)
-
-	limitCount := 10
-
-	type projectRequestCount struct {
-		ProjectID    int `json:"project_id"`
-		RequestCount int `json:"request_count"`
-	}
-
-	var results []projectRequestCount
-
-	// Use database aggregation without ordering (GroupBy doesn't support Order)
-	err := r.client.UsageLog.Query().
-		Limit(limitCount).
-		Modify(func(s *sql.Selector) {
-			s.Select(
-				usagelog.FieldProjectID,
-				sql.As(sql.Count("*"), "request_count"),
-			).
-				GroupBy(usagelog.FieldProjectID).
-				OrderBy(sql.Desc("request_count"))
-		}).
-		Scan(ctx, &results)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get top projects: %w", err)
-	}
-
-	if len(results) == 0 {
-		return []*TopRequestsProjects{}, nil
-	}
-
-	// Get project details for the top projects
-	projectIDs := lo.Map(results, func(item projectRequestCount, _ int) int {
-		return item.ProjectID
-	})
-
-	projects, err := r.client.Project.Query().
-		Where(project.IDIn(projectIDs...)).
-		All(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get project details: %w", err)
-	}
-
-	projectMap := lo.SliceToMap(projects, func(p *ent.Project) (int, *ent.Project) {
-		return p.ID, p
-	})
-
-	// Build response with project details
-	var response []*TopRequestsProjects
-
-	for _, result := range results {
-		if p, exists := projectMap[result.ProjectID]; exists {
-			response = append(response, &TopRequestsProjects{
-				ProjectID:          objects.GUID{Type: "Project", ID: p.ID},
-				ProjectName:        p.Name,
-				ProjectDescription: p.Description,
-				RequestCount:       result.RequestCount,
 			})
 		}
 	}

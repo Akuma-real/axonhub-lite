@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, type ComponentType } from 'react';
 import { format } from 'date-fns';
 import { ColumnDef, Row, Table } from '@tanstack/react-table';
 import { IconCheck, IconX, IconLink, IconChevronDown, IconChevronRight } from '@tabler/icons-react';
@@ -122,12 +122,13 @@ export const createColumns = (t: ReturnType<typeof useTranslation>['t'], canWrit
       cell: ({ row }) => {
         const model = row.original;
         const iconName = model.icon;
-        const IconComponent = iconName && Icons[iconName as keyof typeof Icons];
+        const IconComponent = iconName
+          ? (Icons[iconName as keyof typeof Icons] as ComponentType<{ className?: string }> | undefined)
+          : undefined;
 
         return (
           <div className='flex items-center justify-center'>
             {IconComponent ? (
-              //@ts-ignore
               <IconComponent className='h-5 w-5' />
             ) : (
               <span className='text-muted-foreground text-xs'>-</span>

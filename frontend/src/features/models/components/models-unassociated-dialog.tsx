@@ -1,24 +1,25 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { IconAlertCircle, IconSearch } from '@tabler/icons-react';
+import { IconAlertCircle, IconLink, IconSearch } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
+import { extractNumberIDAsNumber } from '@/lib/utils';
 import { useDebounce } from '@/hooks/use-debounce';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useModels } from '../context/models-context';
-import { useQueryUnassociatedChannels } from '../data/models';
+import { useQueryAllModels, useQueryUnassociatedChannels } from '../data/models';
 import { ChannelModelsList } from './channel-models-list';
 
 export function ModelsUnassociatedDialog() {
   const { t } = useTranslation();
-  const { open, setOpen } = useModels();
+  const { open, setOpen, setCurrentRow, setPendingAssociation } = useModels();
   const { data, refetch, isLoading, isFetching } = useQueryUnassociatedChannels();
+  const isOpen = open === 'unassociated';
+  const { data: modelsData, isLoading: isModelsLoading } = useQueryAllModels({}, { enabled: isOpen });
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
-
-  const isOpen = open === 'unassociated';
 
   useEffect(() => {
     if (isOpen) {
@@ -50,6 +51,32 @@ export function ModelsUnassociatedDialog() {
       models: info.models.map((model) => ({ requestModel: model })),
     }));
   }, [filteredData]);
+
+  const modelsByID = useMemo(() => {
+    const modelMap = new Map<string, NonNullable<typeof modelsData>['edges'][number]['node']>();
+    modelsData?.edges.forEach((edge) => {
+      modelMap.set(edge.node.modelID, edge.node);
+    });
+    return modelMap;
+  }, [modelsData]);
+
+  const handleQuickAssociate = useCallback(
+    (modelId: string, channelId: string | number) => {
+      const model = modelsByID.get(modelId);
+      if (!model) {
+        toast.error(t('models.unassociated.noConfiguredModel', { model: modelId }));
+        return;
+      }
+
+      setCurrentRow(model);
+      setPendingAssociation({
+        channelId: typeof channelId === 'number' ? channelId : extractNumberIDAsNumber(channelId),
+        modelId,
+      });
+      setOpen('association');
+    },
+    [modelsByID, setCurrentRow, setOpen, setPendingAssociation, t]
+  );
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
@@ -89,6 +116,19 @@ export function ModelsUnassociatedDialog() {
               <ScrollArea className='h-[400px] rounded-md border p-4'>
                 <ChannelModelsList
                   channels={channelsForList}
+                  renderModelAction={(model, channel) => (
+                    <Button
+                      type='button'
+                      variant='ghost'
+                      size='sm'
+                      className='h-7 shrink-0 px-2 text-xs'
+                      disabled={isModelsLoading}
+                      onClick={() => handleQuickAssociate(model.requestModel, channel.id)}
+                    >
+                      <IconLink className='mr-1 h-3.5 w-3.5' />
+                      {t('models.unassociated.quickAssociate')}
+                    </Button>
+                  )}
                   emptyMessage={
                     debouncedSearchQuery.trim()
                       ? t('models.unassociated.noSearchResults')

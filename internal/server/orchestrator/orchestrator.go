@@ -26,9 +26,7 @@ func NewChatCompletionOrchestrator(
 	inbound transformer.Inbound,
 	systemService *biz.SystemService,
 	usageLogService *biz.UsageLogService,
-	promptService *biz.PromptService,
 	quotaService *biz.QuotaService,
-	promptProtectionRuleService *biz.PromptProtectionRuleService,
 	liveStreamRegistry *biz.LiveStreamRegistry,
 	channelLimiterManager *ChannelLimiterManager,
 	quotaProvider ProviderQuotaStatusProvider,
@@ -72,8 +70,6 @@ func NewChatCompletionOrchestrator(
 		UsageLogService:    usageLogService,
 		QuotaService:       quotaService,
 		LiveStreamRegistry: liveStreamRegistry,
-		PromptProvider:     promptService,
-		PromptProtecter:    promptProtectionRuleService,
 		Middlewares: []pipeline.Middleware{
 			cc.StripBillingHeaderCCH(),
 			stream.EnsureUsage(),
@@ -101,8 +97,6 @@ type ChatCompletionOrchestrator struct {
 	UsageLogService    *biz.UsageLogService
 	QuotaService       *biz.QuotaService
 	LiveStreamRegistry *biz.LiveStreamRegistry
-	PromptProvider     PromptProvider
-	PromptProtecter    PromptProtecter
 	Middlewares        []pipeline.Middleware
 	PipelineFactory    *pipeline.Factory
 	ModelMapper        *ModelMapper
@@ -197,8 +191,6 @@ func (processor *ChatCompletionOrchestrator) Process(ctx context.Context, reques
 		RequestService:        processor.RequestService,
 		UsageLogService:       processor.UsageLogService,
 		ChannelService:        processor.ChannelService,
-		PromptProvider:        processor.PromptProvider,
-		PromptProtecter:       processor.PromptProtecter,
 		RetryPolicyProvider:   processor.SystemService,
 		CandidateSelector:     processor.channelSelector,
 		LoadBalancer:          loadBalancer,
@@ -236,8 +228,6 @@ func (processor *ChatCompletionOrchestrator) Process(ctx context.Context, reques
 		checkApiKeyModelAccess(inbound),
 		applyModelMapping(inbound),
 		selectCandidates(inbound, processor.quotaProvider, processor.SystemService),
-		injectPrompts(inbound),
-		protectPrompts(inbound),
 		// Response pass-through middlewares run before persistRequest so the raw provider
 		// response is saved when pass-through is enabled.
 		applyPassThroughResponse(outbound, processor.SystemService),

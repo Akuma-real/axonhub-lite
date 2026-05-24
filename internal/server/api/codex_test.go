@@ -12,7 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/require"
 
-	"github.com/looplj/axonhub/internal/contexts"
 	"github.com/looplj/axonhub/internal/pkg/xcache"
 	"github.com/looplj/axonhub/llm/httpclient"
 	"github.com/looplj/axonhub/llm/transformer/openai/codex"
@@ -33,10 +32,6 @@ func TestCodexHandlers_StartOAuth_InvalidJSON(t *testing.T) {
 	})
 
 	router := gin.New()
-	router.Use(func(c *gin.Context) {
-		c.Request = c.Request.WithContext(contexts.WithProjectID(c.Request.Context(), 123))
-		c.Next()
-	})
 	router.POST("/admin/codex/oauth/start", h.StartOAuth)
 
 	req := httptest.NewRequest(http.MethodPost, "/admin/codex/oauth/start", bytes.NewBufferString("{"))
@@ -58,10 +53,6 @@ func TestCodexHandlers_StartOAuth_DoesNotIncludeOriginatorParam(t *testing.T) {
 	})
 
 	router := gin.New()
-	router.Use(func(c *gin.Context) {
-		c.Request = c.Request.WithContext(contexts.WithProjectID(c.Request.Context(), 123))
-		c.Next()
-	})
 	router.POST("/admin/codex/oauth/start", h.StartOAuth)
 
 	req := httptest.NewRequest(http.MethodPost, "/admin/codex/oauth/start", bytes.NewBufferString("{}"))
@@ -122,10 +113,6 @@ func TestCodexHandlers_Exchange_StateDeletedOnTokenExchangeFailure(t *testing.T)
 	})
 
 	router := gin.New()
-	router.Use(func(c *gin.Context) {
-		c.Request = c.Request.WithContext(contexts.WithProjectID(c.Request.Context(), 123))
-		c.Next()
-	})
 	router.POST("/admin/codex/oauth/start", h.StartOAuth)
 	router.POST("/admin/codex/oauth/exchange", h.Exchange)
 
@@ -198,10 +185,6 @@ func TestCodexHandlers_Exchange_RejectsStateMismatch(t *testing.T) {
 	})
 
 	router := gin.New()
-	router.Use(func(c *gin.Context) {
-		c.Request = c.Request.WithContext(contexts.WithProjectID(c.Request.Context(), 123))
-		c.Next()
-	})
 	router.POST("/admin/codex/oauth/start", h.StartOAuth)
 	router.POST("/admin/codex/oauth/exchange", h.Exchange)
 
@@ -280,10 +263,6 @@ func TestCodexHandlers_Exchange_DeletesStateOnSuccess(t *testing.T) {
 	})
 
 	router := gin.New()
-	router.Use(func(c *gin.Context) {
-		c.Request = c.Request.WithContext(contexts.WithProjectID(c.Request.Context(), 123))
-		c.Next()
-	})
 	router.POST("/admin/codex/oauth/start", h.StartOAuth)
 	router.POST("/admin/codex/oauth/exchange", h.Exchange)
 

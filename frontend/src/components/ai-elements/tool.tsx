@@ -9,6 +9,8 @@ import { Badge } from '@/components/ui/badge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { CodeBlock } from './code-block';
 
+type ToolState = ToolUIPart['state'] | 'approval-requested' | 'approval-responded' | 'output-denied';
+
 export type ToolProps = ComponentProps<typeof Collapsible>;
 
 export const Tool = ({ className, ...props }: ToolProps) => (
@@ -18,12 +20,12 @@ export const Tool = ({ className, ...props }: ToolProps) => (
 export type ToolHeaderProps = {
   title?: string;
   type: ToolUIPart['type'];
-  state: ToolUIPart['state'];
+  state: ToolState;
   className?: string;
 };
 
-const getStatusBadge = (status: ToolUIPart['state']) => {
-  const labels: Record<ToolUIPart['state'], string> = {
+const getStatusBadge = (status: ToolState) => {
+  const labels: Record<ToolState, string> = {
     'input-streaming': 'Pending',
     'input-available': 'Running',
     'approval-requested': 'Awaiting Approval',
@@ -33,7 +35,7 @@ const getStatusBadge = (status: ToolUIPart['state']) => {
     'output-denied': 'Denied',
   };
 
-  const icons: Record<ToolUIPart['state'], ReactNode> = {
+  const icons: Record<ToolState, ReactNode> = {
     'input-streaming': <CircleIcon className='size-4' />,
     'input-available': <ClockIcon className='size-4 animate-pulse' />,
     'approval-requested': <ClockIcon className='size-4 text-yellow-600' />,

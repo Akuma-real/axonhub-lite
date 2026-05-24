@@ -6,7 +6,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Header } from '@/components/layout/header';
-import { formatNumber } from '@/utils/format-number';
 import { TimePeriodSelector, type TimePeriod } from '@/components/time-period-selector';
 import { ChannelSuccessRate } from './components/channel-success-rate';
 import { DailyRequestStats } from './components/daily-requests-stats';
@@ -102,11 +101,11 @@ export default function DashboardPage() {
   const [apiKeyTokensTimePeriod, setApiKeyTokensTimePeriod] = useState<TimePeriod>('allTime');
 
   const modelPerformanceDescription = useMemo(() => {
-    return t('dashboard.charts.performanceDescription', { count: formatNumber(modelTotalRequests) });
+    return t('dashboard.charts.performanceDescription', { count: modelTotalRequests });
   }, [t, modelTotalRequests]);
 
   const channelPerformanceDescription = useMemo(() => {
-    return t('dashboard.charts.performanceDescription', { count: formatNumber(channelTotalRequests) });
+    return t('dashboard.charts.performanceDescription', { count: channelTotalRequests });
   }, [t, channelTotalRequests]);
 
   if (isLoading) {

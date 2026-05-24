@@ -210,30 +210,6 @@ test.describe('GitHub Copilot Device Flow', () => {
     await expect(reauthButton).toBeEnabled()
   })
 
-  test('device flow requires project selection', async ({ page }) => {
-    // Navigate to channels without project context
-    await page.goto('/channels?project=none')
-    await page.waitForTimeout(2000)
-
-    // Try to open create dialog
-    const createButton = page.getByTestId('add-channel-button')
-    if (await createButton.isVisible().catch(() => false)) {
-      await createButton.click()
-
-      const createDialog = page.getByRole('dialog')
-      const copilotProviderRadio = createDialog.getByTestId('provider-github_copilot')
-      await copilotProviderRadio.click()
-
-      // Try to start OAuth without project
-      const startButton = createDialog.getByText(/Connect to GitHub Copilot/i)
-      await startButton.click()
-
-      // Should show error about project required
-      const errorMessage = createDialog.getByText(/project required|Please select a project/i)
-      await expect(errorMessage).toBeVisible()
-    }
-  })
-
   test('device flow polling handles success response', async ({ page }) => {
     let pollCount = 0
 

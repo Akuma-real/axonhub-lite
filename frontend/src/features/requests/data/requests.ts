@@ -1,7 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { graphqlRequest } from '@/gql/graphql';
 import { useTranslation } from 'react-i18next';
-import { useSelectedProjectId } from '@/stores/projectStore';
 import { useErrorHandler } from '@/hooks/use-error-handler';
 import { useRequestPermissions } from '../../../hooks/useRequestPermissions';
 import {
@@ -132,10 +131,6 @@ function buildRequestDetailQuery(permissions: { canViewApiKeys: boolean; canView
           modelID
           stream
           clientIP
-          projectID
-          dataStorageID
-          contentSaved
-          contentStorageKey
           requestHeaders
           requestBody
           responseBody
@@ -190,10 +185,6 @@ function buildRequestDetailPollingQuery(permissions: { canViewApiKeys: boolean; 
           modelID
           stream
           clientIP
-          projectID
-          dataStorageID
-          contentSaved
-          contentStorageKey
           status
           format
           metricsReasoningDurationMs
@@ -232,8 +223,6 @@ function buildRequestExecutionsQuery(permissions: { canViewChannels: boolean }) 
                 updatedAt
                 requestID${channelFields}
                 modelID
-                projectID
-                dataStorageID
                 requestHeaders
                 requestBody
                 responseBody
@@ -276,35 +265,20 @@ export function useRequests(variables?: {
     channelIDIn?: string[];
     statusIn?: string[];
     sourceIn?: string[];
-    projectID?: string;
     [key: string]: any;
   };
-}, options?: { projectId?: string | null; scopeToSelectedProject?: boolean; enabled?: boolean }) {
+}, options?: { enabled?: boolean }) {
   const { handleError } = useErrorHandler();
   const { t } = useTranslation();
   const permissions = useRequestPermissions();
-  const selectedProjectId = useSelectedProjectId();
-  const scopeToSelectedProject = options?.scopeToSelectedProject ?? true;
-  const projectId = options?.projectId !== undefined ? options.projectId : selectedProjectId;
   const enabled = options?.enabled ?? true;
 
   return useQuery({
-    queryKey: ['requests', variables, permissions, projectId, scopeToSelectedProject],
+    queryKey: ['requests', variables, permissions],
     queryFn: async () => {
       try {
         const query = buildRequestsQuery(permissions);
-        const headers = projectId ? { 'X-Project-ID': projectId } : undefined;
-
-        // Add project filter if project scoping is enabled
-        const finalVariables = {
-          ...variables,
-          where: {
-            ...variables?.where,
-            ...(scopeToSelectedProject && projectId && { projectID: projectId }),
-          },
-        };
-
-        const data = await graphqlRequest<{ requests: RequestConnection }>(query, finalVariables, headers);
+        const data = await graphqlRequest<{ requests: RequestConnection }>(query, variables);
         return requestConnectionSchema.parse(data?.requests);
       } catch (error) {
         handleError(error, t('common.errors.internalServerError'));
@@ -319,7 +293,6 @@ export function useRequests(variables?: {
 export function useRequest(
   id: string,
   options?: {
-    projectId?: string | null;
     enabled?: boolean;
     disableAutoRefresh?: boolean;
   }
@@ -327,18 +300,15 @@ export function useRequest(
   const { handleError } = useErrorHandler();
   const { t } = useTranslation();
   const permissions = useRequestPermissions();
-  const selectedProjectId = useSelectedProjectId();
   const queryClient = useQueryClient();
-  const projectId = options?.projectId !== undefined ? options.projectId : selectedProjectId;
   const enabled = options?.enabled ?? true;
 
-  const queryKey = ['request', id, permissions, projectId] as const;
+  const queryKey = ['request', id, permissions] as const;
 
   return useQuery({
     queryKey,
     queryFn: async () => {
       try {
-        const headers = projectId ? { 'X-Project-ID': projectId } : undefined;
         const previousRequest = queryClient.getQueryData<Request>(queryKey);
         const shouldUseLightweightPolling = previousRequest?.status === 'processing';
 
@@ -346,7 +316,7 @@ export function useRequest(
           ? buildRequestDetailPollingQuery(permissions)
           : buildRequestDetailQuery(permissions);
 
-        const data = await graphqlRequest<{ node: Request }>(query, { id }, headers);
+        const data = await graphqlRequest<{ node: Request }>(query, { id });
         if (!data.node) {
           throw new Error('Request not found');
         }
@@ -358,7 +328,7 @@ export function useRequest(
         }
 
         if (parsedRequest.status !== 'processing') {
-          const fullData = await graphqlRequest<{ node: Request }>(buildRequestDetailQuery(permissions), { id }, headers);
+          const fullData = await graphqlRequest<{ node: Request }>(buildRequestDetailQuery(permissions), { id });
           if (!fullData.node) {
             throw new Error('Request not found');
           }
@@ -401,7 +371,6 @@ export async function fetchAdjacentRequestPage(params: {
   pageSize: number;
   where?: Record<string, any>;
   permissions: { canViewApiKeys: boolean; canViewChannels: boolean };
-  projectId?: string | null;
 }): Promise<{ requests: Request[]; pageInfo: RequestConnection['pageInfo'] }> {
   const query = buildRequestsQuery(params.permissions);
   const variables =
@@ -410,13 +379,9 @@ export async function fetchAdjacentRequestPage(params: {
       : { last: params.pageSize, before: params.cursor };
 
   const where: Record<string, any> = { ...params.where };
-  if (params.projectId) where.projectID = params.projectId;
-
-  const headers = params.projectId ? { 'X-Project-ID': params.projectId } : undefined;
   const data = await graphqlRequest<{ requests: RequestConnection }>(
     query,
-    { ...variables, where: Object.keys(where).length > 0 ? where : undefined, orderBy: { field: 'CREATED_AT', direction: 'DESC' } },
-    headers
+    { ...variables, where: Object.keys(where).length > 0 ? where : undefined, orderBy: { field: 'CREATED_AT', direction: 'DESC' } }
   );
   const result = requestConnectionSchema.parse(data?.requests);
   return { requests: result.edges.map((e) => e.node), pageInfo: result.pageInfo };
@@ -430,31 +395,28 @@ export function useRequestExecutions(
     orderBy?: { field: 'CREATED_AT'; direction: 'ASC' | 'DESC' };
     where?: Record<string, any>;
   },
-  options?: { projectId?: string | null }
+  options?: { enabled?: boolean }
 ) {
   const { handleError } = useErrorHandler();
   const { t } = useTranslation();
   const permissions = useRequestPermissions();
-  const selectedProjectId = useSelectedProjectId();
-  const projectId = options?.projectId !== undefined ? options.projectId : selectedProjectId;
 
   return useQuery({
-    queryKey: ['request-executions', requestID, variables, permissions, projectId],
+    queryKey: ['request-executions', requestID, variables, permissions],
     queryFn: async () => {
       try {
         const query = buildRequestExecutionsQuery(permissions);
-        const headers = projectId ? { 'X-Project-ID': projectId } : undefined;
         const finalVariables = {
           requestID,
           ...variables,
         };
-        const data = await graphqlRequest<{ node: { executions: RequestExecutionConnection } }>(query, finalVariables, headers);
+        const data = await graphqlRequest<{ node: { executions: RequestExecutionConnection } }>(query, finalVariables);
         return requestExecutionConnectionSchema.parse(data?.node?.executions);
       } catch (error) {
         handleError(error, t('common.errors.internalServerError'));
         throw error;
       }
     },
-    enabled: !!requestID,
+    enabled: !!requestID && (options?.enabled ?? true),
   });
 }

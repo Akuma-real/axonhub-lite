@@ -36,13 +36,8 @@ func (RequestExecution) Indexes() []ent.Index {
 
 func (RequestExecution) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("project_id").Immutable().Default(1),
 		field.Int("request_id").Immutable(),
 		field.Int("channel_id").Immutable().Optional(), // Optional for deleted channel, this field is not null.
-		field.Int("data_storage_id").
-			Optional().
-			Immutable().
-			Comment("Data Storage ID that this request belongs to"),
 		// External ID for tracking requests in external systems
 		field.String("external_id").
 			Optional().
@@ -99,11 +94,6 @@ func (RequestExecution) Edges() []ent.Edge {
 			Annotations(
 				entgql.Directives(forceResolver()),
 			).
-			Immutable().
-			Unique(),
-		edge.From("data_storage", DataStorage.Type).
-			Ref("executions").
-			Field("data_storage_id").
 			Immutable().
 			Unique(),
 	}

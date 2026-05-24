@@ -14,9 +14,7 @@ import (
 	"github.com/looplj/axonhub/internal/ent"
 	"github.com/looplj/axonhub/internal/ent/apikey"
 	"github.com/looplj/axonhub/internal/ent/channel"
-	"github.com/looplj/axonhub/internal/ent/project"
 	"github.com/looplj/axonhub/internal/ent/request"
-	"github.com/looplj/axonhub/internal/ent/user"
 	"github.com/looplj/axonhub/internal/objects"
 	"github.com/looplj/axonhub/internal/scopes"
 	"github.com/looplj/axonhub/internal/server/biz"
@@ -429,133 +427,9 @@ func (r *mutationResolver) BulkArchiveAPIKeys(ctx context.Context, ids []*object
 	return true, nil
 }
 
-// CreateUser is the resolver for the createUser field.
-func (r *mutationResolver) CreateUser(ctx context.Context, input ent.CreateUserInput) (*ent.User, error) {
-	return r.userService.CreateUser(ctx, input)
-}
-
-// UpdateUser is the resolver for the updateUser field.
-func (r *mutationResolver) UpdateUser(ctx context.Context, id objects.GUID, input ent.UpdateUserInput) (*ent.User, error) {
-	return r.userService.UpdateUser(ctx, id.ID, input)
-}
-
-// UpdateUserStatus is the resolver for the updateUserStatus field.
-func (r *mutationResolver) UpdateUserStatus(ctx context.Context, id objects.GUID, status user.Status) (*ent.User, error) {
-	return r.userService.UpdateUserStatus(ctx, id.ID, status)
-}
-
-// DeleteUser is the resolver for the deleteUser field.
-func (r *mutationResolver) DeleteUser(ctx context.Context, id objects.GUID) (bool, error) {
-	if err := r.userService.DeleteUser(ctx, id.ID); err != nil {
-		return false, err
-	}
-
-	return true, nil
-}
-
-// CreateRole is the resolver for the createRole field.
-func (r *mutationResolver) CreateRole(ctx context.Context, input ent.CreateRoleInput) (*ent.Role, error) {
-	return r.roleService.CreateRole(ctx, input)
-}
-
-// UpdateRole is the resolver for the updateRole field.
-func (r *mutationResolver) UpdateRole(ctx context.Context, id objects.GUID, input ent.UpdateRoleInput) (*ent.Role, error) {
-	return r.roleService.UpdateRole(ctx, id.ID, input)
-}
-
-// DeleteRole is the resolver for the deleteRole field.
-func (r *mutationResolver) DeleteRole(ctx context.Context, id objects.GUID) (bool, error) {
-	err := r.roleService.DeleteRole(ctx, id.ID)
-	if err != nil {
-		return false, err
-	}
-
-	return true, nil
-}
-
-// BulkDeleteRoles is the resolver for the bulkDeleteRoles field.
-func (r *mutationResolver) BulkDeleteRoles(ctx context.Context, ids []*objects.GUID) (bool, error) {
-	roleIDs := objects.IntGuids(ids)
-
-	err := r.roleService.BulkDeleteRoles(ctx, roleIDs)
-	if err != nil {
-		return false, err
-	}
-
-	return true, nil
-}
-
-// CreateProject is the resolver for the createProject field.
-func (r *mutationResolver) CreateProject(ctx context.Context, input ent.CreateProjectInput) (*ent.Project, error) {
-	return r.projectService.CreateProject(ctx, input)
-}
-
-// UpdateProject is the resolver for the updateProject field.
-func (r *mutationResolver) UpdateProject(ctx context.Context, id objects.GUID, input ent.UpdateProjectInput) (*ent.Project, error) {
-	return r.projectService.UpdateProject(ctx, id.ID, input)
-}
-
-// UpdateProjectStatus is the resolver for the updateProjectStatus field.
-func (r *mutationResolver) UpdateProjectStatus(ctx context.Context, id objects.GUID, status project.Status) (*ent.Project, error) {
-	return r.projectService.UpdateProjectStatus(ctx, id.ID, status)
-}
-
-// UpdateProjectProfiles is the resolver for the updateProjectProfiles field.
-func (r *mutationResolver) UpdateProjectProfiles(ctx context.Context, id objects.GUID, input objects.ProjectProfiles) (*ent.Project, error) {
-	return r.projectService.UpdateProjectProfiles(ctx, id.ID, input)
-}
-
-// DeleteProject is the resolver for the deleteProject field.
-func (r *mutationResolver) DeleteProject(ctx context.Context, id objects.GUID) (bool, error) {
-	if err := r.projectService.DeleteProject(ctx, id.ID); err != nil {
-		return false, err
-	}
-
-	return true, nil
-}
-
-// AddUserToProject is the resolver for the addUserToProject field.
-func (r *mutationResolver) AddUserToProject(ctx context.Context, input AddUserToProjectInput) (*ent.UserProject, error) {
-	roleIDs := objects.IntGuids(input.RoleIDs)
-	return r.userService.AddUserToProject(ctx, input.UserID.ID, input.ProjectID.ID, input.IsOwner, input.Scopes, roleIDs)
-}
-
-// RemoveUserFromProject is the resolver for the removeUserFromProject field.
-func (r *mutationResolver) RemoveUserFromProject(ctx context.Context, input RemoveUserFromProjectInput) (bool, error) {
-	err := r.userService.RemoveUserFromProject(ctx, input.UserID.ID, input.ProjectID.ID)
-	if err != nil {
-		return false, err
-	}
-
-	return true, nil
-}
-
-// UpdateProjectUser is the resolver for the updateProjectUser field.
-func (r *mutationResolver) UpdateProjectUser(ctx context.Context, input UpdateProjectUserInput) (*ent.UserProject, error) {
-	addRoleIDs := objects.IntGuids(input.AddRoleIDs)
-	removeRoleIDs := objects.IntGuids(input.RemoveRoleIDs)
-
-	return r.userService.UpdateProjectUser(ctx, input.UserID.ID, input.ProjectID.ID, input.IsOwner, input.Scopes, addRoleIDs, removeRoleIDs)
-}
-
-// CreateDataStorage is the resolver for the createDataStorage field.
-func (r *mutationResolver) CreateDataStorage(ctx context.Context, input ent.CreateDataStorageInput) (*ent.DataStorage, error) {
-	return r.dataStorageService.CreateDataStorage(ctx, &input)
-}
-
-// UpdateDataStorage is the resolver for the updateDataStorage field.
-func (r *mutationResolver) UpdateDataStorage(ctx context.Context, id objects.GUID, input ent.UpdateDataStorageInput) (*ent.DataStorage, error) {
-	return r.dataStorageService.UpdateDataStorage(ctx, id.ID, &input)
-}
-
 // CreateChannelOverrideTemplate is the resolver for the createChannelOverrideTemplate field.
 func (r *mutationResolver) CreateChannelOverrideTemplate(ctx context.Context, input ent.CreateChannelOverrideTemplateInput) (*ent.ChannelOverrideTemplate, error) {
-	user, ok := contexts.GetUser(ctx)
-	if !ok {
-		return nil, fmt.Errorf("user not found in context")
-	}
-
-	return r.channelOverrideTemplateService.CreateTemplate(ctx, user.ID, input)
+	return r.channelOverrideTemplateService.CreateTemplate(ctx, input)
 }
 
 // UpdateChannelOverrideTemplate is the resolver for the updateChannelOverrideTemplate field.
@@ -627,26 +501,6 @@ func (r *mutationResolver) SyncChannelModels(ctx context.Context, channelID obje
 	}, nil
 }
 
-// CreateAPIKeyProfileTemplate is the resolver for the createApiKeyProfileTemplate field.
-func (r *mutationResolver) CreateAPIKeyProfileTemplate(ctx context.Context, input ent.CreateAPIKeyProfileTemplateInput, profile objects.APIKeyProfile) (*ent.APIKeyProfileTemplate, error) {
-	return r.apiKeyProfileTemplateService.CreateTemplate(ctx, input, &profile)
-}
-
-// UpdateAPIKeyProfileTemplate is the resolver for the updateApiKeyProfileTemplate field.
-func (r *mutationResolver) UpdateAPIKeyProfileTemplate(ctx context.Context, id objects.GUID, input ent.UpdateAPIKeyProfileTemplateInput, profile *objects.APIKeyProfile) (*ent.APIKeyProfileTemplate, error) {
-	return r.apiKeyProfileTemplateService.UpdateTemplate(ctx, id.ID, input, profile)
-}
-
-// DeleteAPIKeyProfileTemplate is the resolver for the deleteApiKeyProfileTemplate field.
-func (r *mutationResolver) DeleteAPIKeyProfileTemplate(ctx context.Context, id objects.GUID) (*ent.APIKeyProfileTemplate, error) {
-	return r.apiKeyProfileTemplateService.DeleteTemplate(ctx, id.ID)
-}
-
-// LoadAPIKeyProfileTemplate is the resolver for the loadApiKeyProfileTemplate field.
-func (r *mutationResolver) LoadAPIKeyProfileTemplate(ctx context.Context, input LoadAPIKeyProfileTemplateInput) (*ent.APIKey, error) {
-	return r.apiKeyProfileTemplateService.LoadTemplate(ctx, input.TemplateID.ID, input.APIKeyID.ID)
-}
-
 // AllChannelSummarys is the resolver for the allChannelSummarys field.
 func (r *queryResolver) AllChannelSummarys(ctx context.Context, includeArchived *bool) ([]*ent.Channel, error) {
 	statusFilter := []channel.Status{channel.StatusEnabled, channel.StatusDisabled}
@@ -662,19 +516,7 @@ func (r *queryResolver) AllChannelSummarys(ctx context.Context, includeArchived 
 		return nil, fmt.Errorf("failed to query channels: %w", err)
 	}
 
-	projectID, ok := contexts.GetProjectID(ctx)
-	if !ok || projectID == 0 {
-		return channels, nil
-	}
-
-	proj, err := r.client.Project.Get(ctx, projectID)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get project: %w", err)
-	}
-
-	projectProfile := proj.GetActiveProfile()
-
-	return filterChannelsByProjectProfile(channels, projectProfile), nil
+	return channels, nil
 }
 
 // AllChannelTags is the resolver for the allChannelTags field.
@@ -687,16 +529,6 @@ func (r *queryResolver) AllChannelTags(ctx context.Context) ([]string, error) {
 		All(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to query channels: %w", err)
-	}
-
-	projectID, ok := contexts.GetProjectID(ctx)
-	if ok && projectID != 0 {
-		proj, err := r.client.Project.Get(ctx, projectID)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get project: %w", err)
-		}
-
-		channels = filterChannelsByProjectProfile(channels, proj.GetActiveProfile())
 	}
 
 	tags := lo.Reduce(channels, func(acc []string, ch *ent.Channel, _ int) []string {

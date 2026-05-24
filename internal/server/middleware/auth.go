@@ -10,7 +10,6 @@ import (
 	"github.com/looplj/axonhub/internal/authz"
 	"github.com/looplj/axonhub/internal/contexts"
 	"github.com/looplj/axonhub/internal/ent"
-	"github.com/looplj/axonhub/internal/ent/apikey"
 	"github.com/looplj/axonhub/internal/ent/request"
 	"github.com/looplj/axonhub/internal/log"
 	"github.com/looplj/axonhub/internal/server/biz"
@@ -25,19 +24,12 @@ func WithAPIKeyAuth(auth *biz.AuthService) gin.HandlerFunc {
 func WithAPIKeyConfig(auth *biz.AuthService, config *APIKeyConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		key, err := ExtractAPIKeyFromRequest(c.Request, config)
-		// DO NOT ALLOW USE NO AUTH API KEY DIRECTLY.
-		if key == biz.NoAuthAPIKeyValue {
-			AbortWithError(c, http.StatusUnauthorized, errors.New("Invalid API key"))
+		if err != nil {
+			AbortWithError(c, http.StatusUnauthorized, err)
 			return
 		}
 
-		var apiKey *ent.APIKey
-		if err == nil {
-			apiKey, err = auth.AuthenticateAPIKey(c.Request.Context(), key)
-		}
-		if err != nil {
-			apiKey, err = auth.AuthenticateNoAuth(c.Request.Context())
-		}
+		apiKey, err := auth.AuthenticateAPIKey(c.Request.Context(), key)
 		if err != nil {
 			if ent.IsNotFound(err) || errors.Is(err, biz.ErrInvalidAPIKey) {
 				AbortWithError(c, http.StatusUnauthorized, errors.New("Invalid API key"))
@@ -50,10 +42,6 @@ func WithAPIKeyConfig(auth *biz.AuthService, config *APIKeyConfig) gin.HandlerFu
 		}
 
 		ctx := contexts.WithAPIKey(c.Request.Context(), apiKey)
-
-		if apiKey.Edges.Project != nil {
-			ctx = contexts.WithProjectID(ctx, apiKey.Edges.Project.ID)
-		}
 
 		ctx, err = withAPIKeyPrincipal(ctx, apiKey)
 		if err != nil {
@@ -103,52 +91,6 @@ func WithJWTAuth(auth *biz.AuthService) gin.HandlerFunc {
 	}
 }
 
-var apiKeyAuthConfig = &APIKeyConfig{
-	Headers:       []string{"Authorization"},
-	RequireBearer: true,
-}
-
-// WithOpenAPIAuth allows API key auth for createLLMAPIKey only.
-func WithOpenAPIAuth(auth *biz.AuthService) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		key, err := ExtractAPIKeyFromRequest(c.Request, apiKeyAuthConfig)
-		if err != nil {
-			AbortWithError(c, http.StatusUnauthorized, err)
-			return
-		}
-
-		apiKey, err := auth.AuthenticateAPIKey(c.Request.Context(), key)
-		if err != nil {
-			if ent.IsNotFound(err) || errors.Is(err, biz.ErrInvalidAPIKey) {
-				AbortWithError(c, http.StatusUnauthorized, errors.New("Invalid API key"))
-			} else {
-				AbortWithError(c, http.StatusInternalServerError, errors.New("Failed to validate API key"))
-			}
-
-			return
-		}
-
-		if apiKey.Type != apikey.TypeServiceAccount {
-			AbortWithError(c, http.StatusUnauthorized, errors.New("Invalid API key"))
-			return
-		}
-
-		ctx := contexts.WithAPIKey(c.Request.Context(), apiKey)
-		if apiKey.Edges.Project != nil {
-			ctx = contexts.WithProjectID(ctx, apiKey.Edges.Project.ID)
-		}
-
-		ctx, err = withAPIKeyPrincipal(ctx, apiKey)
-		if err != nil {
-			AbortWithError(c, http.StatusUnauthorized, errors.New("Invalid authentication context"))
-			return
-		}
-
-		c.Request = c.Request.WithContext(ctx)
-		c.Next()
-	}
-}
-
 // WithGeminiKeyAuth be compatible with Gemini query key authentication.
 // https://ai.google.dev/api/generate-content?hl=zh-cn#text_gen_text_only_prompt-SHELL
 func WithGeminiKeyAuth(auth *biz.AuthService) gin.HandlerFunc {
@@ -178,10 +120,6 @@ func WithGeminiKeyAuth(auth *biz.AuthService) gin.HandlerFunc {
 		// 将 API key entity 保存到 context 中
 		ctx := contexts.WithAPIKey(c.Request.Context(), apiKey)
 
-		if apiKey.Edges.Project != nil {
-			ctx = contexts.WithProjectID(ctx, apiKey.Edges.Project.ID)
-		}
-
 		ctx, err = withAPIKeyPrincipal(ctx, apiKey)
 		if err != nil {
 			AbortWithError(c, http.StatusUnauthorized, errors.New("Invalid authentication context"))
@@ -210,10 +148,5 @@ func withUserPrincipal(ctx context.Context, user *ent.User) (context.Context, er
 
 func withAPIKeyPrincipal(ctx context.Context, key *ent.APIKey) (context.Context, error) {
 	principal := authz.Principal{Type: authz.PrincipalTypeAPIKey, APIKeyID: &key.ID}
-	if key.Edges.Project != nil {
-		projectID := key.Edges.Project.ID
-		principal.ProjectID = &projectID
-	}
-
 	return authz.WithPrincipal(ctx, principal)
 }

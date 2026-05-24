@@ -3,7 +3,7 @@ import { ColumnDef, Table, Row } from '@tanstack/react-table';
 import { Copy, Eye } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { cn, extractNumberID } from '@/lib/utils';
+import { extractNumberID } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { DataTableColumnHeader } from '@/components/data-table-column-header';
@@ -93,45 +93,6 @@ export const createColumns = (t: ReturnType<typeof useTranslation>['t'], canWrit
     meta: {
       className: 'max-w-48',
     },
-  },
-  {
-    accessorKey: 'creator',
-    header: ({ column }) => <DataTableColumnHeader column={column} title={t('apikeys.columns.creator')} />,
-    cell: ({ row }) => {
-      const creator = row.original.user;
-      const displayName = creator ? `${creator.firstName} ${creator.lastName}` : t('apikeys.user.deleted');
-      return <LongText className='text-muted-foreground max-w-24'>{displayName}</LongText>;
-    },
-    filterFn: (row, _id, value) => {
-      const creator = row.original.user;
-      if (!creator) return false;
-      return value.includes(creator.id);
-    },
-    enableSorting: false,
-  },
-  {
-    accessorKey: 'type',
-    header: ({ column }) => <DataTableColumnHeader column={column} title={t('apikeys.columns.type')} />,
-    cell: ({ row }) => {
-      const type = row.getValue('type') as string;
-      const typeText =
-        {
-          user: t('apikeys.type.user'),
-          service_account: t('apikeys.type.service_account'),
-        }[type] || type;
-
-      const typeColor =
-        {
-          user: 'text-blue-600',
-          service_account: 'text-purple-600',
-        }[type] || 'text-muted-foreground';
-
-      return <div className={`text-sm ${typeColor}`}>{typeText}</div>;
-    },
-    filterFn: (row, _id, value) => {
-      return value.includes(row.getValue('type'));
-    },
-    enableSorting: false,
   },
   {
     accessorKey: 'status',

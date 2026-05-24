@@ -50,14 +50,6 @@ type APIKeyTokenUsageStatsInput struct {
 	CreatedAtLTE *time.Time      `json:"createdAtLTE,omitempty"`
 }
 
-type AddUserToProjectInput struct {
-	ProjectID objects.GUID    `json:"projectId"`
-	UserID    objects.GUID    `json:"userId"`
-	IsOwner   *bool           `json:"isOwner,omitempty"`
-	Scopes    []string        `json:"scopes,omitempty"`
-	RoleIDs   []*objects.GUID `json:"roleIDs,omitempty"`
-}
-
 type ApplyChannelOverrideTemplateInput struct {
 	TemplateID objects.GUID       `json:"templateID"`
 	ChannelIDs []*objects.GUID    `json:"channelIDs"`
@@ -83,12 +75,6 @@ type AutoDisableAPIKeyStatus struct {
 type AutoDisableChannelOnboarding struct {
 	Onboarded   bool       `json:"onboarded"`
 	CompletedAt *time.Time `json:"completedAt,omitempty"`
-}
-
-type BackupPayload struct {
-	Success bool    `json:"success"`
-	Data    *string `json:"data,omitempty"`
-	Message *string `json:"message,omitempty"`
 }
 
 type BrandSettings struct {
@@ -279,11 +265,6 @@ type InitializeSystemPayload struct {
 	Token   *string   `json:"token,omitempty"`
 }
 
-type LoadAPIKeyProfileTemplateInput struct {
-	TemplateID objects.GUID `json:"templateID"`
-	APIKeyID   objects.GUID `json:"apiKeyID"`
-}
-
 // Performance statistics for a specific model on a given date
 type ModelPerformanceStat struct {
 	Date         string   `json:"date"`
@@ -301,14 +282,6 @@ type ModelTokenUsageStats struct {
 	ReasoningTokens int    `json:"reasoningTokens"`
 }
 
-type OIDCIdentityInfo struct {
-	ID      objects.GUID `json:"id"`
-	IdpName string       `json:"idpName"`
-	Issuer  string       `json:"issuer"`
-	Subject string       `json:"subject"`
-	Email   string       `json:"email"`
-}
-
 type OnboardingInfo struct {
 	Onboarded          bool                          `json:"onboarded"`
 	CompletedAt        *time.Time                    `json:"completedAt,omitempty"`
@@ -320,27 +293,11 @@ type PassThroughSettings struct {
 	Enabled bool `json:"enabled"`
 }
 
-type PromptProtectionRulePreviewInput struct {
-	Pattern  string                            `json:"pattern"`
-	TestText string                            `json:"testText"`
-	Settings *objects.PromptProtectionSettings `json:"settings"`
-}
-
-type PromptProtectionRulePreviewResult struct {
-	Result   string `json:"result"`
-	HasMatch bool   `json:"hasMatch"`
-}
-
 type QueryModelsInput struct {
 	StatusIn                []channel.Status `json:"statusIn,omitempty"`
 	IncludeMapping          *bool            `json:"includeMapping,omitempty"`
 	IncludePrefix           *bool            `json:"includePrefix,omitempty"`
 	IncludeAllChannelModels *bool            `json:"includeAllChannelModels,omitempty"`
-}
-
-type RemoveUserFromProjectInput struct {
-	ProjectID objects.GUID `json:"projectId"`
-	UserID    objects.GUID `json:"userId"`
 }
 
 type RequestStats struct {
@@ -364,17 +321,6 @@ type RequestStatsByChannel struct {
 type RequestStatsByModel struct {
 	ModelID string `json:"modelId"`
 	Count   int    `json:"count"`
-}
-
-type RestorePayload struct {
-	Success bool    `json:"success"`
-	Message *string `json:"message,omitempty"`
-}
-
-type ScopeInfo struct {
-	Scope       string   `json:"scope"`
-	Description string   `json:"description"`
-	Levels      []string `json:"levels"`
 }
 
 type SignInInput struct {
@@ -477,41 +423,9 @@ type TokenStatsByModel struct {
 	TotalTokens     int    `json:"totalTokens"`
 }
 
-type TopRequestsProjects struct {
-	ProjectID          objects.GUID `json:"projectId"`
-	ProjectName        string       `json:"projectName"`
-	ProjectDescription string       `json:"projectDescription"`
-	RequestCount       int          `json:"requestCount"`
-}
-
-type TriggerBackupPayload struct {
-	Success bool    `json:"success"`
-	Message *string `json:"message,omitempty"`
-}
-
-type UpdateAPIKeyScopesInput struct {
-	Scopes []string `json:"scopes"`
-}
-
-type UpdateAutoBackupSettingsInput struct {
-	Enabled            *bool                `json:"enabled,omitempty"`
-	Frequency          *biz.BackupFrequency `json:"frequency,omitempty"`
-	DataStorageID      *int                 `json:"dataStorageID,omitempty"`
-	IncludeChannels    *bool                `json:"includeChannels,omitempty"`
-	IncludeModels      *bool                `json:"includeModels,omitempty"`
-	IncludeAPIKeys     *bool                `json:"includeAPIKeys,omitempty"`
-	IncludeModelPrices *bool                `json:"includeModelPrices,omitempty"`
-	IncludeUsageStats  *bool                `json:"includeUsageStats,omitempty"`
-	RetentionDays      *int                 `json:"retentionDays,omitempty"`
-}
-
 type UpdateBrandSettingsInput struct {
 	BrandName *string `json:"brandName,omitempty"`
 	BrandLogo *string `json:"brandLogo,omitempty"`
-}
-
-type UpdateDefaultDataStorageInput struct {
-	DataStorageID objects.GUID `json:"dataStorageID"`
 }
 
 type UpdateMeInput struct {
@@ -528,15 +442,6 @@ type UpdateMyPasswordInput struct {
 
 type UpdatePassThroughSettingsInput struct {
 	Enabled bool `json:"enabled"`
-}
-
-type UpdateProjectUserInput struct {
-	ProjectID     objects.GUID    `json:"projectId"`
-	UserID        objects.GUID    `json:"userId"`
-	IsOwner       *bool           `json:"isOwner,omitempty"`
-	Scopes        []string        `json:"scopes,omitempty"`
-	AddRoleIDs    []*objects.GUID `json:"addRoleIDs,omitempty"`
-	RemoveRoleIDs []*objects.GUID `json:"removeRoleIDs,omitempty"`
 }
 
 type UpdateQuotaEnforcementSettingsInput struct {

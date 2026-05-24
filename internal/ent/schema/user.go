@@ -5,7 +5,6 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/schema"
-	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 
@@ -49,51 +48,17 @@ func (User) Fields() []ent.Field {
 			},
 		),
 		field.Bool("is_owner").Default(false),
-		field.Strings("scopes").
-			Comment("User scopes in system level: write_channels, read_channels, add_users, read_users, etc.").
-			Default([]string{}).
-			Optional(),
 	}
 }
 
 // Edges of the User.
 func (User) Edges() []ent.Edge {
-	return []ent.Edge{
-		edge.From("projects", Project.Type).
-			Through("project_users", UserProject.Type).
-			Ref("users").
-			Annotations(
-				entgql.RelayConnection(),
-			),
-		edge.To("api_keys", APIKey.Type).
-			Annotations(
-				entgql.Skip(entgql.SkipMutationCreateInput, entgql.SkipMutationUpdateInput),
-				entgql.RelayConnection(),
-			),
-		edge.To("roles", Role.Type).
-			Through("user_roles", UserRole.Type).
-			Annotations(
-				entgql.RelayConnection(),
-			),
-		edge.To("channel_override_templates", ChannelOverrideTemplate.Type).
-			Annotations(
-				entgql.Skip(entgql.SkipMutationCreateInput, entgql.SkipMutationUpdateInput),
-				entgql.RelayConnection(),
-			),
-		edge.From("oidc_identities", OIDCIdentity.Type).
-			Ref("user").
-			Annotations(
-				entgql.Skip(entgql.SkipMutationCreateInput, entgql.SkipMutationUpdateInput),
-				entgql.RelayConnection(),
-			),
-	}
+	return []ent.Edge{}
 }
 
 func (User) Annotations() []schema.Annotation {
 	return []schema.Annotation{
-		entgql.QueryField(),
 		entgql.RelayConnection(),
-		entgql.Mutations(entgql.MutationCreate(), entgql.MutationUpdate()),
 	}
 }
 
@@ -101,12 +66,11 @@ func (User) Policy() ent.Policy {
 	return scopes.Policy{
 		Query: scopes.QueryPolicy{
 			scopes.OwnerRule(),
-			scopes.UserReadScopeRule(scopes.ScopeReadUsers),
 			scopes.UserOwnedQueryRule(),
 		},
 		Mutation: scopes.MutationPolicy{
 			scopes.OwnerRule(),
-			scopes.UserWriteScopeRule(scopes.ScopeWriteUsers),
+			scopes.UserOwnedMutationRule(),
 		},
 	}
 }

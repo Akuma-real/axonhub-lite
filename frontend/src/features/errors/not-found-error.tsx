@@ -3,16 +3,16 @@ import { useNavigate, useRouter, useLocation } from '@tanstack/react-router';
 import {
   IconHome,
   IconSearch,
-  IconUsers,
   IconKey,
   IconMessages,
   IconSettings,
   IconChartBar,
-  IconShield,
   IconPlayerPlay,
-  IconHelpCircle,
   IconArrowLeft,
   IconExternalLink,
+  IconStack2,
+  IconActivity,
+  IconRoute,
 } from '@tabler/icons-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -32,74 +32,73 @@ export default function NotFoundError() {
   const location = useLocation();
   const [searchQuery, setSearchQuery] = useState('');
 
-  const suggestedPages: SuggestedPage[] = [
-    {
-      title: 'Dashboard',
-      description: 'Overview of your AxonHub instance',
-      path: '/',
-      icon: <IconHome className='h-5 w-5' />,
-      keywords: ['dashboard', 'home', 'overview', 'main'],
-    },
-    {
-      title: 'Channels',
-      description: 'Manage AI model channels and configurations',
-      path: '/channels',
-      icon: <IconMessages className='h-5 w-5' />,
-      keywords: ['channels', 'models', 'ai', 'configuration', 'chat'],
-    },
-    {
-      title: 'Requests',
-      description: 'Monitor API requests and usage analytics',
-      path: '/requests',
-      icon: <IconChartBar className='h-5 w-5' />,
-      keywords: ['requests', 'api', 'analytics', 'monitoring', 'usage'],
-    },
-    {
-      title: 'Users',
-      description: 'User management and permissions',
-      path: '/users',
-      icon: <IconUsers className='h-5 w-5' />,
-      keywords: ['users', 'people', 'accounts', 'management'],
-    },
-    {
-      title: 'API Keys',
-      description: 'Generate and manage API authentication keys',
-      path: '/api-keys',
-      icon: <IconKey className='h-5 w-5' />,
-      keywords: ['api', 'keys', 'authentication', 'tokens', 'access'],
-    },
-    {
-      title: 'Roles',
-      description: 'Configure user roles and permissions',
-      path: '/roles',
-      icon: <IconShield className='h-5 w-5' />,
-      keywords: ['roles', 'permissions', 'access', 'security', 'rbac'],
-    },
-    {
-      title: 'Playground',
-      description: 'Test and experiment with AI models',
-      path: '/playground',
-      icon: <IconPlayerPlay className='h-5 w-5' />,
-      keywords: ['playground', 'test', 'experiment', 'try', 'demo'],
-    },
-    {
-      title: 'Settings',
-      description: 'System configuration and preferences',
-      path: '/settings',
-      icon: <IconSettings className='h-5 w-5' />,
-      keywords: ['settings', 'configuration', 'preferences', 'system'],
-    },
-    {
-      title: 'Help Center',
-      description: 'Documentation and support resources',
-      path: '/help-center',
-      icon: <IconHelpCircle className='h-5 w-5' />,
-      keywords: ['help', 'documentation', 'support', 'guide', 'docs'],
-    },
-  ];
-
   // Smart suggestions based on current URL and search query
   const smartSuggestions = useMemo(() => {
+    const suggestedPages: SuggestedPage[] = [
+      {
+        title: 'Dashboard',
+        description: 'Overview of your AxonHub instance',
+        path: '/',
+        icon: <IconHome className='h-5 w-5' />,
+        keywords: ['dashboard', 'home', 'overview', 'main'],
+      },
+      {
+        title: 'Channels',
+        description: 'Manage AI model channels and configurations',
+        path: '/channels',
+        icon: <IconMessages className='h-5 w-5' />,
+        keywords: ['channels', 'models', 'ai', 'configuration', 'chat'],
+      },
+      {
+        title: 'Models',
+        description: 'Review available model mappings',
+        path: '/models',
+        icon: <IconStack2 className='h-5 w-5' />,
+        keywords: ['models', 'ai', 'routing'],
+      },
+      {
+        title: 'Playground',
+        description: 'Test and experiment with AI models',
+        path: '/playground',
+        icon: <IconPlayerPlay className='h-5 w-5' />,
+        keywords: ['playground', 'test', 'experiment', 'try', 'demo'],
+      },
+      {
+        title: 'API Keys',
+        description: 'Generate and manage API authentication keys',
+        path: '/api-keys',
+        icon: <IconKey className='h-5 w-5' />,
+        keywords: ['api', 'keys', 'authentication', 'tokens', 'access'],
+      },
+      {
+        title: 'Requests',
+        description: 'Monitor API requests and usage analytics',
+        path: '/requests',
+        icon: <IconChartBar className='h-5 w-5' />,
+        keywords: ['requests', 'api', 'analytics', 'monitoring', 'usage'],
+      },
+      {
+        title: 'Traces',
+        description: 'Inspect gateway traces and execution flow',
+        path: '/traces',
+        icon: <IconRoute className='h-5 w-5' />,
+        keywords: ['traces', 'trace', 'debug', 'flow'],
+      },
+      {
+        title: 'Threads',
+        description: 'Review conversation threads',
+        path: '/threads',
+        icon: <IconActivity className='h-5 w-5' />,
+        keywords: ['threads', 'conversations', 'messages'],
+      },
+      {
+        title: 'Settings',
+        description: 'System configuration and preferences',
+        path: '/settings',
+        icon: <IconSettings className='h-5 w-5' />,
+        keywords: ['settings', 'configuration', 'preferences', 'system'],
+      },
+    ];
     const currentPath = location.pathname.toLowerCase();
     const query = searchQuery.toLowerCase();
 
@@ -109,7 +108,6 @@ export default function NotFoundError() {
 
       // URL path similarity
       const pathSegments = currentPath.split('/').filter(Boolean);
-      const pageSegments = page.path.split('/').filter(Boolean);
 
       pathSegments.forEach((segment) => {
         if (page.path.includes(segment) || page.keywords.some((k) => k.includes(segment))) {
@@ -131,7 +129,7 @@ export default function NotFoundError() {
 
     // Sort by score and return top suggestions
     return scoredPages.sort((a, b) => b.score - a.score).slice(0, query ? 6 : 4);
-  }, [location.pathname, searchQuery, suggestedPages]);
+  }, [location.pathname, searchQuery]);
 
   const handlePageNavigation = (path: string) => {
     navigate({ to: path });
@@ -214,13 +212,6 @@ export default function NotFoundError() {
             </Button>
           </div>
 
-          {/* Additional Help */}
-          <div className='mt-12 text-center'>
-            <p className='text-muted-foreground mb-4 text-sm'>Still can't find what you're looking for?</p>
-            <Button variant='ghost' onClick={() => navigate({ to: '/help-center' })} className='text-primary hover:text-primary/80'>
-              Visit Help Center →
-            </Button>
-          </div>
         </div>
       </div>
     </div>

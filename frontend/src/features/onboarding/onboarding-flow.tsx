@@ -159,24 +159,6 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
               },
             },
             {
-              element: '#default-data-storage',
-              popover: {
-                title: t('system.onboarding.steps.dataStorageSelection.title'),
-                description: t('system.onboarding.steps.dataStorageSelection.description'),
-                side: 'right',
-                align: 'start',
-              },
-            },
-            // {
-            //   element: '#storage-enabled-switch',
-            //   popover: {
-            //     title: t('system.onboarding.steps.storageEnabled.title'),
-            //     description: t('system.onboarding.steps.storageEnabled.description'),
-            //     side: 'right',
-            //     align: 'start',
-            //   },
-            // },
-            {
               element: '#storage-policy-store-chunks',
               popover: {
                 title: t('system.onboarding.steps.storageChunks.title'),
@@ -221,26 +203,6 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                 align: 'start',
               },
             },
-            {
-              element: '#data-storages-link',
-              popover: {
-                title: t('system.onboarding.steps.complete.title'),
-                description: t('system.onboarding.steps.complete.description'),
-                side: 'bottom',
-                align: 'start',
-              },
-              onHighlighted: () => {
-                // Mark onboarding as completed
-                completeOnboarding.mutate(undefined, {
-                  onSuccess: () => {
-                    toast.success(t('system.onboarding.completeTour'));
-                    onComplete?.();
-                    // Navigate to data storages page
-                    navigate({ to: '/data-storages' });
-                  },
-                });
-              },
-            },
           ],
           onDestroyStarted: () => {
             // Complete onboarding when user closes the tour
@@ -257,7 +219,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
         driverObj.drive();
       }, 500); // Wait a bit for the page to render
     });
-  }, [completeOnboarding, navigate, t]);
+  }, [completeOnboarding, navigate, onComplete, t]);
 
   const skipOnboarding = useCallback(() => {
     setShowPrompt(false);

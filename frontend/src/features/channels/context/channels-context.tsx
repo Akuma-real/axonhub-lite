@@ -77,7 +77,6 @@ export default function ChannelsProvider({ children }: Props) {
   );
 }
 
-// eslint-disable-next-line react-refresh/only-export-components
 export const useChannels = () => {
   const channelsContext = React.useContext(ChannelsContext);
 

@@ -85,7 +85,7 @@ export function ChannelsEndpointsDialog({ channel, open, onOpenChange }: Props) 
   const { t } = useTranslation();
   const saveEndpoints = useSaveChannelEndpoints();
 
-  const defaultEndpoints = channel.defaultEndpoints ?? [];
+  const defaultEndpoints = useMemo(() => channel.defaultEndpoints ?? [], [channel.defaultEndpoints]);
 
   const [endpoints, setEndpoints] = useState<ChannelEndpoint[]>(() => channel.endpoints ?? []);
   const [newApiFormat, setNewApiFormat] = useState('');

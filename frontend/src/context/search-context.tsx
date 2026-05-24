@@ -28,7 +28,6 @@ export function SearchProvider({ children }: Props) {
   return <SearchContext.Provider value={{ open, setOpen }}>{children}</SearchContext.Provider>;
 }
 
-// eslint-disable-next-line react-refresh/only-export-components
 export const useSearch = () => {
   const searchContext = React.useContext(SearchContext);
 

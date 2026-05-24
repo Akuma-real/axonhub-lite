@@ -157,6 +157,8 @@
   "models.unassociated.noUnassociated": "All channel models are properly associated",
   "models.unassociated.searchPlaceholder": "Search models...",
   "models.unassociated.noSearchResults": "No models found matching your search",
+  "models.unassociated.quickAssociate": "Quick link",
+  "models.unassociated.noConfiguredModel": "No model configuration found for {{model}}. Create the model first.",
   "models.modelCard.title": "Model Card",
   "models.modelCard.capabilities": "Capabilities",
   "models.modelCard.reasoning": "Reasoning",

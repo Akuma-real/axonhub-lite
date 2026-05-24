@@ -134,6 +134,18 @@ func TestIsNewerVersion(t *testing.T) {
 			want:    false, // build metadata doesn't affect version comparison
 		},
 		{
+			name:    "same lite fork version",
+			current: "v0.9.38-lite.1",
+			latest:  "v0.9.38-lite.1",
+			want:    false,
+		},
+		{
+			name:    "newer lite fork version",
+			current: "v0.9.38-lite.1",
+			latest:  "v0.9.38-lite.2",
+			want:    true,
+		},
+		{
 			name:    "version with many digits",
 			current: "v1.2.3",
 			latest:  "v1.2.3.4",
@@ -163,6 +175,11 @@ func TestIsAxonHubTag(t *testing.T) {
 		{
 			name: "axonhub prerelease tag",
 			tag:  "v1.0.0-beta",
+			want: true,
+		},
+		{
+			name: "axonhub lite fork tag",
+			tag:  "v0.9.38-lite.1",
 			want: true,
 		},
 		{

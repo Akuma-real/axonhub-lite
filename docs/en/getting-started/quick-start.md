@@ -358,7 +358,7 @@ log:
 
 ### Explore Features
 - **Tracing**: Set up request tracing for observability
-- **Permissions**: Configure role-based access control
+- **API Keys**: Create gateway keys for client access
 - **Model Profiles**: Create model mapping rules
 - **Usage Analytics**: Monitor API usage and costs
 

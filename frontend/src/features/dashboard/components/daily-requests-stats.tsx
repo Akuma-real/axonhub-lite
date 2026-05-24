@@ -34,11 +34,13 @@ export function DailyRequestStats() {
   const formatCostTick = useCallback((value: number | string) => formatCurrency(Number(value), 0), [formatCurrency]);
 
   const tooltipFormatter = useCallback(
-    (value: number | string, name: string) => {
-      if (name === t('dashboard.stats.totalCost')) {
-        return [formatCurrency(Number(value), 0), name];
+    (value: unknown, name: unknown): [string, string] => {
+      const label = typeof name === 'string' ? name : String(name ?? '');
+      const numericValue = Array.isArray(value) ? Number(value[0] ?? 0) : Number(value ?? 0);
+      if (label === t('dashboard.stats.totalCost')) {
+        return [formatCurrency(numericValue, 0), label];
       }
-      return [formatNumber(Number(value)), name];
+      return [formatNumber(numericValue), label];
     },
     [formatCurrency, t]
   );

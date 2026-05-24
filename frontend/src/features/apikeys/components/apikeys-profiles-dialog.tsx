@@ -1,9 +1,7 @@
 import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
-import { useForm, useFieldArray } from 'react-hook-form';
+import { useForm, useFieldArray, type Resolver, type UseFormReturn } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { IconPlus, IconTrash, IconSettings, IconChevronDown, IconChevronUp } from '@tabler/icons-react';
-import { ApiKeySaveTemplateDialog } from './apikeys-save-template-dialog';
-import { ApiKeyLoadTemplatePopover } from './apikeys-load-template-popover';
 import { format, type Locale } from 'date-fns';
 import { zhCN, enUS } from 'date-fns/locale';
 import { useQueryModels } from '@/gql/models';
@@ -20,7 +18,6 @@ import { Switch } from '@/components/ui/switch';
 import { TagsAutocompleteInput } from '@/components/ui/tags-autocomplete-input';
 import { AutoComplete } from '@/components/auto-complete';
 import { useAllChannelSummarys } from '@/features/channels/data/channels';
-import { useSelectedProjectId } from '@/stores/projectStore';
 import { useApiKeysContext } from '../context/apikeys-context';
 import { useApiKeyQuotaUsages } from '../data/apikeys';
 import { updateApiKeyProfilesInputSchemaFactory, type ApiKeyProfile, type ApiKeyProfileQuotaUsage, type UpdateApiKeyProfilesInput } from '../data/schema';
@@ -78,9 +75,7 @@ interface ApiKeyProfilesDialogProps {
 export function ApiKeyProfilesDialog({ open, onOpenChange, onSubmit, loading = false, initialData }: ApiKeyProfilesDialogProps) {
   const { t, i18n } = useTranslation();
   const { selectedApiKey } = useApiKeysContext();
-  const selectedProjectId = useSelectedProjectId();
   const { data: availableModels, mutateAsync: fetchModels } = useQueryModels();
-  const [templateLoadPending, setTemplateLoadPending] = useState(false);
   // 用于解决 Dialog 内 Popover 无法滚动的问题
   const [dialogContent, setDialogContent] = useState<HTMLDivElement | null>(null);
   const locale = i18n.language === 'zh' ? zhCN : enUS;
@@ -96,10 +91,6 @@ export function ApiKeyProfilesDialog({ open, onOpenChange, onSubmit, loading = f
     });
     return map;
   }, [quotaUsagesQuery.data]);
-
-  // Template save/load state
-  const [saveTemplateOpen, setSaveTemplateOpen] = useState(false);
-  const [saveTemplateProfileIndex, setSaveTemplateProfileIndex] = useState<number | null>(null);
 
   useEffect(() => {
     if (open) {
@@ -120,7 +111,7 @@ export function ApiKeyProfilesDialog({ open, onOpenChange, onSubmit, loading = f
   );
 
   const form = useForm<UpdateApiKeyProfilesInput>({
-    resolver: zodResolver(updateApiKeyProfilesInputSchemaFactory(t)),
+    resolver: zodResolver(updateApiKeyProfilesInputSchemaFactory(t)) as Resolver<UpdateApiKeyProfilesInput>,
     defaultValues,
   });
 
@@ -152,8 +143,9 @@ export function ApiKeyProfilesDialog({ open, onOpenChange, onSubmit, loading = f
   });
 
   // Watch profile names to update activeProfile dropdown options
-  const watchedProfiles = form.watch('profiles') || [];
-  const profileNames = watchedProfiles.map((profile) => profile.name || '');
+  const watchedProfilesValue = form.watch('profiles');
+  const watchedProfiles = useMemo(() => watchedProfilesValue || [], [watchedProfilesValue]);
+  const profileNames = useMemo(() => watchedProfiles.map((profile) => profile.name || ''), [watchedProfiles]);
 
   useEffect(() => {
     const nonEmptyProfiles = watchedProfiles.filter((profile) => profile?.name?.trim());
@@ -176,7 +168,6 @@ export function ApiKeyProfilesDialog({ open, onOpenChange, onSubmit, loading = f
   useEffect(() => {
     if (!open) {
       lastInitialDataRef.current = null;
-      setTemplateLoadPending(false);
       return;
     }
 
@@ -184,23 +175,13 @@ export function ApiKeyProfilesDialog({ open, onOpenChange, onSubmit, loading = f
       return;
     }
 
-    const wasTemplatePending = templateLoadPending;
-    if (wasTemplatePending) {
-      setTemplateLoadPending(false);
-    }
-
     if (lastInitialDataRef.current === normalizedSerialized) {
-      return;
-    }
-
-    if (wasTemplatePending) {
-      lastInitialDataRef.current = normalizedSerialized;
       return;
     }
 
     form.reset(normalizedInitialData);
     lastInitialDataRef.current = normalizedSerialized;
-  }, [open, loading, form, normalizedInitialData, normalizedSerialized, templateLoadPending]);
+  }, [open, loading, form, normalizedInitialData, normalizedSerialized]);
 
   // Scroll to active profile after profiles rendered
   useEffect(() => {
@@ -302,19 +283,6 @@ export function ApiKeyProfilesDialog({ open, onOpenChange, onSubmit, loading = f
                 <div className='flex items-center justify-between'>
                   <h3 className='text-lg font-medium'>{t('apikeys.profiles.profilesTitle')}</h3>
                   <div className='flex items-center gap-2'>
-                    <ApiKeyLoadTemplatePopover
-                      apiKeyID={apiKeyId}
-                      projectID={selectedProjectId}
-                      onLoadComplete={(loadedProfiles) => {
-                        const resetData = {
-                          activeProfile: loadedProfiles.activeProfile || loadedProfiles.profiles[0]?.name || '',
-                          profiles: loadedProfiles.profiles,
-                        };
-                        setTemplateLoadPending(true);
-                        form.reset(resetData);
-                        lastInitialDataRef.current = JSON.stringify(resetData);
-                      }}
-                    />
                     <Button type='button' variant='outline' size='sm' onClick={addProfile} className='flex items-center gap-2'>
                       <IconPlus className='h-4 w-4' />
                       {t('apikeys.profiles.addProfile')}
@@ -355,11 +323,6 @@ export function ApiKeyProfilesDialog({ open, onOpenChange, onSubmit, loading = f
                               quotaUsageByProfileName={quotaUsageByProfileName}
                               defaultExpanded={isActive}
                               portalContainer={dialogContent}
-                              selectedProjectId={selectedProjectId}
-                              onSaveTemplate={(idx) => {
-                                setSaveTemplateProfileIndex(idx);
-                                setSaveTemplateOpen(true);
-                              }}
                             />
                           </div>
                         );
@@ -419,23 +382,12 @@ export function ApiKeyProfilesDialog({ open, onOpenChange, onSubmit, loading = f
             <Button
               type='submit'
               form='apikey-profiles-form'
-              disabled={loading || templateLoadPending || !form.formState.isValid || Object.keys(form.formState.errors).length > 0}
+              disabled={loading || !form.formState.isValid || Object.keys(form.formState.errors).length > 0}
             >
-              {loading || templateLoadPending ? t('common.buttons.saving') : t('common.buttons.save')}
+              {loading ? t('common.buttons.saving') : t('common.buttons.save')}
             </Button>
           </div>
         </DialogFooter>
-        {saveTemplateOpen && saveTemplateProfileIndex !== null && (
-          <ApiKeySaveTemplateDialog
-            open={saveTemplateOpen}
-            onOpenChange={(open) => {
-              setSaveTemplateOpen(open);
-              if (!open) setSaveTemplateProfileIndex(null);
-            }}
-            profileData={form.watch(`profiles.${saveTemplateProfileIndex}`)}
-            projectID={selectedProjectId}
-          />
-        )}
       </DialogContent>
     </Dialog>
   );
@@ -443,7 +395,7 @@ export function ApiKeyProfilesDialog({ open, onOpenChange, onSubmit, loading = f
 
 interface ProfileCardProps {
   profileIndex: number;
-  form: ReturnType<typeof useForm<UpdateApiKeyProfilesInput>>;
+  form: UseFormReturn<UpdateApiKeyProfilesInput>;
   onRemove: () => void;
   canRemove: boolean;
   availableModels: string[];
@@ -453,9 +405,6 @@ interface ProfileCardProps {
   defaultExpanded?: boolean;
   /** Popover Portal 容器元素，解决 Dialog 内无法滚动的问题 */
   portalContainer?: HTMLElement | null;
-  /** 当前选中的 project ID */
-  selectedProjectId?: string | null;
-  onSaveTemplate: (profileIndex: number) => void;
 }
 
 function ProfileCard({
@@ -469,12 +418,10 @@ function ProfileCard({
   quotaUsageByProfileName,
   defaultExpanded = false,
   portalContainer,
-  selectedProjectId,
-  onSaveTemplate,
 }: ProfileCardProps) {
   const [localProfileName, setLocalProfileName] = useState('');
   const [isCollapsed, setIsCollapsed] = useState(!defaultExpanded);
-  const { data: channelsData } = useAllChannelSummarys(selectedProjectId, { enabled: true });
+  const { data: channelsData } = useAllChannelSummarys(undefined, { enabled: true });
 
   const debouncedProfileName = useDebounce(localProfileName, 500);
 
@@ -499,7 +446,8 @@ function ProfileCard({
   });
 
   // Watch all profiles to check for duplicates
-  const allProfiles = form.watch('profiles') || [];
+  const allProfilesValue = form.watch('profiles');
+  const allProfiles = useMemo(() => allProfilesValue || [], [allProfilesValue]);
   const profileName = form.watch(`profiles.${profileIndex}.name`);
   const channelTagsMatchMode = form.watch(`profiles.${profileIndex}.channelTagsMatchMode`);
   const isExcludeMode = channelTagsMatchMode === 'none';
@@ -585,14 +533,6 @@ function ProfileCard({
               aria-label={isCollapsed ? t('apikeys.profiles.expand') : t('apikeys.profiles.collapse')}
             >
               {isCollapsed ? <IconChevronDown className='h-4 w-4' /> : <IconChevronUp className='h-4 w-4' />}
-            </Button>
-            <Button
-              type='button'
-              variant='ghost'
-              size='sm'
-              onClick={() => onSaveTemplate(profileIndex)}
-            >
-              {t('apikeys.templates.saveAsTemplateButton')}
             </Button>
             {canRemove && (
               <Button type='button' variant='ghost' size='sm' onClick={onRemove} className='text-destructive hover:text-destructive'>

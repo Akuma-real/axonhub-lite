@@ -1,8 +1,8 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { z } from 'zod';
 import { useForm, useFieldArray, useWatch, Control } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Loader2, Save, Download, ChevronDown, ChevronUp, Trash2 } from 'lucide-react';
+import { Loader2, Save, ChevronDown, ChevronUp, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -475,7 +475,6 @@ export function ChannelsOverrideDialog({ open, onOpenChange, currentRow }: Props
   const [templateSearchOpen, setTemplateSearchOpen] = useState(false);
   const [templateSearchValue, setTemplateSearchValue] = useState('');
   const debouncedTemplateSearchValue = useDebounce(templateSearchValue, 300);
-  const [isApplyingTemplate, setIsApplyingTemplate] = useState(false);
 
   const { data: templatesData } = useChannelOverrideTemplates(
     {
@@ -487,7 +486,7 @@ export function ChannelsOverrideDialog({ open, onOpenChange, currentRow }: Props
     }
   );
 
-  const templates = templatesData?.edges?.map((edge) => edge.node) || [];
+  const templates = useMemo(() => templatesData?.edges?.map((edge) => edge.node) || [], [templatesData]);
 
   const form = useForm<OverrideFormValues>({
     resolver: zodResolver(overrideFormSchema),
@@ -641,7 +640,6 @@ export function ChannelsOverrideDialog({ open, onOpenChange, currentRow }: Props
       const template = templates.find((t) => t.id === id);
       if (!template) return;
 
-      setIsApplyingTemplate(true);
       try {
         const templateHeaders = template.headerOverrideOperations || [];
         const templateBodyOps = template.bodyOverrideOperations || [];
@@ -656,10 +654,8 @@ export function ChannelsOverrideDialog({ open, onOpenChange, currentRow }: Props
         replaceBodies(mergedBodyOps);
 
         toast.success(t('channels.templates.messages.applied'));
-      } catch (error) {
+      } catch {
         toast.error(t('common.errors.internalServerError'));
-      } finally {
-        setIsApplyingTemplate(false);
       }
     },
     [selectedTemplateId, templates, form, replaceHeaders, replaceBodies, t]
@@ -684,11 +680,11 @@ export function ChannelsOverrideDialog({ open, onOpenChange, currentRow }: Props
           bodyOverrideOperations: validBodyOps,
         });
         setShowSaveTemplateDialog(false);
-      } catch (error) {
+      } catch {
         // Error already handled by mutation
       }
     },
-    [form, currentRow.type, createTemplate]
+    [form, createTemplate]
   );
 
   const handleDeleteTemplate = useCallback(

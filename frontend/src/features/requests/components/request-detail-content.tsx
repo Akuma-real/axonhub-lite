@@ -5,14 +5,12 @@ import { zhCN, enUS } from 'date-fns/locale';
 import { Copy, Clock, Key, Database, FileText, Layers, Download, Terminal } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { extractNumberID } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { JsonViewer } from '@/components/json-tree-view';
 import { useGeneralSettings } from '@/features/system/data/system';
-import { getTokenFromStorage } from '@/stores/authStore';
 import { useUsageLogs } from '../data/usage-logs';
 import { type Request, useRequest, useRequestExecutions } from '../data';
 import { ChunksDialog } from './chunks-dialog';
@@ -24,26 +22,23 @@ import { generateRequestCurl, generateExecutionCurl } from '../utils/curl-genera
 
 interface RequestDetailContentProps {
   requestId: string;
-  projectId?: string | null;
   previewRequest?: Request | null;
   isPreviewStreaming?: boolean;
 }
 
-export function RequestDetailContent({ requestId, projectId, previewRequest, isPreviewStreaming = false }: RequestDetailContentProps) {
+export function RequestDetailContent({ requestId, previewRequest, isPreviewStreaming = false }: RequestDetailContentProps) {
   const { t, i18n } = useTranslation();
   const locale = i18n.language === 'zh' ? zhCN : enUS;
 
   const [showResponseChunks, setShowResponseChunks] = useState(false);
   const [showExecutionChunks, setShowExecutionChunks] = useState(false);
-  const [selectedResponseChunks, setSelectedResponseChunks] = useState<any[]>([]);
   const [selectedExecutionChunks, setSelectedExecutionChunks] = useState<any[]>([]);
   const [showCurlPreview, setShowCurlPreview] = useState(false);
   const [curlCommand, setCurlCommand] = useState('');
-  const [isDownloadingVideo, setIsDownloadingVideo] = useState(false);
   const [responseView, setResponseView] = useState<'preview' | 'json'>('preview');
 
   const { data: settings } = useGeneralSettings();
-  const { data: requestData, isLoading } = useRequest(requestId, { projectId, disableAutoRefresh: isPreviewStreaming });
+  const { data: requestData, isLoading } = useRequest(requestId, { disableAutoRefresh: isPreviewStreaming });
   const request = previewRequest ?? requestData;
   const {
     data: executions,
@@ -55,7 +50,7 @@ export function RequestDetailContent({ requestId, projectId, previewRequest, isP
       first: 10,
       orderBy: { field: 'CREATED_AT', direction: 'DESC' },
     },
-    { projectId }
+    { enabled: true }
   );
   const { data: usageLogs } = useUsageLogs(
     {
@@ -63,7 +58,7 @@ export function RequestDetailContent({ requestId, projectId, previewRequest, isP
       where: { requestID: requestId },
       orderBy: { field: 'CREATED_AT', direction: 'DESC' },
     },
-    { projectId, enabled: true }
+    { enabled: true }
   );
 
   const parsedResponse = useMemo(() => {
@@ -78,6 +73,12 @@ export function RequestDetailContent({ requestId, projectId, previewRequest, isP
   const isLive = isPreviewStreaming || !!(request?.status === 'processing' && request?.stream);
   const hasResponseBody = !!(request?.responseBody && Object.keys(request.responseBody).length > 0);
   const hasResponseChunks = !!(request?.responseChunks && request.responseChunks.length > 0);
+  const apiKeyDisplayName = useMemo(() => {
+    if (!request) return t('requests.columns.unknown');
+    if (request.apiKey?.name) return request.apiKey.name;
+    if (request.source === 'test' || request.source === 'playground') return t(`requests.source.${request.source}`);
+    return t('requests.columns.unknown');
+  }, [request, t]);
 
   const extractResponseText = useCallback(() => {
     if (!request) return '';
@@ -118,58 +119,8 @@ export function RequestDetailContent({ requestId, projectId, previewRequest, isP
     toast.success(t('requests.actions.download'));
   };
 
-  const downloadVideo = async () => {
-    if (!request?.contentSaved || !request?.contentStorageKey || !projectId) return;
-
-    const requestIdNumber = extractNumberID(request.id);
-    if (!requestIdNumber) return;
-
-    const url = `/admin/requests/${encodeURIComponent(requestIdNumber)}/content`;
-
-    try {
-      setIsDownloadingVideo(true);
-
-      const token = getTokenFromStorage();
-      if (!token) {
-        toast.error(t('common.errors.sessionExpiredSignIn'));
-        return;
-      }
-
-      const resp = await fetch(url, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'X-Project-ID': projectId,
-        },
-      });
-
-      if (!resp.ok) {
-        throw new Error(`HTTP ${resp.status}`);
-      }
-
-      const contentDisposition = resp.headers.get('Content-Disposition') || '';
-      const filenameMatch = contentDisposition.match(/filename=\"?([^\";]+)\"?/i);
-      const filename = filenameMatch?.[1] || `video-${requestIdNumber}.mp4`;
-
-      const blob = await resp.blob();
-      const objectUrl = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = objectUrl;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(objectUrl);
-      toast.success(t('requests.actions.download'));
-    } catch (_err) {
-      toast.error(t('common.errors.operationFailed', { operation: t('requests.actions.downloadVideo') }));
-    } finally {
-      setIsDownloadingVideo(false);
-    }
-  };
-
   const showResponseChunksModal = useCallback(() => {
     if (request?.responseChunks) {
-      setSelectedResponseChunks(request.responseChunks);
       setShowResponseChunks(true);
     }
   }, [request]);
@@ -282,7 +233,7 @@ export function RequestDetailContent({ requestId, projectId, previewRequest, isP
                 <Key className='text-primary h-3.5 w-3.5' />
                 <span className='text-xs font-medium'>{t('requests.dialogs.requestDetail.fields.apiKeyName')}</span>
               </div>
-              <p className='text-muted-foreground font-mono text-xs'>{request.apiKey?.name || t('requests.columns.unknown')}</p>
+              <p className='text-muted-foreground font-mono text-xs'>{apiKeyDisplayName}</p>
             </div>
           </div>
         </CardContent>
@@ -476,20 +427,6 @@ export function RequestDetailContent({ requestId, projectId, previewRequest, isP
                   </TabsList>
 
                   <div className='flex flex-wrap items-center gap-2'>
-                    {(request.format === 'openai/video' || request.format === 'seedance/video') &&
-                      request.contentSaved &&
-                      request.contentStorageKey && (
-                      <Button
-                        variant='outline'
-                        size='sm'
-                        onClick={downloadVideo}
-                        disabled={isDownloadingVideo}
-                        className='hover:bg-primary hover:text-primary-foreground'
-                      >
-                        <Download className='mr-2 h-4 w-4' />
-                        {t('requests.actions.downloadVideo')}
-                      </Button>
-                    )}
                     <Button
                       variant='outline'
                       size='sm'

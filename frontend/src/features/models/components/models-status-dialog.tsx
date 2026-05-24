@@ -32,7 +32,8 @@ export function ModelsStatusDialog({ open, onOpenChange, currentRow }: ModelsSta
         input: { status: newStatus },
       });
       onOpenChange(false);
-    } catch (error) {
+    } catch {
+      // Error handled by mutation hook.
     }
   };
 

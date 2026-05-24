@@ -10,7 +10,6 @@ import { Input } from '@/components/ui/input';
 import { useApiKeysContext } from '../context/apikeys-context';
 import { useUpdateApiKey } from '../data/apikeys';
 import { UpdateApiKeyInput, updateApiKeyInputSchemaFactory } from '../data/schema';
-import { ScopesSelect } from '@/components/scopes-select';
 
 export function ApiKeysEditDialog() {
   const { t } = useTranslation();
@@ -18,13 +17,11 @@ export function ApiKeysEditDialog() {
   const updateApiKey = useUpdateApiKey();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showApiKey, setShowApiKey] = useState(false);
-  const [dialogContent, setDialogContent] = useState<HTMLDivElement | null>(null);
 
   const form = useForm<UpdateApiKeyInput>({
     resolver: zodResolver(updateApiKeyInputSchemaFactory(t)),
     defaultValues: {
       name: '',
-      scopes: [],
     },
   });
 
@@ -32,7 +29,6 @@ export function ApiKeysEditDialog() {
     if (selectedApiKey && isDialogOpen.edit) {
       form.reset({
         name: selectedApiKey.name,
-        scopes: selectedApiKey.scopes || [],
       });
     }
   }, [selectedApiKey, isDialogOpen.edit, form]);
@@ -46,17 +42,14 @@ export function ApiKeysEditDialog() {
         name: data.name,
       };
 
-      if (selectedApiKey.type === 'service_account') {
-        input.scopes = data.scopes;
-      }
-
       await updateApiKey.mutateAsync({
         id: selectedApiKey.id,
         input,
       });
 
       closeDialog('edit');
-    } catch (error) {
+    } catch {
+      // Error is handled by the mutation
     } finally {
       setIsSubmitting(false);
     }
@@ -67,11 +60,9 @@ export function ApiKeysEditDialog() {
     closeDialog('edit');
   };
 
-  const isServiceAccount = selectedApiKey?.type === 'service_account';
-
   return (
     <Dialog open={isDialogOpen.edit} onOpenChange={handleClose}>
-      <DialogContent className='flex max-h-[90vh] flex-col sm:max-w-[600px]' ref={setDialogContent}>
+      <DialogContent className='flex max-h-[90vh] flex-col sm:max-w-[600px]'>
         <DialogHeader>
           <DialogTitle>{t('apikeys.dialogs.edit.title')}</DialogTitle>
           <DialogDescription>{t('apikeys.dialogs.edit.description')}</DialogDescription>
@@ -91,21 +82,6 @@ export function ApiKeysEditDialog() {
                 </FormItem>
               )}
             />
-            {isServiceAccount && (
-              <FormField
-                control={form.control}
-                name='scopes'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t('apikeys.dialogs.fields.scopes.label')}</FormLabel>
-                    <FormControl>
-                      <ScopesSelect value={field.value || []} onChange={field.onChange} portalContainer={dialogContent} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
             <div className='space-y-4'>
               <div>
                 <div className='flex items-center justify-between'>

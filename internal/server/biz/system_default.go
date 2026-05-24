@@ -54,24 +54,6 @@ var defaultGeneralSettings = SystemGeneralSettings{
 	Timezone:     "UTC",
 }
 
-var defaultAutoBackupSettings = AutoBackupSettings{
-	Enabled:            false,
-	Frequency:          BackupFrequencyDaily,
-	IncludeChannels:    true,
-	IncludeModels:      true,
-	IncludeAPIKeys:     false,
-	IncludeModelPrices: true,
-	IncludeUsageStats:  false,
-	RetentionDays:      30,
-}
-
-var defaultVideoStorageSettings = VideoStorageSettings{
-	Enabled:             false,
-	DataStorageID:       0,
-	ScanIntervalMinutes: 1,
-	ScanLimit:           50,
-}
-
 var defaultQuotaEnforcementSettings = QuotaEnforcementSettings{
 	Enabled: false,
 	Mode:    QuotaEnforcementModeExhaustedOnly,

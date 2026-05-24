@@ -20,31 +20,22 @@ import (
 
 	"github.com/looplj/axonhub/internal/ent"
 	"github.com/looplj/axonhub/internal/ent/apikey"
-	"github.com/looplj/axonhub/internal/ent/apikeyprofiletemplate"
 	"github.com/looplj/axonhub/internal/ent/channel"
 	"github.com/looplj/axonhub/internal/ent/channeloverridetemplate"
 	"github.com/looplj/axonhub/internal/ent/channelprobe"
-	"github.com/looplj/axonhub/internal/ent/datastorage"
 	"github.com/looplj/axonhub/internal/ent/model"
-	"github.com/looplj/axonhub/internal/ent/project"
-	"github.com/looplj/axonhub/internal/ent/prompt"
 	"github.com/looplj/axonhub/internal/ent/request"
 	"github.com/looplj/axonhub/internal/ent/requestexecution"
-	"github.com/looplj/axonhub/internal/ent/role"
 	"github.com/looplj/axonhub/internal/ent/system"
 	"github.com/looplj/axonhub/internal/ent/thread"
 	"github.com/looplj/axonhub/internal/ent/trace"
 	"github.com/looplj/axonhub/internal/ent/usagelog"
 	"github.com/looplj/axonhub/internal/ent/user"
-	"github.com/looplj/axonhub/internal/ent/userproject"
-	"github.com/looplj/axonhub/internal/ent/userrole"
 	"github.com/looplj/axonhub/internal/pkg/xerrors"
-	"github.com/looplj/axonhub/internal/server/backup"
 	"github.com/looplj/axonhub/internal/server/biz"
 	"github.com/looplj/axonhub/internal/server/gc"
 	"github.com/looplj/axonhub/internal/server/orchestrator"
 	"github.com/looplj/axonhub/internal/server/scheduler"
-	"github.com/looplj/axonhub/internal/server/video_storage"
 	"github.com/looplj/axonhub/llm/httpclient"
 )
 
@@ -58,19 +49,12 @@ type Dependencies struct {
 	SystemService                  *biz.SystemService
 	ChannelService                 *biz.ChannelService
 	RequestService                 *biz.RequestService
-	ProjectService                 *biz.ProjectService
-	DataStorageService             *biz.DataStorageService
-	RoleService                    *biz.RoleService
 	TraceService                   *biz.TraceService
 	ThreadService                  *biz.ThreadService
 	UsageLogService                *biz.UsageLogService
 	ChannelOverrideTemplateService *biz.ChannelOverrideTemplateService
-	APIKeyProfileTemplateService   *biz.APIKeyProfileTemplateService
 	ModelService                   *biz.ModelService
-	BackupService                  *backup.BackupService
 	ChannelProbeService            *biz.ChannelProbeService
-	PromptService                  *biz.PromptService
-	PromptProtectionRuleService    *biz.PromptProtectionRuleService
 	ProviderQuotaService           *biz.ProviderQuotaService
 	Scheduler                      *scheduler.Scheduler
 	DefaultSelector                *orchestrator.DefaultSelector
@@ -78,7 +62,6 @@ type Dependencies struct {
 	ChannelLimiterManager          *orchestrator.ChannelLimiterManager
 	HttpClient                     *httpclient.HttpClient
 	GCWorker                       *gc.Worker
-	VideoWorker                    *video_storage.Worker
 }
 
 type GraphqlHandler struct {
@@ -96,19 +79,12 @@ func NewGraphqlHandlers(deps Dependencies) *GraphqlHandler {
 			deps.SystemService,
 			deps.ChannelService,
 			deps.RequestService,
-			deps.ProjectService,
-			deps.DataStorageService,
-			deps.RoleService,
 			deps.TraceService,
 			deps.ThreadService,
 			deps.UsageLogService,
 			deps.ChannelOverrideTemplateService,
-			deps.APIKeyProfileTemplateService,
 			deps.ModelService,
-			deps.BackupService,
 			deps.ChannelProbeService,
-			deps.PromptService,
-			deps.PromptProtectionRuleService,
 			deps.ProviderQuotaService,
 			deps.Scheduler,
 			deps.DefaultSelector,
@@ -116,7 +92,6 @@ func NewGraphqlHandlers(deps Dependencies) *GraphqlHandler {
 			deps.ChannelLimiterManager,
 			deps.HttpClient,
 			deps.GCWorker,
-			deps.VideoWorker,
 		),
 	)
 
@@ -178,23 +153,16 @@ func NewGraphqlHandlers(deps Dependencies) *GraphqlHandler {
 var guidTypeToNodeType = map[string]string{
 	ent.TypeUser:                    user.Table,
 	ent.TypeAPIKey:                  apikey.Table,
-	ent.TypeAPIKeyProfileTemplate:   apikeyprofiletemplate.Table,
 	ent.TypeModel:                   model.Table,
 	ent.TypeChannel:                 channel.Table,
 	ent.TypeChannelProbe:            channelprobe.Table,
 	ent.TypeChannelOverrideTemplate: channeloverridetemplate.Table,
 	ent.TypeRequest:                 request.Table,
 	ent.TypeRequestExecution:        requestexecution.Table,
-	ent.TypeRole:                    role.Table,
 	ent.TypeSystem:                  system.Table,
 	ent.TypeUsageLog:                usagelog.Table,
-	ent.TypeProject:                 project.Table,
-	ent.TypeUserProject:             userproject.Table,
-	ent.TypeUserRole:                userrole.Table,
 	ent.TypeThread:                  thread.Table,
 	ent.TypeTrace:                   trace.Table,
-	ent.TypeDataStorage:             datastorage.Table,
-	ent.TypePrompt:                  prompt.Table,
 }
 
 func getNilableChannel(ctx context.Context, client *ent.Client, channelID int) (*ent.Channel, error) {

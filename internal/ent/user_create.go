@@ -11,14 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/looplj/axonhub/internal/ent/apikey"
-	"github.com/looplj/axonhub/internal/ent/channeloverridetemplate"
-	"github.com/looplj/axonhub/internal/ent/oidcidentity"
-	"github.com/looplj/axonhub/internal/ent/project"
-	"github.com/looplj/axonhub/internal/ent/role"
 	"github.com/looplj/axonhub/internal/ent/user"
-	"github.com/looplj/axonhub/internal/ent/userproject"
-	"github.com/looplj/axonhub/internal/ent/userrole"
 )
 
 // UserCreate is the builder for creating a User entity.
@@ -167,117 +160,6 @@ func (_c *UserCreate) SetNillableIsOwner(v *bool) *UserCreate {
 	return _c
 }
 
-// SetScopes sets the "scopes" field.
-func (_c *UserCreate) SetScopes(v []string) *UserCreate {
-	_c.mutation.SetScopes(v)
-	return _c
-}
-
-// AddProjectIDs adds the "projects" edge to the Project entity by IDs.
-func (_c *UserCreate) AddProjectIDs(ids ...int) *UserCreate {
-	_c.mutation.AddProjectIDs(ids...)
-	return _c
-}
-
-// AddProjects adds the "projects" edges to the Project entity.
-func (_c *UserCreate) AddProjects(v ...*Project) *UserCreate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _c.AddProjectIDs(ids...)
-}
-
-// AddAPIKeyIDs adds the "api_keys" edge to the APIKey entity by IDs.
-func (_c *UserCreate) AddAPIKeyIDs(ids ...int) *UserCreate {
-	_c.mutation.AddAPIKeyIDs(ids...)
-	return _c
-}
-
-// AddAPIKeys adds the "api_keys" edges to the APIKey entity.
-func (_c *UserCreate) AddAPIKeys(v ...*APIKey) *UserCreate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _c.AddAPIKeyIDs(ids...)
-}
-
-// AddRoleIDs adds the "roles" edge to the Role entity by IDs.
-func (_c *UserCreate) AddRoleIDs(ids ...int) *UserCreate {
-	_c.mutation.AddRoleIDs(ids...)
-	return _c
-}
-
-// AddRoles adds the "roles" edges to the Role entity.
-func (_c *UserCreate) AddRoles(v ...*Role) *UserCreate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _c.AddRoleIDs(ids...)
-}
-
-// AddChannelOverrideTemplateIDs adds the "channel_override_templates" edge to the ChannelOverrideTemplate entity by IDs.
-func (_c *UserCreate) AddChannelOverrideTemplateIDs(ids ...int) *UserCreate {
-	_c.mutation.AddChannelOverrideTemplateIDs(ids...)
-	return _c
-}
-
-// AddChannelOverrideTemplates adds the "channel_override_templates" edges to the ChannelOverrideTemplate entity.
-func (_c *UserCreate) AddChannelOverrideTemplates(v ...*ChannelOverrideTemplate) *UserCreate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _c.AddChannelOverrideTemplateIDs(ids...)
-}
-
-// AddOidcIdentityIDs adds the "oidc_identities" edge to the OIDCIdentity entity by IDs.
-func (_c *UserCreate) AddOidcIdentityIDs(ids ...int) *UserCreate {
-	_c.mutation.AddOidcIdentityIDs(ids...)
-	return _c
-}
-
-// AddOidcIdentities adds the "oidc_identities" edges to the OIDCIdentity entity.
-func (_c *UserCreate) AddOidcIdentities(v ...*OIDCIdentity) *UserCreate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _c.AddOidcIdentityIDs(ids...)
-}
-
-// AddProjectUserIDs adds the "project_users" edge to the UserProject entity by IDs.
-func (_c *UserCreate) AddProjectUserIDs(ids ...int) *UserCreate {
-	_c.mutation.AddProjectUserIDs(ids...)
-	return _c
-}
-
-// AddProjectUsers adds the "project_users" edges to the UserProject entity.
-func (_c *UserCreate) AddProjectUsers(v ...*UserProject) *UserCreate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _c.AddProjectUserIDs(ids...)
-}
-
-// AddUserRoleIDs adds the "user_roles" edge to the UserRole entity by IDs.
-func (_c *UserCreate) AddUserRoleIDs(ids ...int) *UserCreate {
-	_c.mutation.AddUserRoleIDs(ids...)
-	return _c
-}
-
-// AddUserRoles adds the "user_roles" edges to the UserRole entity.
-func (_c *UserCreate) AddUserRoles(v ...*UserRole) *UserCreate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _c.AddUserRoleIDs(ids...)
-}
-
 // Mutation returns the UserMutation object of the builder.
 func (_c *UserCreate) Mutation() *UserMutation {
 	return _c.mutation
@@ -352,10 +234,6 @@ func (_c *UserCreate) defaults() error {
 	if _, ok := _c.mutation.IsOwner(); !ok {
 		v := user.DefaultIsOwner
 		_c.mutation.SetIsOwner(v)
-	}
-	if _, ok := _c.mutation.Scopes(); !ok {
-		v := user.DefaultScopes
-		_c.mutation.SetScopes(v)
 	}
 	return nil
 }
@@ -461,130 +339,6 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.IsOwner(); ok {
 		_spec.SetField(user.FieldIsOwner, field.TypeBool, value)
 		_node.IsOwner = value
-	}
-	if value, ok := _c.mutation.Scopes(); ok {
-		_spec.SetField(user.FieldScopes, field.TypeJSON, value)
-		_node.Scopes = value
-	}
-	if nodes := _c.mutation.ProjectsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   user.ProjectsTable,
-			Columns: user.ProjectsPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(project.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		createE := &UserProjectCreate{config: _c.config, mutation: newUserProjectMutation(_c.config, OpCreate)}
-		_ = createE.defaults()
-		_, specE := createE.createSpec()
-		edge.Target.Fields = specE.Fields
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.APIKeysIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.APIKeysTable,
-			Columns: []string{user.APIKeysColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(apikey.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.RolesIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   user.RolesTable,
-			Columns: user.RolesPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(role.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		createE := &UserRoleCreate{config: _c.config, mutation: newUserRoleMutation(_c.config, OpCreate)}
-		createE.defaults()
-		_, specE := createE.createSpec()
-		edge.Target.Fields = specE.Fields
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.ChannelOverrideTemplatesIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.ChannelOverrideTemplatesTable,
-			Columns: []string{user.ChannelOverrideTemplatesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(channeloverridetemplate.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.OidcIdentitiesIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   user.OidcIdentitiesTable,
-			Columns: []string{user.OidcIdentitiesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(oidcidentity.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.ProjectUsersIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   user.ProjectUsersTable,
-			Columns: []string{user.ProjectUsersColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(userproject.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.UserRolesIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   user.UserRolesTable,
-			Columns: []string{user.UserRolesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(userrole.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }
@@ -767,24 +521,6 @@ func (u *UserUpsert) SetIsOwner(v bool) *UserUpsert {
 // UpdateIsOwner sets the "is_owner" field to the value that was provided on create.
 func (u *UserUpsert) UpdateIsOwner() *UserUpsert {
 	u.SetExcluded(user.FieldIsOwner)
-	return u
-}
-
-// SetScopes sets the "scopes" field.
-func (u *UserUpsert) SetScopes(v []string) *UserUpsert {
-	u.Set(user.FieldScopes, v)
-	return u
-}
-
-// UpdateScopes sets the "scopes" field to the value that was provided on create.
-func (u *UserUpsert) UpdateScopes() *UserUpsert {
-	u.SetExcluded(user.FieldScopes)
-	return u
-}
-
-// ClearScopes clears the value of the "scopes" field.
-func (u *UserUpsert) ClearScopes() *UserUpsert {
-	u.SetNull(user.FieldScopes)
 	return u
 }
 
@@ -984,27 +720,6 @@ func (u *UserUpsertOne) SetIsOwner(v bool) *UserUpsertOne {
 func (u *UserUpsertOne) UpdateIsOwner() *UserUpsertOne {
 	return u.Update(func(s *UserUpsert) {
 		s.UpdateIsOwner()
-	})
-}
-
-// SetScopes sets the "scopes" field.
-func (u *UserUpsertOne) SetScopes(v []string) *UserUpsertOne {
-	return u.Update(func(s *UserUpsert) {
-		s.SetScopes(v)
-	})
-}
-
-// UpdateScopes sets the "scopes" field to the value that was provided on create.
-func (u *UserUpsertOne) UpdateScopes() *UserUpsertOne {
-	return u.Update(func(s *UserUpsert) {
-		s.UpdateScopes()
-	})
-}
-
-// ClearScopes clears the value of the "scopes" field.
-func (u *UserUpsertOne) ClearScopes() *UserUpsertOne {
-	return u.Update(func(s *UserUpsert) {
-		s.ClearScopes()
 	})
 }
 
@@ -1370,27 +1085,6 @@ func (u *UserUpsertBulk) SetIsOwner(v bool) *UserUpsertBulk {
 func (u *UserUpsertBulk) UpdateIsOwner() *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
 		s.UpdateIsOwner()
-	})
-}
-
-// SetScopes sets the "scopes" field.
-func (u *UserUpsertBulk) SetScopes(v []string) *UserUpsertBulk {
-	return u.Update(func(s *UserUpsert) {
-		s.SetScopes(v)
-	})
-}
-
-// UpdateScopes sets the "scopes" field to the value that was provided on create.
-func (u *UserUpsertBulk) UpdateScopes() *UserUpsertBulk {
-	return u.Update(func(s *UserUpsert) {
-		s.UpdateScopes()
-	})
-}
-
-// ClearScopes clears the value of the "scopes" field.
-func (u *UserUpsertBulk) ClearScopes() *UserUpsertBulk {
-	return u.Update(func(s *UserUpsert) {
-		s.ClearScopes()
 	})
 }
 

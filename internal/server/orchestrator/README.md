@@ -12,11 +12,11 @@ Client → Inbound Transformer → Unified Request Router → Outbound Transform
 This architecture provides:
 - Zero learning curve for OpenAI SDK users
 - Auto failover and load balancing across channels
-- Real-time tracing and per-project usage logs
+- Real-time tracing and global usage logs
 - Support for multiple API formats (OpenAI, Anthropic, Gemini, and custom variants)
 - Model-aware circuit breaking and auto-failover
 - Dynamic request body and header overrides with template support
-- Quota enforcement and prompt injection
+- Quota enforcement
 - Model access control via API key profiles
 - Channel selection with tag-based filtering
 - Native tool support for Anthropic and Google APIs
@@ -34,7 +34,6 @@ This architecture provides:
 - **`retry.go`** - Retry logic and error handling utilities
 - **`state.go`** - Orchestrator state management (PersistenceState)
 - **`performance.go`** - Performance monitoring and metrics
-- **`prompt.go`** - Prompt injection logic for projects and models
 - **`quota.go`** - API key quota enforcement middleware
 - **`override.go`** - Request body and header override middleware with template support
 - **`model_circuit_breaker.go`** - Circuit breaker tracker for specific models on channels
@@ -98,7 +97,6 @@ The load balancer uses partial sorting for efficient top-k candidate selection b
 - **`ChannelTraceProvider`** - Provides trace-related channel information
 - **`CandidateSelector`** - Interface for selecting channel model candidates
 - **`ConnectionTracker`** - Interface for tracking active connections per channel
-- **`PromptProvider`** - Supplies enabled prompts for injection
 - **`ModelCircuitBreakerProvider`** - Provides model-level circuit breaker statistics and weights
 
 ## Pipeline Architecture
@@ -111,7 +109,6 @@ The orchestrator uses a pipeline-based architecture with middleware support:
    - Model access control
    - Model mapping
    - Candidate selection (with API key profile and stream policy filtering)
-   - Prompt injection
    - Request persistence
 
 2. **Outbound Pipeline**:

@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { useTranslation } from 'react-i18next';
 
@@ -18,9 +19,10 @@ interface ChannelModelsListProps {
     models: ChannelModel[];
   }>;
   emptyMessage?: string;
+  renderModelAction?: (model: ChannelModel, channel: Channel) => ReactNode;
 }
 
-export function ChannelModelsList({ channels, emptyMessage }: ChannelModelsListProps) {
+export function ChannelModelsList({ channels, emptyMessage, renderModelAction }: ChannelModelsListProps) {
   const { t } = useTranslation();
 
   const getStatusColor = (status: string) => {
@@ -72,8 +74,9 @@ export function ChannelModelsList({ channels, emptyMessage }: ChannelModelsListP
           </div>
           <div className='space-y-1'>
             {conn.models.map((model) => (
-              <div key={model.requestModel} className='bg-muted rounded px-2 py-1 text-xs'>
-                {model.requestModel}
+              <div key={model.requestModel} className='bg-muted flex items-center justify-between gap-2 rounded px-2 py-1 text-xs'>
+                <span className='min-w-0 truncate'>{model.requestModel}</span>
+                {renderModelAction?.(model, conn.channel)}
               </div>
             ))}
           </div>

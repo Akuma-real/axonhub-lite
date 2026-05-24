@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/looplj/axonhub/internal/ent/predicate"
 )
 
@@ -68,11 +67,6 @@ func UpdatedAt(v time.Time) predicate.ChannelOverrideTemplate {
 // DeletedAt applies equality check predicate on the "deleted_at" field. It's identical to DeletedAtEQ.
 func DeletedAt(v int) predicate.ChannelOverrideTemplate {
 	return predicate.ChannelOverrideTemplate(sql.FieldEQ(FieldDeletedAt, v))
-}
-
-// UserID applies equality check predicate on the "user_id" field. It's identical to UserIDEQ.
-func UserID(v int) predicate.ChannelOverrideTemplate {
-	return predicate.ChannelOverrideTemplate(sql.FieldEQ(FieldUserID, v))
 }
 
 // Name applies equality check predicate on the "name" field. It's identical to NameEQ.
@@ -208,36 +202,6 @@ func DeletedAtLT(v int) predicate.ChannelOverrideTemplate {
 // DeletedAtLTE applies the LTE predicate on the "deleted_at" field.
 func DeletedAtLTE(v int) predicate.ChannelOverrideTemplate {
 	return predicate.ChannelOverrideTemplate(sql.FieldLTE(FieldDeletedAt, v))
-}
-
-// UserIDEQ applies the EQ predicate on the "user_id" field.
-func UserIDEQ(v int) predicate.ChannelOverrideTemplate {
-	return predicate.ChannelOverrideTemplate(sql.FieldEQ(FieldUserID, v))
-}
-
-// UserIDNEQ applies the NEQ predicate on the "user_id" field.
-func UserIDNEQ(v int) predicate.ChannelOverrideTemplate {
-	return predicate.ChannelOverrideTemplate(sql.FieldNEQ(FieldUserID, v))
-}
-
-// UserIDIn applies the In predicate on the "user_id" field.
-func UserIDIn(vs ...int) predicate.ChannelOverrideTemplate {
-	return predicate.ChannelOverrideTemplate(sql.FieldIn(FieldUserID, vs...))
-}
-
-// UserIDNotIn applies the NotIn predicate on the "user_id" field.
-func UserIDNotIn(vs ...int) predicate.ChannelOverrideTemplate {
-	return predicate.ChannelOverrideTemplate(sql.FieldNotIn(FieldUserID, vs...))
-}
-
-// UserIDIsNil applies the IsNil predicate on the "user_id" field.
-func UserIDIsNil() predicate.ChannelOverrideTemplate {
-	return predicate.ChannelOverrideTemplate(sql.FieldIsNull(FieldUserID))
-}
-
-// UserIDNotNil applies the NotNil predicate on the "user_id" field.
-func UserIDNotNil() predicate.ChannelOverrideTemplate {
-	return predicate.ChannelOverrideTemplate(sql.FieldNotNull(FieldUserID))
 }
 
 // NameEQ applies the EQ predicate on the "name" field.
@@ -463,29 +427,6 @@ func BodyOverrideOperationsIsNil() predicate.ChannelOverrideTemplate {
 // BodyOverrideOperationsNotNil applies the NotNil predicate on the "body_override_operations" field.
 func BodyOverrideOperationsNotNil() predicate.ChannelOverrideTemplate {
 	return predicate.ChannelOverrideTemplate(sql.FieldNotNull(FieldBodyOverrideOperations))
-}
-
-// HasUser applies the HasEdge predicate on the "user" edge.
-func HasUser() predicate.ChannelOverrideTemplate {
-	return predicate.ChannelOverrideTemplate(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, UserTable, UserColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasUserWith applies the HasEdge predicate on the "user" edge with a given conditions (other predicates).
-func HasUserWith(preds ...predicate.User) predicate.ChannelOverrideTemplate {
-	return predicate.ChannelOverrideTemplate(func(s *sql.Selector) {
-		step := newUserStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
 }
 
 // And groups predicates with the AND operator between them.

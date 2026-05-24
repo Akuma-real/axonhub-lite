@@ -13,7 +13,6 @@ import (
 	"github.com/looplj/axonhub/internal/authz"
 	"github.com/looplj/axonhub/internal/build"
 	"github.com/looplj/axonhub/internal/contexts"
-	"github.com/looplj/axonhub/internal/objects"
 	"github.com/looplj/axonhub/internal/scopes"
 	"github.com/looplj/axonhub/internal/server/biz"
 	"github.com/looplj/axonhub/internal/server/gc"
@@ -92,16 +91,6 @@ func (r *mutationResolver) UpdateSystemModelSettings(ctx context.Context, input 
 	return true, nil
 }
 
-// UpdateDefaultDataStorage is the resolver for the updateDefaultDataStorage field.
-func (r *mutationResolver) UpdateDefaultDataStorage(ctx context.Context, input UpdateDefaultDataStorageInput) (bool, error) {
-	err := r.systemService.SetDefaultDataStorageID(ctx, input.DataStorageID.ID)
-	if err != nil {
-		return false, fmt.Errorf("failed to update default data storage: %w", err)
-	}
-
-	return true, nil
-}
-
 // CompleteOnboarding is the resolver for the completeOnboarding field.
 func (r *mutationResolver) CompleteOnboarding(ctx context.Context, input CompleteOnboardingInput) (bool, error) {
 	err := r.systemService.CompleteOnboarding(ctx)
@@ -156,20 +145,6 @@ func (r *mutationResolver) UpdateSystemGeneralSettings(ctx context.Context, inpu
 	if err != nil {
 		return false, fmt.Errorf("failed to update general settings: %w", err)
 	}
-
-	r.backupService.Reschedule(ctx, r.scheduler)
-
-	return true, nil
-}
-
-// UpdateVideoStorageSettings is the resolver for the updateVideoStorageSettings field.
-func (r *mutationResolver) UpdateVideoStorageSettings(ctx context.Context, input biz.VideoStorageSettings) (bool, error) {
-	err := r.systemService.SetVideoStorageSettings(ctx, input)
-	if err != nil {
-		return false, fmt.Errorf("failed to update video storage settings: %w", err)
-	}
-
-	r.videoWorker.Reschedule(ctx, r.scheduler)
 
 	return true, nil
 }
@@ -372,23 +347,6 @@ func (r *queryResolver) SystemModelSettings(ctx context.Context) (*biz.SystemMod
 	return settings, nil
 }
 
-// DefaultDataStorageID is the resolver for the defaultDataStorageID field.
-func (r *queryResolver) DefaultDataStorageID(ctx context.Context) (*objects.GUID, error) {
-	id, err := r.systemService.DefaultDataStorageID(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get default data storage ID: %w", err)
-	}
-
-	if id == 0 {
-		return nil, nil
-	}
-
-	return &objects.GUID{
-		Type: "DataStorage",
-		ID:   id,
-	}, nil
-}
-
 // OnboardingInfo is the resolver for the onboardingInfo field.
 func (r *queryResolver) OnboardingInfo(ctx context.Context) (*OnboardingInfo, error) {
 	info, err := r.systemService.OnboardingInfo(ctx)
@@ -455,11 +413,6 @@ func (r *queryResolver) SystemChannelSettings(ctx context.Context) (*biz.SystemC
 // SystemGeneralSettings is the resolver for the systemGeneralSettings field.
 func (r *queryResolver) SystemGeneralSettings(ctx context.Context) (*biz.SystemGeneralSettings, error) {
 	return r.systemService.GeneralSettings(ctx)
-}
-
-// VideoStorageSettings is the resolver for the videoStorageSettings field.
-func (r *queryResolver) VideoStorageSettings(ctx context.Context) (*biz.VideoStorageSettings, error) {
-	return r.systemService.VideoStorageSettings(ctx)
 }
 
 // QuotaEnforcementSettings is the resolver for the quotaEnforcementSettings field.

@@ -16,15 +16,12 @@ import (
 
 	"github.com/looplj/axonhub/internal/authz"
 	"github.com/looplj/axonhub/internal/build"
-	"github.com/looplj/axonhub/internal/contexts"
 	"github.com/looplj/axonhub/internal/ent"
-	"github.com/looplj/axonhub/internal/ent/datastorage"
 	"github.com/looplj/axonhub/internal/ent/system"
 	"github.com/looplj/axonhub/internal/log"
 	"github.com/looplj/axonhub/internal/objects"
 	"github.com/looplj/axonhub/internal/pkg/xcache"
 	"github.com/looplj/axonhub/internal/pkg/xregexp"
-	"github.com/looplj/axonhub/internal/pkg/xtime"
 	"github.com/looplj/axonhub/llm/httpclient"
 )
 
@@ -63,10 +60,6 @@ const (
 	// The value is JSON-encoded WebhookNotifierConfig struct.
 	SystemKeyWebhookNotifierConfig = "webhook_notifier_config"
 
-	// SystemKeyDefaultDataStorage is the key used to store the default data storage ID.
-	// If not set, the primary data storage will be used.
-	SystemKeyDefaultDataStorage = "default_data_storage_id"
-
 	// SystemKeyOnboarded is the key used to store the onboarding status and version.
 	// The value is JSON-encoded OnboardingInfo struct.
 	SystemKeyOnboarded = "system_onboarded"
@@ -82,14 +75,6 @@ const (
 	// SystemKeyGeneralSettings is the key used to store general settings.
 	// The value is JSON-encoded SystemGeneralSettings struct.
 	SystemKeyGeneralSettings = "system_general_settings"
-
-	// SystemKeyAutoBackupSettings is the key used to store auto backup configuration.
-	// The value is JSON-encoded AutoBackupSettings struct.
-	SystemKeyAutoBackupSettings = "system_auto_backup_settings"
-
-	// SystemKeyVideoStorageSettings is the key used to store video storage settings.
-	// The value is JSON-encoded VideoStorageSettings struct.
-	SystemKeyVideoStorageSettings = "system_video_storage_settings"
 
 	// SystemKeyUserAgentPassThrough is the key used to store the user agent pass-through setting.
 	// When set to true, the system will pass through the original User-Agent header to upstream AI providers.
@@ -113,19 +98,6 @@ type SystemGeneralSettings struct {
 	// CurrencyCode is the code used for currency display (e.g., USD, RMB).
 	CurrencyCode string `json:"currency_code"`
 	Timezone     string `json:"timezone"`
-}
-
-// VideoStorageSettings represents system settings for persisting generated videos.
-// It is designed to store video artifacts outside the database (fs/s3/gcs/webdav).
-type VideoStorageSettings struct {
-	// Enabled controls whether to persist generated videos to external storage.
-	Enabled bool `json:"enabled"`
-	// DataStorageID is the target data storage ID for saving video files.
-	DataStorageID int `json:"data_storage_id"`
-	// ScanIntervalMinutes defines how often to scan for completed video requests.
-	ScanIntervalMinutes int `json:"scan_interval_minutes"`
-	// ScanLimit is the max number of requests processed per scan.
-	ScanLimit int `json:"scan_limit"`
 }
 
 // QuotaEnforcementMode defines how quota enforcement is applied.
@@ -195,51 +167,6 @@ type QuotaEnforcementSettings struct {
 	Enabled bool `json:"enabled"`
 	// Mode defines how quota is enforced.
 	Mode QuotaEnforcementMode `json:"mode"`
-}
-
-// BackupFrequency represents how often automatic backups should run.
-type BackupFrequency string
-
-const (
-	BackupFrequencyDaily   BackupFrequency = "daily"
-	BackupFrequencyWeekly  BackupFrequency = "weekly"
-	BackupFrequencyMonthly BackupFrequency = "monthly"
-)
-
-// AutoBackupSettings represents automatic backup configuration.
-type AutoBackupSettings struct {
-	// Enabled controls whether automatic backup is active
-	Enabled bool `json:"enabled"`
-	// Frequency defines how often backups are created
-	Frequency BackupFrequency `json:"frequency"`
-	// DataStorageID is the ID of the data storage to backup to
-	DataStorageID int `json:"data_storage_id"`
-	// BackupOptions defines what to include in the backup
-	IncludeChannels    bool `json:"include_channels"`
-	IncludeModels      bool `json:"include_models"`
-	IncludeAPIKeys     bool `json:"include_api_keys"`
-	IncludeModelPrices bool `json:"include_model_prices"`
-	IncludeUsageStats  bool `json:"include_usage_stats"`
-	// RetentionDays defines how many days to keep backups (0 = keep all)
-	RetentionDays int `json:"retention_days"`
-	// LastBackupAt is the timestamp of the last successful backup
-	LastBackupAt *time.Time `json:"last_backup_at,omitempty"`
-	// LastBackupError is the error message from the last backup attempt (if any)
-	LastBackupError string `json:"last_backup_error,omitempty"`
-}
-
-type autoBackupSettingsJSON struct {
-	Enabled            bool            `json:"enabled"`
-	Frequency          BackupFrequency `json:"frequency"`
-	DataStorageID      int             `json:"data_storage_id"`
-	IncludeChannels    bool            `json:"include_channels"`
-	IncludeModels      bool            `json:"include_models"`
-	IncludeAPIKeys     bool            `json:"include_api_keys"`
-	IncludeModelPrices bool            `json:"include_model_prices"`
-	IncludeUsageStats  *bool           `json:"include_usage_stats"`
-	RetentionDays      int             `json:"retention_days"`
-	LastBackupAt       *time.Time      `json:"last_backup_at,omitempty"`
-	LastBackupError    string          `json:"last_backup_error,omitempty"`
 }
 
 // StoragePolicy represents the storage policy configuration.
@@ -671,29 +598,12 @@ func (s *SystemService) Initialize(ctx context.Context, params *InitializeSystem
 		SetLastName(params.OwnerLastName).
 		SetPreferLanguage(preferLanguage).
 		SetIsOwner(true).
-		SetScopes([]string{"*"}). // Give owner all scopes
 		Save(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to create owner user: %w", err)
 	}
 
 	log.Info(ctx, "created owner user", zap.Int("user_id", user.ID))
-
-	// Set user in context for project creation
-	ctx = contexts.WithUser(ctx, user)
-	// Create default project and assign owner
-	projectService := NewProjectService(ProjectServiceParams{})
-	projectInput := ent.CreateProjectInput{
-		Name:        "Default",
-		Description: lo.ToPtr("Default project"),
-	}
-
-	_, err = projectService.CreateProject(ctx, projectInput)
-	if err != nil {
-		return fmt.Errorf("failed to create default project: %w", err)
-	}
-
-	log.Info(ctx, "created default project", zap.String("slug", "default"))
 
 	// Set secret key.
 	err = s.setSystemValue(ctx, SystemKeySecretKey, secretKey)
@@ -706,27 +616,6 @@ func (s *SystemService) Initialize(ctx context.Context, params *InitializeSystem
 	if err != nil {
 		return fmt.Errorf("failed to set brand name: %w", err)
 	}
-
-	// Create primary data storage
-	primaryDataStorage, err := tx.DataStorage.Create().
-		SetName("Primary").
-		SetDescription("Primary database storage").
-		SetPrimary(true).
-		SetType("database").
-		SetSettings(&objects.DataStorageSettings{}).
-		SetStatus("active").
-		Save(ctx)
-	if err != nil {
-		return fmt.Errorf("failed to create primary data storage: %w", err)
-	}
-
-	// Set default data storage ID.
-	err = s.SetDefaultDataStorageID(ctx, primaryDataStorage.ID)
-	if err != nil {
-		return fmt.Errorf("failed to set default data storage ID: %w", err)
-	}
-
-	log.Info(ctx, "created primary data storage", zap.Int("data_storage_id", primaryDataStorage.ID))
 
 	// Set initialized flag to true.
 	err = s.setSystemValue(ctx, SystemKeyInitialized, "true")
@@ -1265,147 +1154,6 @@ func (s *SystemService) SetGeneralSettings(ctx context.Context, settings SystemG
 	return nil
 }
 
-// DefaultDataStorageID retrieves the default data storage ID from system settings.
-// Returns 0 if not set.
-func (s *SystemService) DefaultDataStorageID(ctx context.Context) (int, error) {
-	value, err := s.getSystemValue(ctx, SystemKeyDefaultDataStorage)
-	if err != nil {
-		if ent.IsNotFound(err) {
-			return 0, nil
-		}
-
-		return 0, fmt.Errorf("failed to get default data storage ID: %w", err)
-	}
-
-	var id int
-	if _, err := fmt.Sscanf(value, "%d", &id); err != nil {
-		return 0, fmt.Errorf("failed to parse default data storage ID: %w", err)
-	}
-
-	return id, nil
-}
-
-// SetDefaultDataStorageID sets the default data storage ID.
-func (s *SystemService) SetDefaultDataStorageID(ctx context.Context, id int) error {
-	return s.setSystemValue(ctx, SystemKeyDefaultDataStorage, fmt.Sprintf("%d", id))
-}
-
-// AutoBackupSettings retrieves the auto backup settings configuration.
-func (s *SystemService) AutoBackupSettings(ctx context.Context) (*AutoBackupSettings, error) {
-	value, err := s.getSystemValue(ctx, SystemKeyAutoBackupSettings)
-	if err != nil {
-		if ent.IsNotFound(err) {
-			return lo.ToPtr(defaultAutoBackupSettings), nil
-		}
-
-		return nil, fmt.Errorf("failed to get auto backup settings: %w", err)
-	}
-
-	var stored autoBackupSettingsJSON
-	if err := json.Unmarshal([]byte(value), &stored); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal auto backup settings: %w", err)
-	}
-
-	includeUsageStats := defaultAutoBackupSettings.IncludeUsageStats
-	if stored.IncludeUsageStats != nil {
-		includeUsageStats = *stored.IncludeUsageStats
-	}
-
-	settings := AutoBackupSettings{
-		Enabled:            stored.Enabled,
-		Frequency:          stored.Frequency,
-		DataStorageID:      stored.DataStorageID,
-		IncludeChannels:    stored.IncludeChannels,
-		IncludeModels:      stored.IncludeModels,
-		IncludeAPIKeys:     stored.IncludeAPIKeys,
-		IncludeModelPrices: stored.IncludeModelPrices,
-		IncludeUsageStats:  includeUsageStats,
-		RetentionDays:      stored.RetentionDays,
-		LastBackupAt:       stored.LastBackupAt,
-		LastBackupError:    stored.LastBackupError,
-	}
-
-	return &settings, nil
-}
-
-// SetAutoBackupSettings sets the auto backup settings configuration.
-func (s *SystemService) SetAutoBackupSettings(ctx context.Context, settings AutoBackupSettings) error {
-	jsonBytes, err := json.Marshal(settings)
-	if err != nil {
-		return fmt.Errorf("failed to marshal auto backup settings: %w", err)
-	}
-
-	err = s.setSystemValue(ctx, SystemKeyAutoBackupSettings, string(jsonBytes))
-	if err != nil {
-		return fmt.Errorf("failed to set auto backup settings: %w", err)
-	}
-
-	return nil
-}
-
-// VideoStorageSettings retrieves the video storage settings configuration.
-func (s *SystemService) VideoStorageSettings(ctx context.Context) (*VideoStorageSettings, error) {
-	value, err := s.getSystemValue(ctx, SystemKeyVideoStorageSettings)
-	if err != nil {
-		if ent.IsNotFound(err) {
-			return lo.ToPtr(defaultVideoStorageSettings), nil
-		}
-
-		return nil, fmt.Errorf("failed to get video storage settings: %w", err)
-	}
-
-	var settings VideoStorageSettings
-	if err := json.Unmarshal([]byte(value), &settings); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal video storage settings: %w", err)
-	}
-
-	if settings.ScanIntervalMinutes <= 0 {
-		settings.ScanIntervalMinutes = defaultVideoStorageSettings.ScanIntervalMinutes
-	}
-	if settings.ScanLimit <= 0 {
-		settings.ScanLimit = defaultVideoStorageSettings.ScanLimit
-	}
-
-	return &settings, nil
-}
-
-// SetVideoStorageSettings sets the video storage settings configuration.
-func (s *SystemService) SetVideoStorageSettings(ctx context.Context, settings VideoStorageSettings) error {
-	if settings.ScanIntervalMinutes <= 0 {
-		settings.ScanIntervalMinutes = defaultVideoStorageSettings.ScanIntervalMinutes
-	}
-	if settings.ScanLimit <= 0 {
-		settings.ScanLimit = defaultVideoStorageSettings.ScanLimit
-	}
-
-	if settings.Enabled {
-		if settings.DataStorageID == 0 {
-			return fmt.Errorf("data_storage_id is required when video storage is enabled")
-		}
-
-		ds, err := s.entFromContext(ctx).DataStorage.Get(ctx, settings.DataStorageID)
-		if err != nil {
-			return fmt.Errorf("failed to get data storage: %w", err)
-		}
-
-		if ds.Primary || ds.Type == datastorage.TypeDatabase {
-			return fmt.Errorf("video storage must use a non-database data storage")
-		}
-	}
-
-	jsonBytes, err := json.Marshal(settings)
-	if err != nil {
-		return fmt.Errorf("failed to marshal video storage settings: %w", err)
-	}
-
-	err = s.setSystemValue(ctx, SystemKeyVideoStorageSettings, string(jsonBytes))
-	if err != nil {
-		return fmt.Errorf("failed to set video storage settings: %w", err)
-	}
-
-	return nil
-}
-
 // UserAgentPassThrough retrieves the user agent pass-through setting.
 // When enabled, the original User-Agent header from the client request is passed through to upstream AI providers.
 func (s *SystemService) UserAgentPassThrough(ctx context.Context) (bool, error) {
@@ -1509,17 +1257,4 @@ func (s *SystemService) SetQuotaEnforcementSettings(ctx context.Context, setting
 	}
 
 	return s.setSystemValue(ctx, SystemKeyQuotaEnforcementSettings, string(jsonBytes))
-}
-
-// UpdateAutoBackupLastRun updates the last backup timestamp and error status.
-func (s *SystemService) UpdateAutoBackupLastRun(ctx context.Context, lastError string) error {
-	settings, err := s.AutoBackupSettings(ctx)
-	if err != nil {
-		return err
-	}
-
-	settings.LastBackupAt = lo.ToPtr(xtime.UTCNow())
-	settings.LastBackupError = lastError
-
-	return s.SetAutoBackupSettings(ctx, *settings)
 }

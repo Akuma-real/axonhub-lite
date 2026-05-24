@@ -70,16 +70,6 @@ func DeletedAt(v int) predicate.APIKey {
 	return predicate.APIKey(sql.FieldEQ(FieldDeletedAt, v))
 }
 
-// UserID applies equality check predicate on the "user_id" field. It's identical to UserIDEQ.
-func UserID(v int) predicate.APIKey {
-	return predicate.APIKey(sql.FieldEQ(FieldUserID, v))
-}
-
-// ProjectID applies equality check predicate on the "project_id" field. It's identical to ProjectIDEQ.
-func ProjectID(v int) predicate.APIKey {
-	return predicate.APIKey(sql.FieldEQ(FieldProjectID, v))
-}
-
 // Key applies equality check predicate on the "key" field. It's identical to KeyEQ.
 func Key(v string) predicate.APIKey {
 	return predicate.APIKey(sql.FieldEQ(FieldKey, v))
@@ -208,56 +198,6 @@ func DeletedAtLT(v int) predicate.APIKey {
 // DeletedAtLTE applies the LTE predicate on the "deleted_at" field.
 func DeletedAtLTE(v int) predicate.APIKey {
 	return predicate.APIKey(sql.FieldLTE(FieldDeletedAt, v))
-}
-
-// UserIDEQ applies the EQ predicate on the "user_id" field.
-func UserIDEQ(v int) predicate.APIKey {
-	return predicate.APIKey(sql.FieldEQ(FieldUserID, v))
-}
-
-// UserIDNEQ applies the NEQ predicate on the "user_id" field.
-func UserIDNEQ(v int) predicate.APIKey {
-	return predicate.APIKey(sql.FieldNEQ(FieldUserID, v))
-}
-
-// UserIDIn applies the In predicate on the "user_id" field.
-func UserIDIn(vs ...int) predicate.APIKey {
-	return predicate.APIKey(sql.FieldIn(FieldUserID, vs...))
-}
-
-// UserIDNotIn applies the NotIn predicate on the "user_id" field.
-func UserIDNotIn(vs ...int) predicate.APIKey {
-	return predicate.APIKey(sql.FieldNotIn(FieldUserID, vs...))
-}
-
-// UserIDIsNil applies the IsNil predicate on the "user_id" field.
-func UserIDIsNil() predicate.APIKey {
-	return predicate.APIKey(sql.FieldIsNull(FieldUserID))
-}
-
-// UserIDNotNil applies the NotNil predicate on the "user_id" field.
-func UserIDNotNil() predicate.APIKey {
-	return predicate.APIKey(sql.FieldNotNull(FieldUserID))
-}
-
-// ProjectIDEQ applies the EQ predicate on the "project_id" field.
-func ProjectIDEQ(v int) predicate.APIKey {
-	return predicate.APIKey(sql.FieldEQ(FieldProjectID, v))
-}
-
-// ProjectIDNEQ applies the NEQ predicate on the "project_id" field.
-func ProjectIDNEQ(v int) predicate.APIKey {
-	return predicate.APIKey(sql.FieldNEQ(FieldProjectID, v))
-}
-
-// ProjectIDIn applies the In predicate on the "project_id" field.
-func ProjectIDIn(vs ...int) predicate.APIKey {
-	return predicate.APIKey(sql.FieldIn(FieldProjectID, vs...))
-}
-
-// ProjectIDNotIn applies the NotIn predicate on the "project_id" field.
-func ProjectIDNotIn(vs ...int) predicate.APIKey {
-	return predicate.APIKey(sql.FieldNotIn(FieldProjectID, vs...))
 }
 
 // KeyEQ applies the EQ predicate on the "key" field.
@@ -390,26 +330,6 @@ func NameContainsFold(v string) predicate.APIKey {
 	return predicate.APIKey(sql.FieldContainsFold(FieldName, v))
 }
 
-// TypeEQ applies the EQ predicate on the "type" field.
-func TypeEQ(v Type) predicate.APIKey {
-	return predicate.APIKey(sql.FieldEQ(FieldType, v))
-}
-
-// TypeNEQ applies the NEQ predicate on the "type" field.
-func TypeNEQ(v Type) predicate.APIKey {
-	return predicate.APIKey(sql.FieldNEQ(FieldType, v))
-}
-
-// TypeIn applies the In predicate on the "type" field.
-func TypeIn(vs ...Type) predicate.APIKey {
-	return predicate.APIKey(sql.FieldIn(FieldType, vs...))
-}
-
-// TypeNotIn applies the NotIn predicate on the "type" field.
-func TypeNotIn(vs ...Type) predicate.APIKey {
-	return predicate.APIKey(sql.FieldNotIn(FieldType, vs...))
-}
-
 // StatusEQ applies the EQ predicate on the "status" field.
 func StatusEQ(v Status) predicate.APIKey {
 	return predicate.APIKey(sql.FieldEQ(FieldStatus, v))
@@ -430,16 +350,6 @@ func StatusNotIn(vs ...Status) predicate.APIKey {
 	return predicate.APIKey(sql.FieldNotIn(FieldStatus, vs...))
 }
 
-// ScopesIsNil applies the IsNil predicate on the "scopes" field.
-func ScopesIsNil() predicate.APIKey {
-	return predicate.APIKey(sql.FieldIsNull(FieldScopes))
-}
-
-// ScopesNotNil applies the NotNil predicate on the "scopes" field.
-func ScopesNotNil() predicate.APIKey {
-	return predicate.APIKey(sql.FieldNotNull(FieldScopes))
-}
-
 // ProfilesIsNil applies the IsNil predicate on the "profiles" field.
 func ProfilesIsNil() predicate.APIKey {
 	return predicate.APIKey(sql.FieldIsNull(FieldProfiles))
@@ -448,52 +358,6 @@ func ProfilesIsNil() predicate.APIKey {
 // ProfilesNotNil applies the NotNil predicate on the "profiles" field.
 func ProfilesNotNil() predicate.APIKey {
 	return predicate.APIKey(sql.FieldNotNull(FieldProfiles))
-}
-
-// HasUser applies the HasEdge predicate on the "user" edge.
-func HasUser() predicate.APIKey {
-	return predicate.APIKey(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, UserTable, UserColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasUserWith applies the HasEdge predicate on the "user" edge with a given conditions (other predicates).
-func HasUserWith(preds ...predicate.User) predicate.APIKey {
-	return predicate.APIKey(func(s *sql.Selector) {
-		step := newUserStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
-// HasProject applies the HasEdge predicate on the "project" edge.
-func HasProject() predicate.APIKey {
-	return predicate.APIKey(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, ProjectTable, ProjectColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasProjectWith applies the HasEdge predicate on the "project" edge with a given conditions (other predicates).
-func HasProjectWith(preds ...predicate.Project) predicate.APIKey {
-	return predicate.APIKey(func(s *sql.Selector) {
-		step := newProjectStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
 }
 
 // HasRequests applies the HasEdge predicate on the "requests" edge.

@@ -19,8 +19,6 @@ type JinaHandlersParams struct {
 	RequestService  *biz.RequestService
 	SystemService   *biz.SystemService
 	UsageLogService *biz.UsageLogService
-	PromptService   *biz.PromptService
-	PromptProtectionRuleService *biz.PromptProtectionRuleService
 	QuotaService    *biz.QuotaService
 	HttpClient      *httpclient.HttpClient
 	LiveStreamRegistry *biz.LiveStreamRegistry
@@ -39,9 +37,7 @@ func NewJinaHandlers(params JinaHandlersParams) *JinaHandlers {
 				jina.NewRerankInboundTransformer(),
 				params.SystemService,
 				params.UsageLogService,
-				params.PromptService,
 				params.QuotaService,
-				params.PromptProtectionRuleService,
 				params.LiveStreamRegistry,
 				params.ChannelLimiterManager,
 				params.ProviderQuotaStatusProvider,
@@ -56,9 +52,7 @@ func NewJinaHandlers(params JinaHandlersParams) *JinaHandlers {
 				jina.NewEmbeddingInboundTransformer(),
 				params.SystemService,
 				params.UsageLogService,
-				params.PromptService,
 				params.QuotaService,
-				params.PromptProtectionRuleService,
 				params.LiveStreamRegistry,
 				params.ChannelLimiterManager,
 				params.ProviderQuotaStatusProvider,

@@ -24,8 +24,6 @@ type GeminiHandlersParams struct {
 	RequestService  *biz.RequestService
 	SystemService   *biz.SystemService
 	UsageLogService *biz.UsageLogService
-	PromptService   *biz.PromptService
-	PromptProtectionRuleService *biz.PromptProtectionRuleService
 	QuotaService    *biz.QuotaService
 	HttpClient      *httpclient.HttpClient
 	LiveStreamRegistry *biz.LiveStreamRegistry
@@ -50,9 +48,7 @@ func NewGeminiHandlers(params GeminiHandlersParams) *GeminiHandlers {
 				gemini.NewInboundTransformer(),
 				params.SystemService,
 				params.UsageLogService,
-				params.PromptService,
 				params.QuotaService,
-				params.PromptProtectionRuleService,
 				params.LiveStreamRegistry,
 				params.ChannelLimiterManager,
 				params.ProviderQuotaStatusProvider,

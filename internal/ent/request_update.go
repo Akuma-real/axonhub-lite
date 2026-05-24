@@ -229,87 +229,6 @@ func (_u *RequestUpdate) ClearMetricsReasoningDurationMs() *RequestUpdate {
 	return _u
 }
 
-// SetContentSaved sets the "content_saved" field.
-func (_u *RequestUpdate) SetContentSaved(v bool) *RequestUpdate {
-	_u.mutation.SetContentSaved(v)
-	return _u
-}
-
-// SetNillableContentSaved sets the "content_saved" field if the given value is not nil.
-func (_u *RequestUpdate) SetNillableContentSaved(v *bool) *RequestUpdate {
-	if v != nil {
-		_u.SetContentSaved(*v)
-	}
-	return _u
-}
-
-// SetContentStorageID sets the "content_storage_id" field.
-func (_u *RequestUpdate) SetContentStorageID(v int) *RequestUpdate {
-	_u.mutation.ResetContentStorageID()
-	_u.mutation.SetContentStorageID(v)
-	return _u
-}
-
-// SetNillableContentStorageID sets the "content_storage_id" field if the given value is not nil.
-func (_u *RequestUpdate) SetNillableContentStorageID(v *int) *RequestUpdate {
-	if v != nil {
-		_u.SetContentStorageID(*v)
-	}
-	return _u
-}
-
-// AddContentStorageID adds value to the "content_storage_id" field.
-func (_u *RequestUpdate) AddContentStorageID(v int) *RequestUpdate {
-	_u.mutation.AddContentStorageID(v)
-	return _u
-}
-
-// ClearContentStorageID clears the value of the "content_storage_id" field.
-func (_u *RequestUpdate) ClearContentStorageID() *RequestUpdate {
-	_u.mutation.ClearContentStorageID()
-	return _u
-}
-
-// SetContentStorageKey sets the "content_storage_key" field.
-func (_u *RequestUpdate) SetContentStorageKey(v string) *RequestUpdate {
-	_u.mutation.SetContentStorageKey(v)
-	return _u
-}
-
-// SetNillableContentStorageKey sets the "content_storage_key" field if the given value is not nil.
-func (_u *RequestUpdate) SetNillableContentStorageKey(v *string) *RequestUpdate {
-	if v != nil {
-		_u.SetContentStorageKey(*v)
-	}
-	return _u
-}
-
-// ClearContentStorageKey clears the value of the "content_storage_key" field.
-func (_u *RequestUpdate) ClearContentStorageKey() *RequestUpdate {
-	_u.mutation.ClearContentStorageKey()
-	return _u
-}
-
-// SetContentSavedAt sets the "content_saved_at" field.
-func (_u *RequestUpdate) SetContentSavedAt(v time.Time) *RequestUpdate {
-	_u.mutation.SetContentSavedAt(v)
-	return _u
-}
-
-// SetNillableContentSavedAt sets the "content_saved_at" field if the given value is not nil.
-func (_u *RequestUpdate) SetNillableContentSavedAt(v *time.Time) *RequestUpdate {
-	if v != nil {
-		_u.SetContentSavedAt(*v)
-	}
-	return _u
-}
-
-// ClearContentSavedAt clears the value of the "content_saved_at" field.
-func (_u *RequestUpdate) ClearContentSavedAt() *RequestUpdate {
-	_u.mutation.ClearContentSavedAt()
-	return _u
-}
-
 // AddExecutionIDs adds the "executions" edge to the RequestExecution entity by IDs.
 func (_u *RequestUpdate) AddExecutionIDs(ids ...int) *RequestUpdate {
 	_u.mutation.AddExecutionIDs(ids...)
@@ -452,9 +371,6 @@ func (_u *RequestUpdate) check() error {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Request.status": %w`, err)}
 		}
 	}
-	if _u.mutation.ProjectCleared() && len(_u.mutation.ProjectIDs()) > 0 {
-		return errors.New(`ent: clearing a required unique edge "Request.project"`)
-	}
 	return nil
 }
 
@@ -550,30 +466,6 @@ func (_u *RequestUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if _u.mutation.MetricsReasoningDurationMsCleared() {
 		_spec.ClearField(request.FieldMetricsReasoningDurationMs, field.TypeInt64)
-	}
-	if value, ok := _u.mutation.ContentSaved(); ok {
-		_spec.SetField(request.FieldContentSaved, field.TypeBool, value)
-	}
-	if value, ok := _u.mutation.ContentStorageID(); ok {
-		_spec.SetField(request.FieldContentStorageID, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedContentStorageID(); ok {
-		_spec.AddField(request.FieldContentStorageID, field.TypeInt, value)
-	}
-	if _u.mutation.ContentStorageIDCleared() {
-		_spec.ClearField(request.FieldContentStorageID, field.TypeInt)
-	}
-	if value, ok := _u.mutation.ContentStorageKey(); ok {
-		_spec.SetField(request.FieldContentStorageKey, field.TypeString, value)
-	}
-	if _u.mutation.ContentStorageKeyCleared() {
-		_spec.ClearField(request.FieldContentStorageKey, field.TypeString)
-	}
-	if value, ok := _u.mutation.ContentSavedAt(); ok {
-		_spec.SetField(request.FieldContentSavedAt, field.TypeTime, value)
-	}
-	if _u.mutation.ContentSavedAtCleared() {
-		_spec.ClearField(request.FieldContentSavedAt, field.TypeTime)
 	}
 	if _u.mutation.ExecutionsCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -911,87 +803,6 @@ func (_u *RequestUpdateOne) ClearMetricsReasoningDurationMs() *RequestUpdateOne 
 	return _u
 }
 
-// SetContentSaved sets the "content_saved" field.
-func (_u *RequestUpdateOne) SetContentSaved(v bool) *RequestUpdateOne {
-	_u.mutation.SetContentSaved(v)
-	return _u
-}
-
-// SetNillableContentSaved sets the "content_saved" field if the given value is not nil.
-func (_u *RequestUpdateOne) SetNillableContentSaved(v *bool) *RequestUpdateOne {
-	if v != nil {
-		_u.SetContentSaved(*v)
-	}
-	return _u
-}
-
-// SetContentStorageID sets the "content_storage_id" field.
-func (_u *RequestUpdateOne) SetContentStorageID(v int) *RequestUpdateOne {
-	_u.mutation.ResetContentStorageID()
-	_u.mutation.SetContentStorageID(v)
-	return _u
-}
-
-// SetNillableContentStorageID sets the "content_storage_id" field if the given value is not nil.
-func (_u *RequestUpdateOne) SetNillableContentStorageID(v *int) *RequestUpdateOne {
-	if v != nil {
-		_u.SetContentStorageID(*v)
-	}
-	return _u
-}
-
-// AddContentStorageID adds value to the "content_storage_id" field.
-func (_u *RequestUpdateOne) AddContentStorageID(v int) *RequestUpdateOne {
-	_u.mutation.AddContentStorageID(v)
-	return _u
-}
-
-// ClearContentStorageID clears the value of the "content_storage_id" field.
-func (_u *RequestUpdateOne) ClearContentStorageID() *RequestUpdateOne {
-	_u.mutation.ClearContentStorageID()
-	return _u
-}
-
-// SetContentStorageKey sets the "content_storage_key" field.
-func (_u *RequestUpdateOne) SetContentStorageKey(v string) *RequestUpdateOne {
-	_u.mutation.SetContentStorageKey(v)
-	return _u
-}
-
-// SetNillableContentStorageKey sets the "content_storage_key" field if the given value is not nil.
-func (_u *RequestUpdateOne) SetNillableContentStorageKey(v *string) *RequestUpdateOne {
-	if v != nil {
-		_u.SetContentStorageKey(*v)
-	}
-	return _u
-}
-
-// ClearContentStorageKey clears the value of the "content_storage_key" field.
-func (_u *RequestUpdateOne) ClearContentStorageKey() *RequestUpdateOne {
-	_u.mutation.ClearContentStorageKey()
-	return _u
-}
-
-// SetContentSavedAt sets the "content_saved_at" field.
-func (_u *RequestUpdateOne) SetContentSavedAt(v time.Time) *RequestUpdateOne {
-	_u.mutation.SetContentSavedAt(v)
-	return _u
-}
-
-// SetNillableContentSavedAt sets the "content_saved_at" field if the given value is not nil.
-func (_u *RequestUpdateOne) SetNillableContentSavedAt(v *time.Time) *RequestUpdateOne {
-	if v != nil {
-		_u.SetContentSavedAt(*v)
-	}
-	return _u
-}
-
-// ClearContentSavedAt clears the value of the "content_saved_at" field.
-func (_u *RequestUpdateOne) ClearContentSavedAt() *RequestUpdateOne {
-	_u.mutation.ClearContentSavedAt()
-	return _u
-}
-
 // AddExecutionIDs adds the "executions" edge to the RequestExecution entity by IDs.
 func (_u *RequestUpdateOne) AddExecutionIDs(ids ...int) *RequestUpdateOne {
 	_u.mutation.AddExecutionIDs(ids...)
@@ -1147,9 +958,6 @@ func (_u *RequestUpdateOne) check() error {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Request.status": %w`, err)}
 		}
 	}
-	if _u.mutation.ProjectCleared() && len(_u.mutation.ProjectIDs()) > 0 {
-		return errors.New(`ent: clearing a required unique edge "Request.project"`)
-	}
 	return nil
 }
 
@@ -1262,30 +1070,6 @@ func (_u *RequestUpdateOne) sqlSave(ctx context.Context) (_node *Request, err er
 	}
 	if _u.mutation.MetricsReasoningDurationMsCleared() {
 		_spec.ClearField(request.FieldMetricsReasoningDurationMs, field.TypeInt64)
-	}
-	if value, ok := _u.mutation.ContentSaved(); ok {
-		_spec.SetField(request.FieldContentSaved, field.TypeBool, value)
-	}
-	if value, ok := _u.mutation.ContentStorageID(); ok {
-		_spec.SetField(request.FieldContentStorageID, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedContentStorageID(); ok {
-		_spec.AddField(request.FieldContentStorageID, field.TypeInt, value)
-	}
-	if _u.mutation.ContentStorageIDCleared() {
-		_spec.ClearField(request.FieldContentStorageID, field.TypeInt)
-	}
-	if value, ok := _u.mutation.ContentStorageKey(); ok {
-		_spec.SetField(request.FieldContentStorageKey, field.TypeString, value)
-	}
-	if _u.mutation.ContentStorageKeyCleared() {
-		_spec.ClearField(request.FieldContentStorageKey, field.TypeString)
-	}
-	if value, ok := _u.mutation.ContentSavedAt(); ok {
-		_spec.SetField(request.FieldContentSavedAt, field.TypeTime, value)
-	}
-	if _u.mutation.ContentSavedAtCleared() {
-		_spec.ClearField(request.FieldContentSavedAt, field.TypeTime)
 	}
 	if _u.mutation.ExecutionsCleared() {
 		edge := &sqlgraph.EdgeSpec{

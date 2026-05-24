@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { DataTableFacetedFilter } from '@/components/data-table-faceted-filter';
 import { useAllChannelTags } from '../data/channels';
-import { CHANNEL_CONFIGS } from '../data/config_channels';
 import { DataTableViewOptions } from './data-table-view-options';
 
 interface DataTableToolbarProps<TData> {
@@ -22,8 +21,6 @@ interface DataTableToolbarProps<TData> {
 export function DataTableToolbar<TData>({
   table,
   isFiltered: externalIsFiltered,
-  selectedCount: externalSelectedCount,
-  selectedTypeTab = 'all',
   showErrorOnly,
   onExitErrorOnlyMode,
 }: DataTableToolbarProps<TData>) {
@@ -62,16 +59,6 @@ export function DataTableToolbar<TData>({
       label: model.id,
     }));
   }, [modelsData]);
-
-  // Generate channel types from CHANNEL_CONFIGS
-  const channelTypes = useMemo(
-    () =>
-      Object.values(CHANNEL_CONFIGS).map((config) => ({
-        value: config.channelType,
-        label: t(`channels.types.${config.channelType}`),
-      })),
-    [t]
-  );
 
   const channelStatuses = useMemo(
     () => [

@@ -1,10 +1,5 @@
 import { z } from 'zod';
 import { pageInfoSchema } from '@/gql/pagination';
-import { userSchema } from '@/features/users/data/schema';
-
-// API Key Type
-export const apiKeyTypeSchema = z.enum(['user', 'service_account', 'noauth']);
-export type ApiKeyType = z.infer<typeof apiKeyTypeSchema>;
 
 // API Key Status
 export const apiKeyStatusSchema = z.enum(['enabled', 'disabled', 'archived']);
@@ -26,12 +21,9 @@ export const apiKeySchema = z.object({
   id: z.string(),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
-  user: userSchema.partial().optional().nullable(),
   key: z.string(),
   name: z.string(),
-  type: apiKeyTypeSchema,
   status: apiKeyStatusSchema,
-  scopes: z.array(z.string()).optional().nullable(),
   // Optional profiles for detailed view (may be omitted in list queries)
   profiles: z
     .object({
@@ -101,17 +93,11 @@ export type ApiKeyConnection = z.infer<typeof apiKeyConnectionSchema>;
 export const createApiKeyInputSchemaFactory = (t: (key: string) => string) =>
   z.object({
     name: z.string().min(1, t('apikeys.validation.nameRequired')),
-    type: apiKeyTypeSchema.optional(),
-    scopes: z.array(z.string()).optional(),
-    projectID: z.number().optional(),
   });
 
 // Default schema for backward compatibility
 export const createApiKeyInputSchema = z.object({
   name: z.string().min(1, 'Name is required'),
-  type: apiKeyTypeSchema.optional(),
-  scopes: z.array(z.string()).optional(),
-  projectID: z.number().optional(),
 });
 export type CreateApiKeyInput = z.infer<typeof createApiKeyInputSchema>;
 
@@ -119,13 +105,11 @@ export type CreateApiKeyInput = z.infer<typeof createApiKeyInputSchema>;
 export const updateApiKeyInputSchemaFactory = (t: (key: string) => string) =>
   z.object({
     name: z.string().min(1, t('apikeys.validation.nameRequired')).optional(),
-    scopes: z.array(z.string()).optional(),
   });
 
 // Default schema for backward compatibility
 export const updateApiKeyInputSchema = z.object({
   name: z.string().min(1, 'Name is required').optional(),
-  scopes: z.array(z.string()).optional(),
 });
 export type UpdateApiKeyInput = z.infer<typeof updateApiKeyInputSchema>;
 
@@ -178,35 +162,6 @@ export const apiKeyProfilesSchema = z.object({
   profiles: z.array(apiKeyProfileSchema),
 });
 export type ApiKeyProfiles = z.infer<typeof apiKeyProfilesSchema>;
-
-// API Key Profile Template schema
-export const apiKeyProfileTemplateSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  description: z.string().default(''),
-  profile: apiKeyProfileSchema,
-  projectID: z.string(),
-  createdAt: z.string(),
-  updatedAt: z.string(),
-});
-export type ApiKeyProfileTemplate = z.infer<typeof apiKeyProfileTemplateSchema>;
-
-// Create API Key Profile Template Input schema
-export const createApiKeyProfileTemplateInputSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
-  description: z.string().optional(),
-  projectID: z.string(),
-  profile: apiKeyProfileSchema,
-});
-export type CreateApiKeyProfileTemplateInput = z.infer<typeof createApiKeyProfileTemplateInputSchema>;
-
-// Update API Key Profile Template Input schema
-export const updateApiKeyProfileTemplateInputSchema = z.object({
-  name: z.string().min(1, 'Name is required').optional(),
-  description: z.string().optional(),
-  profile: apiKeyProfileSchema.optional(),
-});
-export type UpdateApiKeyProfileTemplateInput = z.infer<typeof updateApiKeyProfileTemplateInputSchema>;
 
 // Update API Key Profiles Input schema - factory function for i18n support
 export const updateApiKeyProfilesInputSchemaFactory = (t: (key: string) => string) =>

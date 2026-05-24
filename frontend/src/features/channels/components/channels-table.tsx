@@ -234,10 +234,7 @@ export function ChannelsTable({
     manualFiltering: true, // Enable manual filtering for server-side filtering
   });
 
-  const filteredSelectedRows = useMemo(
-    () => table.getFilteredSelectedRowModel().rows,
-    [table.getState().rowSelection, table.getFilteredRowModel().rows]
-  );
+  const filteredSelectedRows = useMemo(() => table.getFilteredSelectedRowModel().rows, [table]);
 
   const getApiFormatLabel = useCallback(
     (apiFormat?: string) => {

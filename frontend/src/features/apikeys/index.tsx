@@ -4,7 +4,6 @@ import { useDebounce } from '@/hooks/use-debounce';
 import { usePaginationSearch } from '@/hooks/use-pagination-search';
 import { usePermissions } from '@/hooks/usePermissions';
 import { type DateTimeRangeValue } from '@/utils/date-range';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Header } from '@/components/layout/header';
 import { Main } from '@/components/layout/main';
 import { createColumns } from './components/apikeys-columns';
@@ -13,9 +12,6 @@ import { ApiKeysPrimaryButtons } from './components/apikeys-primary-buttons';
 import { ApiKeysTable } from './components/apikeys-table';
 import ApiKeysProvider from './context/apikeys-context';
 import { useApiKeys } from './data/apikeys';
-import { ApiKeyType } from './data/schema';
-
-type ApiKeyTabKey = ApiKeyType | 'all';
 
 function ApiKeysContent() {
   const { t } = useTranslation();
@@ -25,12 +21,8 @@ function ApiKeysContent() {
     pageSizeStorageKey: 'apikeys-table-page-size',
   });
 
-  const [activeTab, setActiveTab] = useState<ApiKeyTabKey>('all');
-
-  // Filter states - following the same pattern as roles and users
   const [searchFilter, setSearchFilter] = useState<string>('');
   const [statusFilter, setStatusFilter] = useState<string[]>([]);
-  const [userFilter, setUserFilter] = useState<string[]>([]);
   const [dateRange, setDateRange] = useState<DateTimeRangeValue | undefined>();
 
   const debouncedSearchFilter = useDebounce(searchFilter, 300);
@@ -47,21 +39,15 @@ function ApiKeysContent() {
       ];
     }
     
-    if (activeTab !== 'all') {
-      where.typeIn = [activeTab];
-    }
     if (statusFilter.length > 0) {
       where.statusIn = statusFilter;
     } else {
       // By default, exclude archived API keys when no status filter is applied
       where.statusIn = ['enabled', 'disabled'];
     }
-    if (userFilter.length > 0 && userFilter[0]) {
-      where.userID = userFilter[0]; // API expects single userID
-    }
-    
+
     // Add AND condition to combine OR search with other filters
-    if (where.or && (where.typeIn || where.statusIn || where.userID)) {
+    if (where.or && where.statusIn) {
       const orCondition = where.or;
       delete where.or;
       return {
@@ -90,7 +76,7 @@ function ApiKeysContent() {
   React.useEffect(() => {
     resetCursor();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedSearchFilter, activeTab, statusFilter, userFilter, dateRange]);
+  }, [debouncedSearchFilter, statusFilter, dateRange]);
 
   const handleNextPage = () => {
     if (data?.pageInfo?.hasNextPage && data?.pageInfo?.endCursor) {
@@ -111,7 +97,6 @@ function ApiKeysContent() {
   const handleResetFilters = () => {
     setSearchFilter('');
     setStatusFilter([]);
-    setUserFilter([]);
     setDateRange(undefined);
     resetCursor();
   };
@@ -120,20 +105,7 @@ function ApiKeysContent() {
 
   return (
     <div className='flex flex-1 flex-col'>
-      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as ApiKeyTabKey)} className='w-full'>
-        <TabsList className='shadow-soft border-border bg-background grid w-full grid-cols-3 rounded-2xl border'>
-          <TabsTrigger value='all' data-value='all'>
-            {t('apikeys.tabs.all')}
-          </TabsTrigger>
-          <TabsTrigger value='user' data-value='user'>
-            {t('apikeys.type.user')}
-          </TabsTrigger>
-          <TabsTrigger value='service_account' data-value='service_account'>
-            {t('apikeys.type.service_account')}
-          </TabsTrigger>
-        </TabsList>
-      </Tabs>
-      <div className='mt-6 flex-1'>
+      <div className='flex-1'>
         <ApiKeysTable
           data={tableData}
           loading={isLoading}
@@ -143,14 +115,12 @@ function ApiKeysContent() {
           totalCount={data?.totalCount}
           searchFilter={searchFilter}
           statusFilter={statusFilter}
-          userFilter={userFilter}
           dateRange={dateRange}
           onNextPage={handleNextPage}
           onPreviousPage={handlePreviousPage}
           onPageSizeChange={handlePageSizeChange}
           onSearchFilterChange={setSearchFilter}
           onStatusFilterChange={setStatusFilter}
-          onUserFilterChange={setUserFilter}
           onDateRangeChange={setDateRange}
           onResetFilters={handleResetFilters}
           canWrite={apiKeyPermissions.canWrite}

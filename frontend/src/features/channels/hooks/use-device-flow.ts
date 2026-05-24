@@ -74,7 +74,7 @@ export function useDeviceFlow(
   const [error, setError] = useState<string | null>(null);
   const [isComplete, setIsComplete] = useState(false);
 
-  const pollingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pollingTimeoutRef = useRef<number | null>(null);
   const currentIntervalRef = useRef<number>(5);
   const onSuccessRef = useRef(onSuccess);
 
@@ -89,33 +89,6 @@ export function useDeviceFlow(
   useEffect(() => {
     onSuccessRef.current = onSuccess;
   }, [onSuccess]);
-
-  const start = useCallback(async () => {
-    if (pollingTimeoutRef.current) {
-      clearTimeout(pollingTimeoutRef.current);
-      pollingTimeoutRef.current = null;
-    }
-
-    setIsPolling(true);
-    setError(null);
-
-    try {
-      const result: DeviceFlowStartResult = await copilotOAuthStart();
-
-      setUserCode(result.user_code);
-      setVerificationUri(result.verification_uri);
-      setSessionId(result.session_id);
-      setExpiresAt(Date.now() + result.expires_in * 1000);
-      setInterval(result.interval);
-      currentIntervalRef.current = result.interval;
-
-      poll(result.session_id, Date.now() + result.expires_in * 1000);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : String(err);
-      setError(errorMessage);
-      setIsPolling(false);
-    }
-  }, [t]);
 
   const poll = useCallback(
     async (sessionId: string, expiry: number) => {
@@ -165,6 +138,33 @@ export function useDeviceFlow(
     },
     [t, onSuccessRef]
   );
+
+  const start = useCallback(async () => {
+    if (pollingTimeoutRef.current) {
+      clearTimeout(pollingTimeoutRef.current);
+      pollingTimeoutRef.current = null;
+    }
+
+    setIsPolling(true);
+    setError(null);
+
+    try {
+      const result: DeviceFlowStartResult = await copilotOAuthStart();
+
+      setUserCode(result.user_code);
+      setVerificationUri(result.verification_uri);
+      setSessionId(result.session_id);
+      setExpiresAt(Date.now() + result.expires_in * 1000);
+      setInterval(result.interval);
+      currentIntervalRef.current = result.interval;
+
+      poll(result.session_id, Date.now() + result.expires_in * 1000);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      setError(errorMessage);
+      setIsPolling(false);
+    }
+  }, [poll]);
 
   const reset = useCallback(() => {
     if (pollingTimeoutRef.current) {

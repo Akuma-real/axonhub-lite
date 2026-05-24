@@ -20,10 +20,12 @@ const API_FORMAT_PATHS: Record<ApiFormat, string> = {
   'openai/embeddings': '/v1/embeddings',
   'anthropic/messages': '/v1/messages',
   'gemini/contents': '/v1beta/models/{model}:generateContent',
+  'gemini/embeddings': '/v1beta/models/{model}:embedContent',
   'aisdk/text': '/api/chat',
   'aisdk/datastream': '/api/datastream',
   'jina/rerank': '/v1/rerank',
   'jina/embeddings': '/jina/v1/embeddings',
+  'ollama/chat': '/api/chat',
 };
 
 function getApiPath(apiFormat?: ApiFormat, body?: any, channelType?: ChannelType): string {
@@ -33,7 +35,7 @@ function getApiPath(apiFormat?: ApiFormat, body?: any, channelType?: ChannelType
 
   let path = API_FORMAT_PATHS[apiFormat] || '/v1/chat/completions';
 
-  if (apiFormat === 'gemini/contents' && body?.model) {
+  if ((apiFormat === 'gemini/contents' || apiFormat === 'gemini/embeddings') && body?.model) {
     if (channelType === 'gemini_vertex') {
       path = '/v1/publishers/google/models/{model}:generateContent';
     }

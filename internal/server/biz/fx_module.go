@@ -19,20 +19,13 @@ var Module = fx.Module("biz",
 	fx.Provide(NewVideoService),
 	fx.Provide(NewUserService),
 	fx.Provide(NewAPIKeyService),
-	fx.Provide(NewProjectService),
-	fx.Provide(NewRoleService),
 	fx.Provide(NewThreadService),
 	fx.Provide(NewTraceService),
-	fx.Provide(NewDataStorageService),
 	fx.Provide(NewChannelOverrideTemplateService),
 	fx.Provide(NewModelService),
 	fx.Provide(NewChannelProbeService),
-	fx.Provide(NewPromptService),
-	fx.Provide(NewPromptProtectionRuleService),
 	fx.Provide(NewQuotaService),
 	fx.Provide(NewProviderQuotaService),
-	fx.Provide(NewOIDCService),
-	fx.Provide(NewAPIKeyProfileTemplateService),
 	fx.Invoke(func(lc fx.Lifecycle, svc *APIKeyService) {
 		lc.Append(fx.Hook{
 			OnStop: func(ctx context.Context) error {
@@ -69,32 +62,10 @@ var Module = fx.Module("biz",
 			},
 		})
 	}),
-	fx.Invoke(func(lc fx.Lifecycle, svc *DataStorageService, s *scheduler.Scheduler) {
-		lc.Append(fx.Hook{
-			OnStart: func(ctx context.Context) error {
-				return svc.RegisterScheduledTasks(ctx, s)
-			},
-		})
-	}),
 	fx.Invoke(func(lc fx.Lifecycle, svc *ChannelProbeService, s *scheduler.Scheduler) {
 		lc.Append(fx.Hook{
 			OnStart: func(ctx context.Context) error {
 				return svc.RegisterScheduledTasks(ctx, s)
-			},
-		})
-	}),
-	fx.Invoke(func(lc fx.Lifecycle, svc *PromptService, s *scheduler.Scheduler) {
-		lc.Append(fx.Hook{
-			OnStart: func(ctx context.Context) error {
-				return svc.RegisterScheduledTasks(ctx, s)
-			},
-		})
-	}),
-	fx.Invoke(func(lc fx.Lifecycle, svc *PromptProtectionRuleService) {
-		lc.Append(fx.Hook{
-			OnStop: func(ctx context.Context) error {
-				svc.Stop()
-				return nil
 			},
 		})
 	}),

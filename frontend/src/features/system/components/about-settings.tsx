@@ -8,6 +8,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Skeleton } from '@/components/ui/skeleton';
 import { useSystemVersion, useCheckForUpdate } from '../data/system';
 
+const AXONHUB_LITE_REPO_URL = 'https://github.com/akuma-real/axonhub-lite';
+
 export function AboutSettings() {
   const { t } = useTranslation();
   const { data: version, isLoading: versionLoading } = useSystemVersion();
@@ -125,19 +127,19 @@ export function AboutSettings() {
             <h4 className='mb-4 text-sm font-medium'>{t('system.about.links.title')}</h4>
             <div className='flex flex-wrap gap-4'>
               <Button variant='outline' size='sm' asChild>
-                <a href='https://github.com/looplj/axonhub' target='_blank' rel='noopener noreferrer'>
+                <a href={AXONHUB_LITE_REPO_URL} target='_blank' rel='noopener noreferrer'>
                   GitHub
                   <ExternalLink className='ml-1 h-3 w-3' />
                 </a>
               </Button>
               <Button variant='outline' size='sm' asChild>
-                <a href='https://github.com/looplj/axonhub/releases' target='_blank' rel='noopener noreferrer'>
+                <a href={`${AXONHUB_LITE_REPO_URL}/releases`} target='_blank' rel='noopener noreferrer'>
                   {t('system.about.links.releases')}
                   <ExternalLink className='ml-1 h-3 w-3' />
                 </a>
               </Button>
               <Button variant='outline' size='sm' asChild>
-                <a href='https://github.com/looplj/axonhub/issues' target='_blank' rel='noopener noreferrer'>
+                <a href={`${AXONHUB_LITE_REPO_URL}/issues`} target='_blank' rel='noopener noreferrer'>
                   {t('system.about.links.issues')}
                   <ExternalLink className='ml-1 h-3 w-3' />
                 </a>

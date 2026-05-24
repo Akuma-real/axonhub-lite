@@ -3,7 +3,6 @@ package scopes
 import (
 	"context"
 
-	"github.com/looplj/axonhub/internal/contexts"
 	"github.com/looplj/axonhub/internal/ent"
 	"github.com/looplj/axonhub/internal/ent/privacy"
 )
@@ -64,14 +63,6 @@ func UserScopeQueryMutationRule(requiredScope ScopeSlug) privacy.QueryMutationRu
 }
 
 func UserHasScope(ctx context.Context, requiredScope ScopeSlug) bool {
-	user, ok := contexts.GetUser(ctx)
-	if !ok || user == nil {
-		return false
-	}
-
-	if userHasSystemScope(user, requiredScope) {
-		return true
-	}
-
-	return false
+	user, err := getUserFromContext(ctx)
+	return err == nil && userHasSystemScope(user, requiredScope)
 }

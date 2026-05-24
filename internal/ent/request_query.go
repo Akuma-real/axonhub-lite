@@ -15,9 +15,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/looplj/axonhub/internal/ent/apikey"
 	"github.com/looplj/axonhub/internal/ent/channel"
-	"github.com/looplj/axonhub/internal/ent/datastorage"
 	"github.com/looplj/axonhub/internal/ent/predicate"
-	"github.com/looplj/axonhub/internal/ent/project"
 	"github.com/looplj/axonhub/internal/ent/request"
 	"github.com/looplj/axonhub/internal/ent/requestexecution"
 	"github.com/looplj/axonhub/internal/ent/trace"
@@ -32,9 +30,7 @@ type RequestQuery struct {
 	inters              []Interceptor
 	predicates          []predicate.Request
 	withAPIKey          *APIKeyQuery
-	withProject         *ProjectQuery
 	withTrace           *TraceQuery
-	withDataStorage     *DataStorageQuery
 	withExecutions      *RequestExecutionQuery
 	withChannel         *ChannelQuery
 	withUsageLogs       *UsageLogQuery
@@ -100,28 +96,6 @@ func (_q *RequestQuery) QueryAPIKey() *APIKeyQuery {
 	return query
 }
 
-// QueryProject chains the current query on the "project" edge.
-func (_q *RequestQuery) QueryProject() *ProjectQuery {
-	query := (&ProjectClient{config: _q.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := _q.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := _q.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(request.Table, request.FieldID, selector),
-			sqlgraph.To(project.Table, project.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, request.ProjectTable, request.ProjectColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
 // QueryTrace chains the current query on the "trace" edge.
 func (_q *RequestQuery) QueryTrace() *TraceQuery {
 	query := (&TraceClient{config: _q.config}).Query()
@@ -137,28 +111,6 @@ func (_q *RequestQuery) QueryTrace() *TraceQuery {
 			sqlgraph.From(request.Table, request.FieldID, selector),
 			sqlgraph.To(trace.Table, trace.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, request.TraceTable, request.TraceColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// QueryDataStorage chains the current query on the "data_storage" edge.
-func (_q *RequestQuery) QueryDataStorage() *DataStorageQuery {
-	query := (&DataStorageClient{config: _q.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := _q.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := _q.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(request.Table, request.FieldID, selector),
-			sqlgraph.To(datastorage.Table, datastorage.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, request.DataStorageTable, request.DataStorageColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -419,18 +371,16 @@ func (_q *RequestQuery) Clone() *RequestQuery {
 		return nil
 	}
 	return &RequestQuery{
-		config:          _q.config,
-		ctx:             _q.ctx.Clone(),
-		order:           append([]request.OrderOption{}, _q.order...),
-		inters:          append([]Interceptor{}, _q.inters...),
-		predicates:      append([]predicate.Request{}, _q.predicates...),
-		withAPIKey:      _q.withAPIKey.Clone(),
-		withProject:     _q.withProject.Clone(),
-		withTrace:       _q.withTrace.Clone(),
-		withDataStorage: _q.withDataStorage.Clone(),
-		withExecutions:  _q.withExecutions.Clone(),
-		withChannel:     _q.withChannel.Clone(),
-		withUsageLogs:   _q.withUsageLogs.Clone(),
+		config:         _q.config,
+		ctx:            _q.ctx.Clone(),
+		order:          append([]request.OrderOption{}, _q.order...),
+		inters:         append([]Interceptor{}, _q.inters...),
+		predicates:     append([]predicate.Request{}, _q.predicates...),
+		withAPIKey:     _q.withAPIKey.Clone(),
+		withTrace:      _q.withTrace.Clone(),
+		withExecutions: _q.withExecutions.Clone(),
+		withChannel:    _q.withChannel.Clone(),
+		withUsageLogs:  _q.withUsageLogs.Clone(),
 		// clone intermediate query.
 		sql:       _q.sql.Clone(),
 		path:      _q.path,
@@ -449,17 +399,6 @@ func (_q *RequestQuery) WithAPIKey(opts ...func(*APIKeyQuery)) *RequestQuery {
 	return _q
 }
 
-// WithProject tells the query-builder to eager-load the nodes that are connected to
-// the "project" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *RequestQuery) WithProject(opts ...func(*ProjectQuery)) *RequestQuery {
-	query := (&ProjectClient{config: _q.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	_q.withProject = query
-	return _q
-}
-
 // WithTrace tells the query-builder to eager-load the nodes that are connected to
 // the "trace" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *RequestQuery) WithTrace(opts ...func(*TraceQuery)) *RequestQuery {
@@ -468,17 +407,6 @@ func (_q *RequestQuery) WithTrace(opts ...func(*TraceQuery)) *RequestQuery {
 		opt(query)
 	}
 	_q.withTrace = query
-	return _q
-}
-
-// WithDataStorage tells the query-builder to eager-load the nodes that are connected to
-// the "data_storage" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *RequestQuery) WithDataStorage(opts ...func(*DataStorageQuery)) *RequestQuery {
-	query := (&DataStorageClient{config: _q.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	_q.withDataStorage = query
 	return _q
 }
 
@@ -599,11 +527,9 @@ func (_q *RequestQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Requ
 	var (
 		nodes       = []*Request{}
 		_spec       = _q.querySpec()
-		loadedTypes = [7]bool{
+		loadedTypes = [5]bool{
 			_q.withAPIKey != nil,
-			_q.withProject != nil,
 			_q.withTrace != nil,
-			_q.withDataStorage != nil,
 			_q.withExecutions != nil,
 			_q.withChannel != nil,
 			_q.withUsageLogs != nil,
@@ -636,21 +562,9 @@ func (_q *RequestQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Requ
 			return nil, err
 		}
 	}
-	if query := _q.withProject; query != nil {
-		if err := _q.loadProject(ctx, query, nodes, nil,
-			func(n *Request, e *Project) { n.Edges.Project = e }); err != nil {
-			return nil, err
-		}
-	}
 	if query := _q.withTrace; query != nil {
 		if err := _q.loadTrace(ctx, query, nodes, nil,
 			func(n *Request, e *Trace) { n.Edges.Trace = e }); err != nil {
-			return nil, err
-		}
-	}
-	if query := _q.withDataStorage; query != nil {
-		if err := _q.loadDataStorage(ctx, query, nodes, nil,
-			func(n *Request, e *DataStorage) { n.Edges.DataStorage = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -725,35 +639,6 @@ func (_q *RequestQuery) loadAPIKey(ctx context.Context, query *APIKeyQuery, node
 	}
 	return nil
 }
-func (_q *RequestQuery) loadProject(ctx context.Context, query *ProjectQuery, nodes []*Request, init func(*Request), assign func(*Request, *Project)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Request)
-	for i := range nodes {
-		fk := nodes[i].ProjectID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(project.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "project_id" returned %v`, n.ID)
-		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
-	}
-	return nil
-}
 func (_q *RequestQuery) loadTrace(ctx context.Context, query *TraceQuery, nodes []*Request, init func(*Request), assign func(*Request, *Trace)) error {
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*Request)
@@ -776,35 +661,6 @@ func (_q *RequestQuery) loadTrace(ctx context.Context, query *TraceQuery, nodes 
 		nodes, ok := nodeids[n.ID]
 		if !ok {
 			return fmt.Errorf(`unexpected foreign-key "trace_id" returned %v`, n.ID)
-		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
-	}
-	return nil
-}
-func (_q *RequestQuery) loadDataStorage(ctx context.Context, query *DataStorageQuery, nodes []*Request, init func(*Request), assign func(*Request, *DataStorage)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Request)
-	for i := range nodes {
-		fk := nodes[i].DataStorageID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(datastorage.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "data_storage_id" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
@@ -933,14 +789,8 @@ func (_q *RequestQuery) querySpec() *sqlgraph.QuerySpec {
 		if _q.withAPIKey != nil {
 			_spec.Node.AddColumnOnce(request.FieldAPIKeyID)
 		}
-		if _q.withProject != nil {
-			_spec.Node.AddColumnOnce(request.FieldProjectID)
-		}
 		if _q.withTrace != nil {
 			_spec.Node.AddColumnOnce(request.FieldTraceID)
-		}
-		if _q.withDataStorage != nil {
-			_spec.Node.AddColumnOnce(request.FieldDataStorageID)
 		}
 		if _q.withChannel != nil {
 			_spec.Node.AddColumnOnce(request.FieldChannelID)

@@ -11,7 +11,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/looplj/axonhub/internal/ent/project"
 	"github.com/looplj/axonhub/internal/ent/thread"
 	"github.com/looplj/axonhub/internal/ent/trace"
 )
@@ -52,21 +51,10 @@ func (_c *ThreadCreate) SetNillableUpdatedAt(v *time.Time) *ThreadCreate {
 	return _c
 }
 
-// SetProjectID sets the "project_id" field.
-func (_c *ThreadCreate) SetProjectID(v int) *ThreadCreate {
-	_c.mutation.SetProjectID(v)
-	return _c
-}
-
 // SetThreadID sets the "thread_id" field.
 func (_c *ThreadCreate) SetThreadID(v string) *ThreadCreate {
 	_c.mutation.SetThreadID(v)
 	return _c
-}
-
-// SetProject sets the "project" edge to the Project entity.
-func (_c *ThreadCreate) SetProject(v *Project) *ThreadCreate {
-	return _c.SetProjectID(v.ID)
 }
 
 // AddTraceIDs adds the "traces" edge to the Trace entity by IDs.
@@ -140,14 +128,8 @@ func (_c *ThreadCreate) defaults() error {
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *ThreadCreate) check() error {
-	if _, ok := _c.mutation.ProjectID(); !ok {
-		return &ValidationError{Name: "project_id", err: errors.New(`ent: missing required field "Thread.project_id"`)}
-	}
 	if _, ok := _c.mutation.ThreadID(); !ok {
 		return &ValidationError{Name: "thread_id", err: errors.New(`ent: missing required field "Thread.thread_id"`)}
-	}
-	if len(_c.mutation.ProjectIDs()) == 0 {
-		return &ValidationError{Name: "project", err: errors.New(`ent: missing required edge "Thread.project"`)}
 	}
 	return nil
 }
@@ -187,23 +169,6 @@ func (_c *ThreadCreate) createSpec() (*Thread, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.ThreadID(); ok {
 		_spec.SetField(thread.FieldThreadID, field.TypeString, value)
 		_node.ThreadID = value
-	}
-	if nodes := _c.mutation.ProjectIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   thread.ProjectTable,
-			Columns: []string{thread.ProjectColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(project.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.ProjectID = nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := _c.mutation.TracesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -310,9 +275,6 @@ func (u *ThreadUpsertOne) UpdateNewValues() *ThreadUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
 		if _, exists := u.create.mutation.CreatedAt(); exists {
 			s.SetIgnore(thread.FieldCreatedAt)
-		}
-		if _, exists := u.create.mutation.ProjectID(); exists {
-			s.SetIgnore(thread.FieldProjectID)
 		}
 	}))
 	return u
@@ -551,9 +513,6 @@ func (u *ThreadUpsertBulk) UpdateNewValues() *ThreadUpsertBulk {
 		for _, b := range u.create.builders {
 			if _, exists := b.mutation.CreatedAt(); exists {
 				s.SetIgnore(thread.FieldCreatedAt)
-			}
-			if _, exists := b.mutation.ProjectID(); exists {
-				s.SetIgnore(thread.FieldProjectID)
 			}
 		}
 	}))

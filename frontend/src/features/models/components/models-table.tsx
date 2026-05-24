@@ -131,7 +131,7 @@ export function ModelsTable({
       groups.get(developer)!.push(row);
     });
     return new Map([...groups.entries()].sort(([a], [b]) => a.localeCompare(b)));
-  }, [table, data, sorting]);
+  }, [table]);
 
   const allGroupsCollapsed = groupedRows.size > 0 && collapsedGroups.size === groupedRows.size;
   const developerRuleCounts = useMemo(() => {
@@ -162,7 +162,7 @@ export function ModelsTable({
     }
   }, [allGroupsCollapsed, groupedRows]);
 
-  const filteredSelectedRows = useMemo(() => table.getFilteredSelectedRowModel().rows, [table, rowSelection, data]);
+  const filteredSelectedRows = useMemo(() => table.getFilteredSelectedRowModel().rows, [table]);
 
   const selectedCount = filteredSelectedRows.length;
 

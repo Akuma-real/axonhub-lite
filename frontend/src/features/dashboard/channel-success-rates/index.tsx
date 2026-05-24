@@ -155,7 +155,7 @@ export default function DashboardChannelSuccessRates() {
 
   return (
     <div className="flex flex-col gap-4">
-      <Header title={t('dashboard.channelSuccessRates.pageTitle')} description="查看所有渠道的请求成功率统计" />
+      <Header title={t('dashboard.channelSuccessRates.pageTitle')} />
       <div className="space-y-4">
         {/* Toolbar */}
         <div className="flex items-center justify-between">

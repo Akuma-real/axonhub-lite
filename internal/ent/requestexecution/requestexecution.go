@@ -21,14 +21,10 @@ const (
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
-	// FieldProjectID holds the string denoting the project_id field in the database.
-	FieldProjectID = "project_id"
 	// FieldRequestID holds the string denoting the request_id field in the database.
 	FieldRequestID = "request_id"
 	// FieldChannelID holds the string denoting the channel_id field in the database.
 	FieldChannelID = "channel_id"
-	// FieldDataStorageID holds the string denoting the data_storage_id field in the database.
-	FieldDataStorageID = "data_storage_id"
 	// FieldExternalID holds the string denoting the external_id field in the database.
 	FieldExternalID = "external_id"
 	// FieldModelID holds the string denoting the model_id field in the database.
@@ -61,8 +57,6 @@ const (
 	EdgeRequest = "request"
 	// EdgeChannel holds the string denoting the channel edge name in mutations.
 	EdgeChannel = "channel"
-	// EdgeDataStorage holds the string denoting the data_storage edge name in mutations.
-	EdgeDataStorage = "data_storage"
 	// Table holds the table name of the requestexecution in the database.
 	Table = "request_executions"
 	// RequestTable is the table that holds the request relation/edge.
@@ -79,13 +73,6 @@ const (
 	ChannelInverseTable = "channels"
 	// ChannelColumn is the table column denoting the channel relation/edge.
 	ChannelColumn = "channel_id"
-	// DataStorageTable is the table that holds the data_storage relation/edge.
-	DataStorageTable = "request_executions"
-	// DataStorageInverseTable is the table name for the DataStorage entity.
-	// It exists in this package in order to avoid circular dependency with the "datastorage" package.
-	DataStorageInverseTable = "data_storages"
-	// DataStorageColumn is the table column denoting the data_storage relation/edge.
-	DataStorageColumn = "data_storage_id"
 )
 
 // Columns holds all SQL columns for requestexecution fields.
@@ -93,10 +80,8 @@ var Columns = []string{
 	FieldID,
 	FieldCreatedAt,
 	FieldUpdatedAt,
-	FieldProjectID,
 	FieldRequestID,
 	FieldChannelID,
-	FieldDataStorageID,
 	FieldExternalID,
 	FieldModelID,
 	FieldFormat,
@@ -130,8 +115,6 @@ var (
 	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
 	UpdateDefaultUpdatedAt func() time.Time
-	// DefaultProjectID holds the default value on creation for the "project_id" field.
-	DefaultProjectID int
 	// ExternalIDValidator is a validator for the "external_id" field. It is called by the builders before save.
 	ExternalIDValidator func(string) error
 	// DefaultFormat holds the default value on creation for the "format" field.
@@ -184,11 +167,6 @@ func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
 }
 
-// ByProjectID orders the results by the project_id field.
-func ByProjectID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldProjectID, opts...).ToFunc()
-}
-
 // ByRequestID orders the results by the request_id field.
 func ByRequestID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldRequestID, opts...).ToFunc()
@@ -197,11 +175,6 @@ func ByRequestID(opts ...sql.OrderTermOption) OrderOption {
 // ByChannelID orders the results by the channel_id field.
 func ByChannelID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldChannelID, opts...).ToFunc()
-}
-
-// ByDataStorageID orders the results by the data_storage_id field.
-func ByDataStorageID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldDataStorageID, opts...).ToFunc()
 }
 
 // ByExternalID orders the results by the external_id field.
@@ -267,13 +240,6 @@ func ByChannelField(field string, opts ...sql.OrderTermOption) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newChannelStep(), sql.OrderByField(field, opts...))
 	}
 }
-
-// ByDataStorageField orders the results by data_storage field.
-func ByDataStorageField(field string, opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newDataStorageStep(), sql.OrderByField(field, opts...))
-	}
-}
 func newRequestStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -286,13 +252,6 @@ func newChannelStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(ChannelInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, true, ChannelTable, ChannelColumn),
-	)
-}
-func newDataStorageStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(DataStorageInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, DataStorageTable, DataStorageColumn),
 	)
 }
 

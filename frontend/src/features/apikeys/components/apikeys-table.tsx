@@ -39,14 +39,12 @@ interface DataTableProps {
   totalCount?: number;
   searchFilter: string;
   statusFilter: string[];
-  userFilter: string[];
   dateRange?: DateTimeRangeValue;
   onNextPage: () => void;
   onPreviousPage: () => void;
   onPageSizeChange: (pageSize: number) => void;
   onSearchFilterChange: (value: string) => void;
   onStatusFilterChange: (value: string[]) => void;
-  onUserFilterChange: (value: string[]) => void;
   onDateRangeChange: (value: DateTimeRangeValue | undefined) => void;
   onResetFilters?: () => void;
   canWrite?: boolean;
@@ -61,14 +59,12 @@ export function ApiKeysTable({
   totalCount,
   searchFilter,
   statusFilter,
-  userFilter,
   dateRange,
   onNextPage,
   onPreviousPage,
   onPageSizeChange,
   onSearchFilterChange,
   onStatusFilterChange,
-  onUserFilterChange,
   onDateRangeChange,
   onResetFilters,
   canWrite = true,
@@ -96,11 +92,8 @@ export function ApiKeysTable({
     if (statusFilter.length > 0) {
       newFilters.push({ id: 'status', value: statusFilter });
     }
-    if (userFilter.length > 0) {
-      newFilters.push({ id: 'creator', value: userFilter });
-    }
     setColumnFilters(newFilters);
-  }, [searchFilter, statusFilter, userFilter]);
+  }, [searchFilter, statusFilter]);
 
   const handleColumnFiltersChange = (updater: ColumnFiltersState | ((prev: ColumnFiltersState) => ColumnFiltersState)) => {
     const newFilters = typeof updater === 'function' ? updater(columnFilters) : updater;
@@ -108,7 +101,6 @@ export function ApiKeysTable({
 
     const nameFilterValue = newFilters.find((f) => f.id === 'name')?.value;
     const statusFilterValue = newFilters.find((f) => f.id === 'status')?.value;
-    const userFilterValue = newFilters.find((f) => f.id === 'creator')?.value;
 
     // The search filter is represented by the 'name' column in the table
     const newSearchFilter = typeof nameFilterValue === 'string' ? nameFilterValue : '';
@@ -121,10 +113,6 @@ export function ApiKeysTable({
       onStatusFilterChange(newStatusFilter);
     }
 
-    const newUserFilter = Array.isArray(userFilterValue) ? userFilterValue : [];
-    if (JSON.stringify(newUserFilter.sort()) !== JSON.stringify(userFilter.sort())) {
-      onUserFilterChange(newUserFilter);
-    }
   };
 
   const table = useReactTable({
@@ -149,7 +137,7 @@ export function ApiKeysTable({
     getRowId: (row) => row.id,
   });
 
-  const filteredSelectedRows = useMemo(() => table.getFilteredSelectedRowModel().rows, [table, rowSelection, data]);
+  const filteredSelectedRows = useMemo(() => table.getFilteredSelectedRowModel().rows, [table]);
 
   const selectedCount = filteredSelectedRows.length;
 

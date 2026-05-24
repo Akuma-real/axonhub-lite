@@ -8,13 +8,6 @@ interface Role {
   name: string;
 }
 
-interface Project {
-  projectID: string;
-  isOwner: boolean;
-  scopes: string[];
-  roles: Role[];
-}
-
 export interface AuthUser {
   id: string;
   email: string;
@@ -23,10 +16,8 @@ export interface AuthUser {
   isOwner: boolean;
   preferLanguage: string;
   avatar?: string;
-  scopes: string[];
-  roles: Role[];
-  projects: Project[];
-  oidcIdentities?: { id: string; idpName: string; issuer: string; subject: string; email: string }[];
+  scopes?: string[];
+  roles?: Role[];
   hasPassword?: boolean;
 }
 
@@ -45,22 +36,24 @@ interface AuthState {
 export const getTokenFromStorage = (): string => {
   try {
     return localStorage.getItem(ACCESS_TOKEN) || '';
-    } catch (error) {
-      return '';
-    }
-  };
+  } catch {
+    return '';
+  }
+};
 
 export const setTokenToStorage = (token: string): void => {
   try {
     localStorage.setItem(ACCESS_TOKEN, token);
-  } catch (error) {
+  } catch {
+    // Ignore storage failures.
   }
 };
 
 export const removeTokenFromStorage = (): void => {
   try {
     localStorage.removeItem(ACCESS_TOKEN);
-  } catch (error) {
+  } catch {
+    // Ignore storage failures.
   }
 };
 
@@ -68,7 +61,7 @@ const getUserFromStorage = (): AuthUser | null => {
   try {
     const userStr = localStorage.getItem(USER_INFO);
     return userStr ? JSON.parse(userStr) : null;
-  } catch (error) {
+  } catch {
     return null;
   }
 };
@@ -80,14 +73,16 @@ const setUserToStorage = (user: AuthUser | null): void => {
     } else {
       localStorage.removeItem(USER_INFO);
     }
-  } catch (error) {
+  } catch {
+    // Ignore storage failures.
   }
 };
 
 const removeUserFromStorage = (): void => {
   try {
     localStorage.removeItem(USER_INFO);
-  } catch (error) {
+  } catch {
+    // Ignore storage failures.
   }
 };
 

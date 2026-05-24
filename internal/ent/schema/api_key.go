@@ -26,10 +26,9 @@ func (APIKey) Mixin() []ent.Mixin {
 
 func (APIKey) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("user_id").
-			StorageKey("api_keys_by_user_id"),
-		index.Fields("project_id").
-			StorageKey("api_keys_by_project_id"),
+		index.Fields("name", "deleted_at").
+			StorageKey("api_keys_by_name").
+			Unique(),
 		index.Fields("key").
 			StorageKey("api_keys_by_key").
 			Unique(),
@@ -38,35 +37,14 @@ func (APIKey) Indexes() []ent.Index {
 
 func (APIKey) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("user_id").Optional().Immutable().
-			Annotations(
-				entgql.Skip(entgql.SkipMutationCreateInput, entgql.SkipMutationUpdateInput),
-			).Comment("The creator of the API key"),
-		field.Int("project_id").
-			Immutable().
-			Default(1).
-			Comment("Project ID, default to 1 for backward compatibility").
-			Annotations(
-				entgql.Skip(entgql.SkipMutationUpdateInput),
-			),
 		field.String("key").
 			Annotations(
 				entgql.Skip(entgql.SkipMutationCreateInput, entgql.SkipMutationUpdateInput),
 			),
 		field.String("name"),
-		field.Enum("type").
-			Values("user", "service_account", "noauth").
-			Default("user").
-			Comment("API Key type: user, service_account, or noauth").Annotations(
-			entgql.Skip(entgql.SkipMutationUpdateInput),
-		),
 		field.Enum("status").Values("enabled", "disabled", "archived").Default("enabled").Annotations(
 			entgql.Skip(entgql.SkipMutationCreateInput, entgql.SkipMutationUpdateInput),
 		),
-		field.Strings("scopes").
-			Comment("API Key specific scopes. For user type: default read_channels, write_requests (immutable). For service_account: custom scopes.").
-			Default([]string{"read_channels", "write_requests"}).
-			Optional(),
 		field.JSON("profiles", &objects.APIKeyProfiles{}).
 			Default(&objects.APIKeyProfiles{}).
 			Optional().
@@ -78,22 +56,6 @@ func (APIKey) Fields() []ent.Field {
 
 func (APIKey) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("user", User.Type).
-			Unique().
-			Immutable().
-			Annotations(
-				entgql.Skip(entgql.SkipMutationCreateInput, entgql.SkipMutationUpdateInput),
-				entgql.Directives(forceResolver()),
-			).
-			Ref("api_keys").Field("user_id"),
-		edge.From("project", Project.Type).
-			Unique().
-			Immutable().
-			Required().
-			Annotations(
-				entgql.Skip(entgql.SkipMutationUpdateInput),
-			).
-			Ref("api_keys").Field("project_id"),
 		edge.To("requests", Request.Type).
 			Annotations(
 				entgql.Skip(entgql.SkipMutationCreateInput, entgql.SkipMutationUpdateInput),
@@ -114,14 +76,10 @@ func (APIKey) Annotations() []schema.Annotation {
 func (APIKey) Policy() ent.Policy {
 	return scopes.Policy{
 		Query: scopes.QueryPolicy{
-			scopes.UserProjectScopeReadRule(scopes.ScopeReadAPIKeys),   // User 主体：需要 API Keys 读取权限
-			scopes.APIKeyProjectScopeReadRule(scopes.ScopeReadAPIKeys), // API key 主体：用于 OpenAPI 走 service account 读 APIKey
-			scopes.OwnerRule(), // owner 用户可以访问所有 API Keys
+			scopes.OwnerRule(),
 		},
 		Mutation: scopes.MutationPolicy{
-			scopes.UserProjectScopeWriteRule(scopes.ScopeWriteAPIKeys),   // 需要 API Keys 写入权限
-			scopes.APIKeyProjectScopeWriteRule(scopes.ScopeWriteAPIKeys), // API key scope + project 校验
-			scopes.OwnerRule(), // owner 用户可以修改所有 API Keys
+			scopes.OwnerRule(),
 		},
 	}
 }

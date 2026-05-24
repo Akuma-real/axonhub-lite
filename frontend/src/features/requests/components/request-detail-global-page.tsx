@@ -14,13 +14,13 @@ export default function RequestDetailGlobalPage() {
   const { t } = useTranslation();
   const { requestId } = useParams({ from: '/_authenticated/requests/$requestId' });
   const navigate = useNavigate();
-  const { data: request } = useRequest(requestId, { projectId: null });
+  const { data: request } = useRequest(requestId);
 
   return (
     <div className='flex h-screen flex-col'>
       <Header className='bg-background/95 supports-[backdrop-filter]:bg-background/60 border-b backdrop-blur'>
         <div className='flex items-center space-x-4'>
-          <Button variant='ghost' size='sm' onClick={() => navigate({ to: '/channels' })} className='hover:bg-accent'>
+          <Button variant='ghost' size='sm' onClick={() => navigate({ to: '/requests' })} className='hover:bg-accent'>
             <ArrowLeft className='mr-2 h-4 w-4' />
             {t('common.back')}
           </Button>
@@ -47,7 +47,7 @@ export default function RequestDetailGlobalPage() {
 
       <Main className='flex-1 overflow-auto'>
         <div className='container mx-auto max-w-7xl p-6'>
-          <RequestDetailContent requestId={requestId} projectId={null} />
+          <RequestDetailContent requestId={requestId} />
         </div>
       </Main>
     </div>

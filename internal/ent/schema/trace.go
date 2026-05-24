@@ -24,8 +24,6 @@ func (Trace) Mixin() []ent.Mixin {
 
 func (Trace) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("project_id").
-			StorageKey("traces_by_project_id"),
 		index.Fields("trace_id").
 			StorageKey("traces_by_trace_id").
 			Unique(),
@@ -37,9 +35,6 @@ func (Trace) Indexes() []ent.Index {
 // Fields of the Trace.
 func (Trace) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("project_id").
-			Immutable().
-			Comment("Project ID that this trace belongs to"),
 		field.String("trace_id").
 			Unique().
 			Comment("Unique trace identifier"),
@@ -53,12 +48,6 @@ func (Trace) Fields() []ent.Field {
 // Edges of the Trace.
 func (Trace) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("project", Project.Type).
-			Ref("traces").
-			Field("project_id").
-			Immutable().
-			Required().
-			Unique(),
 		edge.From("thread", Thread.Type).
 			Ref("traces").
 			Field("thread_id").
@@ -84,17 +73,12 @@ func (Trace) Annotations() []schema.Annotation {
 func (Trace) Policy() ent.Policy {
 	return scopes.Policy{
 		Query: scopes.QueryPolicy{
-			// The API key can query traces if it has write requests scope.
 			scopes.APIKeyScopeQueryRule(scopes.ScopeWriteRequests),
-			scopes.UserProjectScopeReadRule(scopes.ScopeReadRequests),
 			scopes.OwnerRule(),
-			scopes.UserReadScopeRule(scopes.ScopeReadRequests),
 		},
 		Mutation: scopes.MutationPolicy{
 			scopes.APIKeyScopeMutationRule(scopes.ScopeWriteRequests),
-			scopes.UserProjectScopeWriteRule(scopes.ScopeWriteRequests),
 			scopes.OwnerRule(),
-			scopes.UserWriteScopeRule(scopes.ScopeWriteRequests),
 		},
 	}
 }

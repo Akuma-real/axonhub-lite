@@ -516,7 +516,7 @@ function buildDeveloperChannelPreview(associations: AssociationFormRow[], channe
 
 export function ModelsAssociationDialog() {
   const { t, i18n } = useTranslation();
-  const { open, setOpen, currentRow, currentDeveloper, setCurrentDeveloper } = useModels();
+  const { open, setOpen, currentRow, currentDeveloper, setCurrentDeveloper, pendingAssociation, setPendingAssociation } = useModels();
   const updateModel = useUpdateModel();
   const updateModelSettings = useUpdateModelSettings();
   const { data: settings, isLoading: isSettingsLoading } = useModelSettings();
@@ -639,14 +639,14 @@ export function ModelsAssociationDialog() {
         } else {
           setConnections([]);
         }
-      } catch (error) {
+      } catch {
         toast.error(t('common.errors.loadFailed'));
         setConnections([]);
       }
     };
 
     fetchConnections();
-  }, [channelOptions, currentRow?.modelID, debouncedAssociationsString, inheritedAssociations, isOpen, isDeveloperMode, queryConnections]);
+  }, [channelOptions, currentRow?.modelID, debouncedAssociationsString, inheritedAssociations, isOpen, isDeveloperMode, queryConnections, t]);
 
   useEffect(() => {
     if (isOpen) {
@@ -734,6 +734,42 @@ export function ModelsAssociationDialog() {
       inheritModel: isDeveloperMode,
     });
   }, [append, fields.length, form, isDeveloperMode]);
+
+  useEffect(() => {
+    if (!isOpen || isDeveloperMode || !pendingAssociation || !currentRow) {
+      return;
+    }
+
+    const currentAssociations = form.getValues('associations') || [];
+    const exists = currentAssociations.some(
+      (assoc) =>
+        assoc.type === 'channel_model' &&
+        assoc.channelId === pendingAssociation.channelId &&
+        assoc.modelId === pendingAssociation.modelId
+    );
+
+    if (!exists && currentAssociations.length < 10) {
+      const nextPriority =
+        currentAssociations.length > 0 ? Math.max(...currentAssociations.map((assoc) => assoc.priority ?? 0)) : 0;
+      append({
+        type: 'channel_model',
+        priority: nextPriority,
+        disabled: false,
+        whenEnabled: false,
+        whenCondition: DEFAULT_WHEN_CONDITION,
+        channelId: pendingAssociation.channelId,
+        channelTags: [],
+        modelId: pendingAssociation.modelId,
+        pattern: '',
+        excludeChannelNamePattern: '',
+        excludeChannelIds: [],
+        excludeChannelTags: [],
+        inheritModel: false,
+      });
+    }
+
+    setPendingAssociation(null);
+  }, [append, currentRow, form, isDeveloperMode, isOpen, pendingAssociation, setPendingAssociation]);
 
   // Filter connections by channel name
   const filteredConnections = useMemo(() => {

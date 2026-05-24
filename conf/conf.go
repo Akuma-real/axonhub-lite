@@ -19,7 +19,6 @@ import (
 	"github.com/looplj/axonhub/internal/metrics"
 	"github.com/looplj/axonhub/internal/pkg/xcache"
 	"github.com/looplj/axonhub/internal/server"
-	"github.com/looplj/axonhub/internal/server/biz"
 	"github.com/looplj/axonhub/internal/server/db"
 	"github.com/looplj/axonhub/internal/server/gc"
 )
@@ -34,9 +33,7 @@ type Config struct {
 	GC               gc.Config           `conf:"gc" yaml:"gc" json:"gc"`
 	Cache            xcache.Config       `conf:"cache" yaml:"cache" json:"cache"`
 	ProviderQuota    providerQuotaConfig `conf:"provider_quota" yaml:"provider_quota" json:"provider_quota"`
-	OIDC             biz.OIDCConfig      `conf:"oidc" yaml:"oidc" json:"oidc"`
 	DisableSSLVerify bool                `name:"disable_ssl_verify" yaml:"-" json:"-"`
-	AllowNoAuth      bool                `name:"allow_no_auth" yaml:"-" json:"-"`
 	APIKeyPrefix     string              `name:"api_key_prefix" yaml:"-" json:"-"`
 }
 
@@ -94,7 +91,6 @@ func Load() (Config, error) {
 	}
 
 	config.DisableSSLVerify = config.APIServer.DisableSSLVerify
-	config.AllowNoAuth = config.APIServer.API.Auth.AllowNoAuth
 	config.APIKeyPrefix = config.APIServer.API.Auth.KeyPrefix
 
 	log.Debug(context.Background(), "Config loaded successfully", log.Any("config", config))
@@ -175,11 +171,10 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("server.cors.debug", false)
 	v.SetDefault("server.cors.allowed_origins", []string{"http://localhost:8090"})
 	v.SetDefault("server.cors.allowed_methods", []string{"GET", "POST", "DELETE", "PATCH", "PUT", "OPTIONS", "HEAD"})
-	v.SetDefault("server.cors.allowed_headers", []string{"Content-Type", "Authorization", "X-API-Key", "X-Goog-Api-Key", "X-Project-ID", "X-Thread-ID", "X-Trace-ID"})
+	v.SetDefault("server.cors.allowed_headers", []string{"Content-Type", "Authorization", "X-API-Key", "X-Goog-Api-Key", "X-Thread-ID", "X-Trace-ID"})
 	v.SetDefault("server.cors.exposed_headers", []string{})
 	v.SetDefault("server.cors.allow_credentials", false)
 	v.SetDefault("server.cors.max_age", "30m")
-	v.SetDefault("server.api.auth.allow_no_auth", false)
 	v.SetDefault("server.api.auth.key_prefix", "ah")
 
 	// Database defaults
@@ -238,9 +233,6 @@ func setDefaults(v *viper.Viper) {
 	// Note: cache.redis.db has no default value to allow explicit override to 0
 	v.SetDefault("cache.redis.tls", false)
 	v.SetDefault("cache.redis.tls_insecure_skip_verify", false)
-
-	// OIDC defaults
-	v.SetDefault("oidc.providers", []biz.OIDCProvider{})
 }
 
 // parseLogLevel converts a string log level to zapcore.Level.

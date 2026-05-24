@@ -23,7 +23,7 @@ export function ChannelsErrorResolvedDialog({ open, onOpenChange }: ChannelsErro
       });
       setOpen(null);
       onOpenChange(false);
-    } catch (error) {
+    } catch {
       // Error is handled by the mutation hook
     }
   };

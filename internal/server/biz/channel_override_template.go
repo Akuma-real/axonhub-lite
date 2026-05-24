@@ -36,10 +36,9 @@ func NewChannelOverrideTemplateService(params ChannelOverrideTemplateServicePara
 	}
 }
 
-// CreateTemplate creates a new override template for the given user.
+// CreateTemplate creates a new global override template.
 func (svc *ChannelOverrideTemplateService) CreateTemplate(
 	ctx context.Context,
-	userID int,
 	input ent.CreateChannelOverrideTemplateInput,
 ) (*ent.ChannelOverrideTemplate, error) {
 	if input.HeaderOverrideOperations != nil {
@@ -55,7 +54,6 @@ func (svc *ChannelOverrideTemplateService) CreateTemplate(
 	}
 
 	template, err := svc.entFromContext(ctx).ChannelOverrideTemplate.Create().
-		SetUserID(userID).
 		SetName(input.Name).
 		SetNillableDescription(input.Description).
 		SetHeaderOverrideOperations(input.HeaderOverrideOperations).

@@ -5,15 +5,11 @@ schema:
   - axonhub.graphql
   - ent.graphql
   - dashboard.graphql
-  - scopes.graphql
   - me.graphql
   - system.graphql
   - filter.graphql
   - model.graphql
-  - backup.graphql
   - channel_probe.graphql
-  - prompt.graphql
-  - prompt_protection_rule.graphql
   - price.graphql
   - cost.graphql
 
@@ -225,18 +221,6 @@ models:
   APIKeyProfile:
     model:
       - github.com/looplj/axonhub/internal/objects.APIKeyProfile
-  UpdateProjectProfilesInput:
-    model:
-      - github.com/looplj/axonhub/internal/objects.ProjectProfiles
-  ProjectProfileInput:
-    model:
-      - github.com/looplj/axonhub/internal/objects.ProjectProfile
-  ProjectProfiles:
-    model:
-      - github.com/looplj/axonhub/internal/objects.ProjectProfiles
-  ProjectProfile:
-    model:
-      - github.com/looplj/axonhub/internal/objects.ProjectProfile
   ChannelTagsMatchMode:
     model:
       - github.com/looplj/axonhub/internal/objects.ChannelTagsMatchMode
@@ -273,15 +257,6 @@ models:
   APIKeyQuotaCalendarDurationUnit:
     model:
       - github.com/looplj/axonhub/internal/objects.APIKeyQuotaCalendarDurationUnit
-  BackupOptionsInput:
-    model:
-      - github.com/looplj/axonhub/internal/server/backup.BackupOptions
-  RestoreOptionsInput:
-    model:
-      - github.com/looplj/axonhub/internal/server/backup.RestoreOptions
-  BackupConflictStrategy:
-    model:
-      - github.com/looplj/axonhub/internal/server/backup.ConflictStrategy
   GCPCredential:
     model:
       - github.com/looplj/axonhub/internal/objects.GCPCredential
@@ -294,36 +269,6 @@ models:
   UserInfo:
     model:
       - github.com/looplj/axonhub/internal/objects.UserInfo
-  RoleInfo:
-    model:
-      - github.com/looplj/axonhub/internal/objects.RoleInfo
-  UserProjectInfo:
-    model:
-      - github.com/looplj/axonhub/internal/objects.UserProjectInfo
-  DataStorageSettings:
-    model:
-      - github.com/looplj/axonhub/internal/objects.DataStorageSettings
-  DataStorageSettingsInput:
-    model:
-      - github.com/looplj/axonhub/internal/objects.DataStorageSettings
-  S3:
-    model:
-      - github.com/looplj/axonhub/internal/objects.S3
-  S3Input:
-    model:
-      - github.com/looplj/axonhub/internal/objects.S3
-  GCS:
-    model:
-      - github.com/looplj/axonhub/internal/objects.GCS
-  GCSInput:
-    model:
-      - github.com/looplj/axonhub/internal/objects.GCS
-  WebDAV:
-    model:
-      - github.com/looplj/axonhub/internal/objects.WebDAV
-  WebDAVInput:
-    model:
-      - github.com/looplj/axonhub/internal/objects.WebDAV
   Segment:
     model:
       - github.com/looplj/axonhub/internal/server/biz.Segment
@@ -588,12 +533,6 @@ models:
   UpdateSystemGeneralSettingsInput:
     model:
       - github.com/looplj/axonhub/internal/server/biz.SystemGeneralSettings
-  VideoStorageSettings:
-    model:
-      - github.com/looplj/axonhub/internal/server/biz.VideoStorageSettings
-  UpdateVideoStorageSettingsInput:
-    model:
-      - github.com/looplj/axonhub/internal/server/biz.VideoStorageSettings
   ProxyPreset:
     model:
       - github.com/looplj/axonhub/internal/server/biz.ProxyPreset
@@ -636,48 +575,6 @@ models:
   GcCleanupPreviewItem:
     model:
       - github.com/looplj/axonhub/internal/server/gc.GcCleanupPreviewItem
-  PromptSettings:
-    model:
-      - github.com/looplj/axonhub/internal/objects.PromptSettings
-  PromptSettingsInput:
-    model:
-      - github.com/looplj/axonhub/internal/objects.PromptSettings
-  PromptProtectionSettings:
-    model:
-      - github.com/looplj/axonhub/internal/objects.PromptProtectionSettings
-  PromptProtectionSettingsInput:
-    model:
-      - github.com/looplj/axonhub/internal/objects.PromptProtectionSettings
-  PromptProtectionAction:
-    model:
-      - github.com/looplj/axonhub/internal/objects.PromptProtectionAction
-  PromptProtectionScope:
-    model:
-      - github.com/looplj/axonhub/internal/objects.PromptProtectionScope
-  PromptAction:
-    model:
-      - github.com/looplj/axonhub/internal/objects.PromptAction
-  PromptActionInput:
-    model:
-      - github.com/looplj/axonhub/internal/objects.PromptAction
-  PromptActivationCondition:
-    model:
-      - github.com/looplj/axonhub/internal/objects.PromptActivationCondition
-  PromptActivationConditionInput:
-    model:
-      - github.com/looplj/axonhub/internal/objects.PromptActivationCondition
-  PromptActionType:
-    model:
-      - github.com/looplj/axonhub/internal/objects.PromptActionType
-  PromptActivationConditionType:
-    model:
-      - github.com/looplj/axonhub/internal/objects.PromptActivationConditionType
-  PromptActivationConditionComposite:
-    model:
-      - github.com/looplj/axonhub/internal/objects.PromptActivationConditionComposite
-  PromptActivationConditionCompositeInput:
-    model:
-      - github.com/looplj/axonhub/internal/objects.PromptActivationConditionComposite
   DisabledAPIKey:
     model:
       - github.com/looplj/axonhub/internal/objects.DisabledAPIKey

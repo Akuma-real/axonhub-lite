@@ -1,7 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { graphqlRequest } from '@/gql/graphql';
-import { useSelectedProjectId } from '@/stores/projectStore';
 import { useErrorHandler } from '@/hooks/use-error-handler';
 import { Trace, TraceConnection, TraceDetail, traceConnectionSchema, traceDetailSchema } from './schema';
 
@@ -62,10 +61,6 @@ function buildTraceDetailQuery() {
             totalCachedTokens
             totalCachedWriteTokens
           }
-          project {
-            id
-            name
-          }
           thread {
             id
             threadID
@@ -96,10 +91,6 @@ function buildTraceWithRequestTracesQuery() {
             totalCachedTokens
             totalCachedWriteTokens
           }
-          project {
-            id
-            name
-          }
           thread {
             id
             threadID
@@ -120,7 +111,6 @@ export function useTraces(variables?: {
   after?: string;
   orderBy?: { field: 'CREATED_AT'; direction: 'ASC' | 'DESC' };
   where?: {
-    projectID?: string;
     threadID?: string;
     traceID?: string;
     [key: string]: any;
@@ -128,47 +118,33 @@ export function useTraces(variables?: {
 }) {
   const { handleError } = useErrorHandler();
   const { t } = useTranslation();
-  const selectedProjectId = useSelectedProjectId();
 
   return useQuery({
-    queryKey: ['traces', variables, selectedProjectId],
+    queryKey: ['traces', variables],
     queryFn: async () => {
       try {
         const query = buildTracesQuery();
-        const headers = selectedProjectId ? { 'X-Project-ID': selectedProjectId } : undefined;
-
-        // Add project filter if project is selected
-        const finalVariables = {
-          ...variables,
-          where: {
-            ...variables?.where,
-            ...(selectedProjectId && { projectID: selectedProjectId }),
-          },
-        };
-
-        const data = await graphqlRequest<{ traces: TraceConnection }>(query, finalVariables, headers);
+        const data = await graphqlRequest<{ traces: TraceConnection }>(query, variables);
         return traceConnectionSchema.parse(data?.traces);
       } catch (error) {
         handleError(error, t('common.errors.internalServerError'));
         throw error;
       }
     },
-    enabled: true, // Traces can be queried without project selection for admin users
+    enabled: true,
   });
 }
 
 export function useTrace(id: string) {
   const { handleError } = useErrorHandler();
   const { t } = useTranslation();
-  const selectedProjectId = useSelectedProjectId();
 
   return useQuery({
-    queryKey: ['trace', id, selectedProjectId],
+    queryKey: ['trace', id],
     queryFn: async () => {
       try {
         const query = buildTraceDetailQuery();
-        const headers = selectedProjectId ? { 'X-Project-ID': selectedProjectId } : undefined;
-        const data = await graphqlRequest<{ node: Trace }>(query, { id }, headers);
+        const data = await graphqlRequest<{ node: Trace }>(query, { id });
         if (!data.node) {
           throw new Error('Trace not found');
         }
@@ -185,15 +161,13 @@ export function useTrace(id: string) {
 export function useTraceWithSegments(id: string) {
   const { handleError } = useErrorHandler();
   const { t } = useTranslation();
-  const selectedProjectId = useSelectedProjectId();
 
   return useQuery({
-    queryKey: ['trace-with-segments', id, selectedProjectId],
+    queryKey: ['trace-with-segments', id],
     queryFn: async () => {
       try {
         const query = buildTraceWithRequestTracesQuery();
-        const headers = selectedProjectId ? { 'X-Project-ID': selectedProjectId } : undefined;
-        const data = await graphqlRequest<{ node: TraceDetail }>(query, { id }, headers);
+        const data = await graphqlRequest<{ node: TraceDetail }>(query, { id });
         if (!data.node) {
           throw new Error('Trace not found');
         }

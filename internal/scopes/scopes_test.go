@@ -15,10 +15,6 @@ func TestAllScopes(t *testing.T) {
 	expectedScopes := []ScopeSlug{
 		ScopeReadChannels,
 		ScopeWriteChannels,
-		ScopeReadUsers,
-		ScopeWriteUsers,
-		ScopeReadRoles,
-		ScopeWriteRoles,
 		ScopeReadAPIKeys,
 		ScopeWriteAPIKeys,
 		ScopeReadRequests,
@@ -77,8 +73,8 @@ func TestIsValidScope(t *testing.T) {
 			expected: true,
 		},
 		{
-			name:     "valid scope - write users",
-			scope:    string(ScopeWriteUsers),
+			name:     "valid scope - write channels",
+			scope:    string(ScopeWriteChannels),
 			expected: true,
 		},
 		{
@@ -113,10 +109,6 @@ func TestScopeConstants(t *testing.T) {
 	scopes := map[string]ScopeSlug{
 		"ScopeReadChannels":  ScopeReadChannels,
 		"ScopeWriteChannels": ScopeWriteChannels,
-		"ScopeReadUsers":     ScopeReadUsers,
-		"ScopeWriteUsers":    ScopeWriteUsers,
-		"ScopeReadRoles":     ScopeReadRoles,
-		"ScopeWriteRoles":    ScopeWriteRoles,
 		"ScopeReadAPIKeys":   ScopeReadAPIKeys,
 		"ScopeWriteAPIKeys":  ScopeWriteAPIKeys,
 		"ScopeReadRequests":  ScopeReadRequests,

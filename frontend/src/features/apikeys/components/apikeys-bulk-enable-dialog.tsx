@@ -20,7 +20,8 @@ export function ApiKeysBulkEnableDialog() {
       resetRowSelection();
       setSelectedApiKeys([]);
       closeDialog();
-    } catch (error) {
+    } catch {
+      // The mutation hook handles the error toast.
     }
   };
 

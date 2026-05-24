@@ -1,7 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { graphqlRequest } from '@/gql/graphql';
 import { toast } from 'sonner';
-import { getTokenFromStorage } from '@/stores/authStore';
 import i18n from '@/lib/i18n';
 import { useErrorHandler } from '@/hooks/use-error-handler';
 import type { ProxyConfig } from '@/features/channels/data/schema';
@@ -153,18 +152,6 @@ const UPDATE_WEBHOOK_NOTIFIER_CONFIG_MUTATION = `
   }
 `;
 
-const DEFAULT_DATA_STORAGE_QUERY = `
-  query DefaultDataStorageID {
-    defaultDataStorageID
-  }
-`;
-
-const UPDATE_DEFAULT_DATA_STORAGE_MUTATION = `
-  mutation UpdateDefaultDataStorage($input: UpdateDefaultDataStorageInput!) {
-    updateDefaultDataStorage(input: $input)
-  }
-`;
-
 const ONBOARDING_INFO_QUERY = `
   query OnboardingInfo {
     onboardingInfo {
@@ -231,20 +218,6 @@ export interface SystemGeneralSettings {
 export interface UpdateSystemGeneralSettingsInput {
   currencyCode?: string;
   timezone?: string;
-}
-
-export interface VideoStorageSettings {
-  enabled: boolean;
-  dataStorageID: number;
-  scanIntervalMinutes: number;
-  scanLimit: number;
-}
-
-export interface UpdateVideoStorageSettingsInput {
-  enabled?: boolean;
-  dataStorageID?: number;
-  scanIntervalMinutes?: number;
-  scanLimit?: number;
 }
 
 export interface StoragePolicy {
@@ -362,10 +335,6 @@ export interface RetryPolicyInput {
   autoDisableChannel?: AutoDisableChannelInput;
   emptyResponseDetection?: boolean;
   upstreamErrorPolicy?: Partial<UpstreamErrorPolicy>;
-}
-
-export interface UpdateDefaultDataStorageInput {
-  dataStorageID: string;
 }
 
 export interface SystemModelSettingOnboarding {
@@ -584,41 +553,6 @@ export function useUpdateWebhookNotifierConfig() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['webhookNotifierConfig'] });
-      toast.success(i18n.t('common.success.systemUpdated'));
-    },
-    onError: () => {
-      toast.error(i18n.t('common.errors.systemUpdateFailed'));
-    },
-  });
-}
-
-export function useDefaultDataStorageID() {
-  const { handleError } = useErrorHandler();
-
-  return useQuery({
-    queryKey: ['defaultDataStorageID'],
-    queryFn: async () => {
-      try {
-        const data = await graphqlRequest<{ defaultDataStorageID: string | null }>(DEFAULT_DATA_STORAGE_QUERY);
-        return data.defaultDataStorageID;
-      } catch (error) {
-        handleError(error, i18n.t('common.errors.internalServerError'));
-        throw error;
-      }
-    },
-  });
-}
-
-export function useUpdateDefaultDataStorage() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (input: UpdateDefaultDataStorageInput) => {
-      const data = await graphqlRequest<{ updateDefaultDataStorage: boolean }>(UPDATE_DEFAULT_DATA_STORAGE_MUTATION, { input });
-      return data.updateDefaultDataStorage;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['defaultDataStorageID'] });
       toast.success(i18n.t('common.success.systemUpdated'));
     },
     onError: () => {
@@ -894,23 +828,6 @@ const UPDATE_SYSTEM_GENERAL_SETTINGS_MUTATION = `
   }
 `;
 
-const VIDEO_STORAGE_SETTINGS_QUERY = `
-  query VideoStorageSettings {
-    videoStorageSettings {
-      enabled
-      dataStorageID
-      scanIntervalMinutes
-      scanLimit
-    }
-  }
-`;
-
-const UPDATE_VIDEO_STORAGE_SETTINGS_MUTATION = `
-  mutation UpdateVideoStorageSettings($input: UpdateVideoStorageSettingsInput!) {
-    updateVideoStorageSettings(input: $input)
-  }
-`;
-
 export interface ModelSettings {
   fallbackToChannelsOnModelNotFound: boolean;
   queryAllChannelModels: boolean;
@@ -1070,285 +987,6 @@ export function useUpdateGeneralSettings() {
     },
     onError: () => {
       toast.error(i18n.t('common.errors.systemUpdateFailed'));
-    },
-  });
-}
-
-export function useVideoStorageSettings() {
-  const { handleError } = useErrorHandler();
-
-  return useQuery({
-    queryKey: ['videoStorageSettings'],
-    queryFn: async () => {
-      try {
-        const data = await graphqlRequest<{ videoStorageSettings: VideoStorageSettings }>(VIDEO_STORAGE_SETTINGS_QUERY);
-        return data.videoStorageSettings;
-      } catch (error) {
-        handleError(error, i18n.t('common.errors.internalServerError'));
-        throw error;
-      }
-    },
-  });
-}
-
-export function useUpdateVideoStorageSettings() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (input: UpdateVideoStorageSettingsInput) => {
-      const data = await graphqlRequest<{ updateVideoStorageSettings: boolean }>(UPDATE_VIDEO_STORAGE_SETTINGS_MUTATION, { input });
-      return data.updateVideoStorageSettings;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['videoStorageSettings'] });
-      toast.success(i18n.t('common.success.systemUpdated'));
-    },
-    onError: () => {
-      toast.error(i18n.t('common.errors.systemUpdateFailed'));
-    },
-  });
-}
-
-// Backup and Restore
-const BACKUP_MUTATION = `
-  mutation Backup($input: BackupOptionsInput!) {
-    backup(input: $input) {
-      success
-      data
-      message
-    }
-  }
-`;
-
-const RESTORE_MUTATION = `
-  mutation Restore($file: Upload!, $input: RestoreOptionsInput!) {
-    restore(file: $file, input: $input) {
-      success
-      message
-    }
-  }
-`;
-
-export interface BackupOptionsInput {
-  includeChannels: boolean;
-  includeModelPrices: boolean;
-  includeModels: boolean;
-  includeAPIKeys: boolean;
-  includeUsageStats: boolean;
-}
-
-export interface BackupPayload {
-  success: boolean;
-  data?: string;
-  message?: string;
-}
-
-export interface RestoreOptionsInput {
-  includeChannels: boolean;
-  includeModelPrices: boolean;
-  includeModels: boolean;
-  includeAPIKeys: boolean;
-  includeUsageStats: boolean;
-  channelConflictStrategy: 'skip' | 'overwrite' | 'error';
-  modelConflictStrategy: 'skip' | 'overwrite' | 'error';
-  modelPriceConflictStrategy: 'skip' | 'overwrite' | 'error';
-  apiKeyConflictStrategy: 'skip' | 'overwrite' | 'error';
-}
-
-export interface RestorePayload {
-  success: boolean;
-  message?: string;
-}
-
-export function useBackup() {
-  return useMutation({
-    mutationFn: async (input: BackupOptionsInput) => {
-      const data = await graphqlRequest<{ backup: BackupPayload }>(BACKUP_MUTATION, { input });
-      return data.backup;
-    },
-    onSuccess: (data) => {
-      if (data.success && data.data) {
-        const blob = new Blob([data.data], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-        a.download = `axonhub-backup-${timestamp}.json`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        toast.success(data.message || i18n.t('system.backup.success'));
-      } else {
-        toast.error(data.message || i18n.t('system.backup.failed'));
-      }
-    },
-    onError: () => {
-      toast.error(i18n.t('system.backup.failed'));
-    },
-  });
-}
-
-export function useRestore() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async ({ file, input }: { file: File; input: RestoreOptionsInput }) => {
-      const formData = new FormData();
-      formData.append(
-        'operations',
-        JSON.stringify({
-          query: RESTORE_MUTATION,
-          variables: { file: null, input },
-        })
-      );
-      formData.append('map', JSON.stringify({ '0': ['variables.file'] }));
-      formData.append('0', file);
-
-      const token = getTokenFromStorage();
-      const response = await fetch('/admin/graphql', {
-        method: 'POST',
-        headers: {
-          Authorization: token ? `Bearer ${token}` : '',
-        },
-        body: formData,
-      });
-
-      const result = await response.json();
-      if (result.errors) {
-        throw new Error(result.errors[0].message);
-      }
-      return result.data.restore as RestorePayload;
-    },
-    onSuccess: (data) => {
-      if (data.success) {
-        queryClient.invalidateQueries();
-        toast.success(data.message || i18n.t('system.restore.success'));
-      } else {
-        toast.error(data.message || i18n.t('system.restore.failed'));
-      }
-    },
-    onError: (error: Error) => {
-      toast.error(error.message || i18n.t('system.restore.failed'));
-    },
-  });
-}
-
-// Auto Backup Settings
-const AUTO_BACKUP_SETTINGS_QUERY = `
-  query AutoBackupSettings {
-    autoBackupSettings {
-      enabled
-      frequency
-      dataStorageID
-      includeChannels
-      includeModels
-      includeAPIKeys
-      includeModelPrices
-      includeUsageStats
-      retentionDays
-      lastBackupAt
-      lastBackupError
-    }
-  }
-`;
-
-const UPDATE_AUTO_BACKUP_SETTINGS_MUTATION = `
-  mutation UpdateAutoBackupSettings($input: UpdateAutoBackupSettingsInput!) {
-    updateAutoBackupSettings(input: $input)
-  }
-`;
-
-const TRIGGER_AUTO_BACKUP_MUTATION = `
-  mutation TriggerAutoBackup {
-    triggerAutoBackup {
-      success
-      message
-    }
-  }
-`;
-
-export type BackupFrequency = 'daily' | 'weekly' | 'monthly';
-
-export interface AutoBackupSettings {
-  enabled: boolean;
-  frequency: BackupFrequency;
-  dataStorageID: number;
-  includeChannels: boolean;
-  includeModels: boolean;
-  includeAPIKeys: boolean;
-  includeModelPrices: boolean;
-  includeUsageStats: boolean;
-  retentionDays: number;
-  lastBackupAt?: string;
-  lastBackupError?: string;
-}
-
-export interface UpdateAutoBackupSettingsInput {
-  enabled?: boolean;
-  frequency?: BackupFrequency;
-  dataStorageID?: number;
-  includeChannels?: boolean;
-  includeModels?: boolean;
-  includeAPIKeys?: boolean;
-  includeModelPrices?: boolean;
-  includeUsageStats?: boolean;
-  retentionDays?: number;
-}
-
-export function useAutoBackupSettings() {
-  const { handleError } = useErrorHandler();
-
-  return useQuery({
-    queryKey: ['autoBackupSettings'],
-    queryFn: async () => {
-      try {
-        const data = await graphqlRequest<{ autoBackupSettings: AutoBackupSettings }>(AUTO_BACKUP_SETTINGS_QUERY);
-        return data.autoBackupSettings;
-      } catch (error) {
-        handleError(error, i18n.t('common.errors.internalServerError'));
-        throw error;
-      }
-    },
-  });
-}
-
-export function useUpdateAutoBackupSettings() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (input: UpdateAutoBackupSettingsInput) => {
-      const data = await graphqlRequest<{ updateAutoBackupSettings: boolean }>(UPDATE_AUTO_BACKUP_SETTINGS_MUTATION, { input });
-      return data.updateAutoBackupSettings;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['autoBackupSettings'] });
-      toast.success(i18n.t('common.success.systemUpdated'));
-    },
-    onError: () => {
-      toast.error(i18n.t('common.errors.systemUpdateFailed'));
-    },
-  });
-}
-
-export function useTriggerAutoBackup() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async () => {
-      const data = await graphqlRequest<{ triggerAutoBackup: { success: boolean; message?: string } }>(TRIGGER_AUTO_BACKUP_MUTATION);
-      return data.triggerAutoBackup;
-    },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['autoBackupSettings'] });
-      if (data.success) {
-        toast.success(i18n.t('system.autoBackup.triggerSuccess'));
-      } else {
-        toast.error(data.message || i18n.t('system.autoBackup.triggerFailed'));
-      }
-    },
-    onError: () => {
-      toast.error(i18n.t('system.autoBackup.triggerFailed'));
     },
   });
 }

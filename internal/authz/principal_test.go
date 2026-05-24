@@ -236,7 +236,7 @@ func TestNewUserContext(t *testing.T) {
 }
 
 func TestNewAPIKeyContext(t *testing.T) {
-	ctx := NewAPIKeyContext(context.Background(), 456, 789)
+	ctx := NewAPIKeyContext(context.Background(), 456)
 
 	p, ok := GetPrincipal(ctx)
 	if !ok {
@@ -251,9 +251,6 @@ func TestNewAPIKeyContext(t *testing.T) {
 		t.Error("api key id should be 456")
 	}
 
-	if p.ProjectID == nil || *p.ProjectID != 789 {
-		t.Error("project id should be 789")
-	}
 }
 
 func TestPrincipalEqual(t *testing.T) {
@@ -289,14 +286,14 @@ func TestPrincipalEqual(t *testing.T) {
 		},
 		{
 			name: "same apikey",
-			a:    Principal{Type: PrincipalTypeAPIKey, APIKeyID: lo.ToPtr(123), ProjectID: lo.ToPtr(456)},
-			b:    Principal{Type: PrincipalTypeAPIKey, APIKeyID: lo.ToPtr(123), ProjectID: lo.ToPtr(456)},
+			a:    Principal{Type: PrincipalTypeAPIKey, APIKeyID: lo.ToPtr(123)},
+			b:    Principal{Type: PrincipalTypeAPIKey, APIKeyID: lo.ToPtr(123)},
 			want: true,
 		},
 		{
-			name: "different project id",
-			a:    Principal{Type: PrincipalTypeAPIKey, APIKeyID: lo.ToPtr(123), ProjectID: lo.ToPtr(456)},
-			b:    Principal{Type: PrincipalTypeAPIKey, APIKeyID: lo.ToPtr(123), ProjectID: lo.ToPtr(789)},
+			name: "different api key id",
+			a:    Principal{Type: PrincipalTypeAPIKey, APIKeyID: lo.ToPtr(123)},
+			b:    Principal{Type: PrincipalTypeAPIKey, APIKeyID: lo.ToPtr(789)},
 			want: false,
 		},
 	}

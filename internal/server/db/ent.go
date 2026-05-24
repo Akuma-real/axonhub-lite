@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect"
-	"entgo.io/ent/dialect/sql/schema"
 
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/jackc/pgx/v5/stdlib"
@@ -17,8 +16,6 @@ import (
 
 	"github.com/looplj/axonhub/internal/ent"
 	"github.com/looplj/axonhub/internal/ent/migrate"
-	"github.com/looplj/axonhub/internal/ent/migrate/datamigrate"
-	"github.com/looplj/axonhub/internal/ent/migrate/schemahook"
 	_ "github.com/looplj/axonhub/internal/ent/runtime"
 	_ "github.com/looplj/axonhub/internal/pkg/sqlite"
 )
@@ -67,14 +64,8 @@ func NewEntClient(cfg Config) *ent.Client {
 		migrate.WithForeignKeys(false),
 		migrate.WithDropIndex(true),
 		migrate.WithDropColumn(true),
-		schema.WithHooks(schemahook.V0_3_0),
 	)
 	if err != nil {
-		panic(err)
-	}
-
-	migrator := datamigrate.NewMigrator(client)
-	if err := migrator.Run(context.Background()); err != nil {
 		panic(err)
 	}
 

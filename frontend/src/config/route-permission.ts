@@ -19,128 +19,25 @@ export interface RouteGroup {
 export const routeConfigs: RouteGroup[] = [
   {
     title: 'Admin',
-    scopeLevel: 'system', // Admin 路由组只能通过 system-level 权限访问
     routes: [
-      {
-        path: '/',
-        requiredScopes: ['read_dashboard'],
-        mode: 'hidden',
-      },
-      {
-        path: '/projects',
-        requiredScopes: ['read_projects'],
-        mode: 'hidden',
-      },
-      {
-        path: '/users',
-        requiredScopes: ['read_users'],
-        mode: 'hidden',
-      },
-      {
-        path: '/roles',
-        requiredScopes: ['read_roles'],
-        mode: 'hidden',
-      },
-      {
-        path: '/channels',
-        requiredScopes: ['read_channels'],
-        mode: 'hidden',
-      },
-      {
-        path: '/models',
-        requiredScopes: ['read_channels'],
-        mode: 'hidden',
-      },
-      {
-        path: '/prompt-protection-rules',
-        requiredScopes: ['read_channels'],
-        mode: 'hidden',
-      },
-      {
-        path: '/data-storages',
-        requiredScopes: ['read_data_storages'],
-        mode: 'hidden',
-      },
-      {
-        path: '/system',
-        requiredScopes: ['read_system'],
-        mode: 'hidden',
-      },
-      {
-        path: '/permission-demo',
-        // 权限演示页面所有用户都可以访问
-      },
-    ],
-  },
-  {
-    title: 'Project',
-    scopeLevel: 'any', // Project 路由组可以通过 system-level 或 project-level 权限访问
-    routes: [
-      {
-        path: '/project/api-keys',
-        requiredScopes: ['read_api_keys'],
-        mode: 'hidden',
-      },
-      {
-        path: '/project/prompts',
-        requiredScopes: ['read_prompts'],
-        mode: 'hidden',
-      },
-      {
-        path: '/project/requests',
-        requiredScopes: ['read_requests'],
-        mode: 'hidden',
-      },
-      {
-        path: '/project/usage-logs',
-        requiredScopes: ['read_requests'],
-        mode: 'hidden',
-      },
-      {
-        path: '/project/traces',
-        requiredScopes: ['read_requests'],
-        mode: 'hidden',
-      },
-      {
-        path: '/project/threads',
-        requiredScopes: ['read_requests'],
-        mode: 'hidden',
-      },
-      {
-        path: '/project/users',
-        requiredScopes: ['read_users'],
-        mode: 'hidden',
-      },
-      {
-        path: '/project/roles',
-        requiredScopes: ['read_roles'],
-        mode: 'hidden',
-      },
-      {
-        path: '/project/playground',
-        // Playground is accessible to all users
-      },
+      { path: '/' },
+      { path: '/channels' },
+      { path: '/models' },
+      { path: '/api-keys' },
+      { path: '/requests' },
+      { path: '/traces' },
+      { path: '/threads' },
+      { path: '/playground' },
     ],
   },
   {
     title: 'Settings',
     routes: [
-      {
-        path: '/settings',
-        // Profile 设置所有用户都可以访问
-      },
-      {
-        path: '/settings/profile',
-        // Profile 设置所有用户都可以访问
-      },
-      {
-        path: '/settings/appearance',
-        // Appearance 设置所有用户都可以访问
-      },
-      {
-        path: '/settings/notifications',
-        // Notifications 设置所有用户都可以访问
-      },
+      { path: '/system' },
+      { path: '/settings' },
+      { path: '/settings/profile' },
+      { path: '/settings/appearance' },
+      { path: '/settings/notifications' },
     ],
   },
 ];

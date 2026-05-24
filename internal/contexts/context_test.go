@@ -12,10 +12,9 @@ import (
 func TestWithAPIKey(t *testing.T) {
 	ctx := t.Context()
 	apiKey := &ent.APIKey{
-		ID:     1,
-		UserID: 123,
-		Key:    "sk-1234567890abcdef",
-		Name:   "test-key",
+		ID:   1,
+		Key:  "sk-1234567890abcdef",
+		Name: "test-key",
 	}
 
 	// Test storing API key entity
@@ -36,10 +35,6 @@ func TestWithAPIKey(t *testing.T) {
 
 	if retrievedKey.ID != apiKey.ID {
 		t.Errorf("expected ID %d, got %d", apiKey.ID, retrievedKey.ID)
-	}
-
-	if retrievedKey.UserID != apiKey.UserID {
-		t.Errorf("expected UserID %d, got %d", apiKey.UserID, retrievedKey.UserID)
 	}
 
 	if retrievedKey.Key != apiKey.Key {
@@ -281,53 +276,6 @@ func TestGetOperationName(t *testing.T) {
 	}
 }
 
-func TestWithProjectID(t *testing.T) {
-	ctx := t.Context()
-	projectID := 123
-
-	// Test storing project ID
-	newCtx := WithProjectID(ctx, projectID)
-	if newCtx == ctx {
-		t.Error("WithProjectID should return a new context")
-	}
-
-	// Test retrieving project ID
-	retrievedProjectID, ok := GetProjectID(newCtx)
-	if !ok {
-		t.Error("GetProjectID should return true for existing project ID")
-	}
-
-	if retrievedProjectID != projectID {
-		t.Errorf("expected project ID %d, got %d", projectID, retrievedProjectID)
-	}
-}
-
-func TestGetProjectID(t *testing.T) {
-	ctx := t.Context()
-
-	// Test retrieving project ID from empty context
-	projectID, ok := GetProjectID(ctx)
-	if ok {
-		t.Error("GetProjectID should return false for empty context")
-	}
-
-	if projectID != 0 {
-		t.Error("GetProjectID should return 0 for empty context")
-	}
-
-	// Test retrieving project ID from context with other values
-	ctxWithOtherValue := context.WithValue(ctx, "other_key", "other_value")
-
-	projectID, ok = GetProjectID(ctxWithOtherValue)
-	if ok {
-		t.Error("GetProjectID should return false for context without project ID")
-	}
-
-	if projectID != 0 {
-		t.Error("GetProjectID should return 0 for context without project ID")
-	}
-}
-
 func TestWithSource(t *testing.T) {
 	ctx := t.Context()
 	source := request.SourcePlayground
@@ -408,7 +356,6 @@ func TestContextContainerMultipleValues(t *testing.T) {
 	ctx = WithTraceID(ctx, "trace-123")
 	ctx = WithRequestID(ctx, "req-456")
 	ctx = WithOperationName(ctx, "test.operation")
-	ctx = WithProjectID(ctx, 456)
 	ctx = WithSource(ctx, request.SourcePlayground)
 
 	// Test retrieving all values
@@ -435,11 +382,6 @@ func TestContextContainerMultipleValues(t *testing.T) {
 	operationName, ok := GetOperationName(ctx)
 	if !ok || operationName != "test.operation" {
 		t.Error("Operation name should be stored and retrievable")
-	}
-
-	projectID, ok := GetProjectID(ctx)
-	if !ok || projectID != 456 {
-		t.Error("Project ID should be stored and retrievable")
 	}
 
 	source, ok := GetSource(ctx)

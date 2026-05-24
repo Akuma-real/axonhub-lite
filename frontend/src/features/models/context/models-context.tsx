@@ -1,6 +1,11 @@
 import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
 import { Model } from '../data/schema';
 
+export interface PendingModelAssociation {
+  channelId: number;
+  modelId: string;
+}
+
 type DialogType =
   | 'create'
   | 'batchCreate'
@@ -22,6 +27,8 @@ interface ModelsContextType {
   setCurrentRow: (row: Model | null) => void;
   currentDeveloper: string | null;
   setCurrentDeveloper: (developer: string | null) => void;
+  pendingAssociation: PendingModelAssociation | null;
+  setPendingAssociation: (association: PendingModelAssociation | null) => void;
   selectedModels: Model[];
   setSelectedModels: (models: Model[]) => void;
   resetRowSelection: (() => void) | null;
@@ -34,6 +41,7 @@ export function ModelsProvider({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState<DialogType>(null);
   const [currentRow, setCurrentRow] = useState<Model | null>(null);
   const [currentDeveloper, setCurrentDeveloper] = useState<string | null>(null);
+  const [pendingAssociation, setPendingAssociation] = useState<PendingModelAssociation | null>(null);
   const [selectedModels, setSelectedModels] = useState<Model[]>([]);
   const [resetRowSelection, setResetRowSelection] = useState<(() => void) | null>(null);
 
@@ -47,6 +55,10 @@ export function ModelsProvider({ children }: { children: React.ReactNode }) {
 
   const handleSetCurrentDeveloper = useCallback((developer: string | null) => {
     setCurrentDeveloper(developer);
+  }, []);
+
+  const handleSetPendingAssociation = useCallback((association: PendingModelAssociation | null) => {
+    setPendingAssociation(association);
   }, []);
 
   const handleSetSelectedModels = useCallback((models: Model[]) => {
@@ -65,6 +77,8 @@ export function ModelsProvider({ children }: { children: React.ReactNode }) {
       setCurrentRow: handleSetCurrentRow,
       currentDeveloper,
       setCurrentDeveloper: handleSetCurrentDeveloper,
+      pendingAssociation,
+      setPendingAssociation: handleSetPendingAssociation,
       selectedModels,
       setSelectedModels: handleSetSelectedModels,
       resetRowSelection,
@@ -77,6 +91,8 @@ export function ModelsProvider({ children }: { children: React.ReactNode }) {
       handleSetCurrentRow,
       currentDeveloper,
       handleSetCurrentDeveloper,
+      pendingAssociation,
+      handleSetPendingAssociation,
       selectedModels,
       handleSetSelectedModels,
       resetRowSelection,

@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, ReactNode } from 'react';
-import { Trace, RequestTrace, Span } from '../data/schema';
+import { Trace, Segment, Span } from '../data/schema';
 
 interface TracesContextType {
   // Dialog states
@@ -22,8 +22,8 @@ interface TracesContextType {
   currentTrace: Trace | null;
   setCurrentTrace: (trace: Trace | null) => void;
 
-  currentRequestTrace: RequestTrace | null;
-  setCurrentRequestTrace: (requestTrace: RequestTrace | null) => void;
+  currentRequestTrace: Segment | null;
+  setCurrentRequestTrace: (requestTrace: Segment | null) => void;
 
   currentSpan: Span | null;
   setCurrentSpan: (span: Span | null) => void;
@@ -45,7 +45,7 @@ export default function TracesProvider({ children }: TracesProviderProps) {
   const [jsonViewerData, setJsonViewerData] = useState<{ title: string; data: any } | null>(null);
   const [spanDetailOpen, setSpanDetailOpen] = useState(false);
   const [currentTrace, setCurrentTrace] = useState<Trace | null>(null);
-  const [currentRequestTrace, setCurrentRequestTrace] = useState<RequestTrace | null>(null);
+  const [currentRequestTrace, setCurrentRequestTrace] = useState<Segment | null>(null);
   const [currentSpan, setCurrentSpan] = useState<Span | null>(null);
   const [selectedTraces, setSelectedTraces] = useState<string[]>([]);
 

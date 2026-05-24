@@ -1305,19 +1305,17 @@ export function useBulkImportChannels() {
   });
 }
 
-export function useAllChannelSummarys(projectId?: string | null, options?: { enabled?: boolean; includeArchived?: boolean }) {
+export function useAllChannelSummarys(_projectId?: string | null, options?: { enabled?: boolean; includeArchived?: boolean }) {
   const { handleError } = useErrorHandler();
   const { t } = useTranslation();
 
   return useQuery({
-    queryKey: ['allChannelSummarys', projectId, options?.includeArchived],
+    queryKey: ['allChannelSummarys', options?.includeArchived],
     queryFn: async () => {
       try {
-        const headers = projectId ? { 'X-Project-ID': projectId } : undefined;
         const data = await graphqlRequest<{ allChannelSummarys: ChannelSummaryConnection['edges'][number]['node'][] }>(
           ALL_CHANNEL_SUMMARYS_QUERY,
-          { includeArchived: options?.includeArchived },
-          headers
+          { includeArchived: options?.includeArchived }
         );
         return channelSummaryConnectionSchema.parse({
           edges: (data?.allChannelSummarys || []).map((node) => ({ node })),
@@ -1490,16 +1488,15 @@ export function useErrorChannelsCount() {
   });
 }
 
-export function useAllChannelTags(projectId?: string | null) {
+export function useAllChannelTags(_projectId?: string | null) {
   const { handleError } = useErrorHandler();
   const { t } = useTranslation();
 
   return useQuery({
-    queryKey: ['allChannelTags', projectId],
+    queryKey: ['allChannelTags'],
     queryFn: async () => {
       try {
-        const headers = projectId ? { 'X-Project-ID': projectId } : undefined;
-        const data = await graphqlRequest<{ allChannelTags: string[] }>(ALL_CHANNEL_TAGS_QUERY, undefined, headers);
+        const data = await graphqlRequest<{ allChannelTags: string[] }>(ALL_CHANNEL_TAGS_QUERY);
         return data.allChannelTags || [];
       } catch (error) {
         handleError(error, t('common.errors.internalServerError'));

@@ -65,11 +65,6 @@ func UpdatedAt(v time.Time) predicate.RequestExecution {
 	return predicate.RequestExecution(sql.FieldEQ(FieldUpdatedAt, v))
 }
 
-// ProjectID applies equality check predicate on the "project_id" field. It's identical to ProjectIDEQ.
-func ProjectID(v int) predicate.RequestExecution {
-	return predicate.RequestExecution(sql.FieldEQ(FieldProjectID, v))
-}
-
 // RequestID applies equality check predicate on the "request_id" field. It's identical to RequestIDEQ.
 func RequestID(v int) predicate.RequestExecution {
 	return predicate.RequestExecution(sql.FieldEQ(FieldRequestID, v))
@@ -78,11 +73,6 @@ func RequestID(v int) predicate.RequestExecution {
 // ChannelID applies equality check predicate on the "channel_id" field. It's identical to ChannelIDEQ.
 func ChannelID(v int) predicate.RequestExecution {
 	return predicate.RequestExecution(sql.FieldEQ(FieldChannelID, v))
-}
-
-// DataStorageID applies equality check predicate on the "data_storage_id" field. It's identical to DataStorageIDEQ.
-func DataStorageID(v int) predicate.RequestExecution {
-	return predicate.RequestExecution(sql.FieldEQ(FieldDataStorageID, v))
 }
 
 // ExternalID applies equality check predicate on the "external_id" field. It's identical to ExternalIDEQ.
@@ -210,46 +200,6 @@ func UpdatedAtLTE(v time.Time) predicate.RequestExecution {
 	return predicate.RequestExecution(sql.FieldLTE(FieldUpdatedAt, v))
 }
 
-// ProjectIDEQ applies the EQ predicate on the "project_id" field.
-func ProjectIDEQ(v int) predicate.RequestExecution {
-	return predicate.RequestExecution(sql.FieldEQ(FieldProjectID, v))
-}
-
-// ProjectIDNEQ applies the NEQ predicate on the "project_id" field.
-func ProjectIDNEQ(v int) predicate.RequestExecution {
-	return predicate.RequestExecution(sql.FieldNEQ(FieldProjectID, v))
-}
-
-// ProjectIDIn applies the In predicate on the "project_id" field.
-func ProjectIDIn(vs ...int) predicate.RequestExecution {
-	return predicate.RequestExecution(sql.FieldIn(FieldProjectID, vs...))
-}
-
-// ProjectIDNotIn applies the NotIn predicate on the "project_id" field.
-func ProjectIDNotIn(vs ...int) predicate.RequestExecution {
-	return predicate.RequestExecution(sql.FieldNotIn(FieldProjectID, vs...))
-}
-
-// ProjectIDGT applies the GT predicate on the "project_id" field.
-func ProjectIDGT(v int) predicate.RequestExecution {
-	return predicate.RequestExecution(sql.FieldGT(FieldProjectID, v))
-}
-
-// ProjectIDGTE applies the GTE predicate on the "project_id" field.
-func ProjectIDGTE(v int) predicate.RequestExecution {
-	return predicate.RequestExecution(sql.FieldGTE(FieldProjectID, v))
-}
-
-// ProjectIDLT applies the LT predicate on the "project_id" field.
-func ProjectIDLT(v int) predicate.RequestExecution {
-	return predicate.RequestExecution(sql.FieldLT(FieldProjectID, v))
-}
-
-// ProjectIDLTE applies the LTE predicate on the "project_id" field.
-func ProjectIDLTE(v int) predicate.RequestExecution {
-	return predicate.RequestExecution(sql.FieldLTE(FieldProjectID, v))
-}
-
 // RequestIDEQ applies the EQ predicate on the "request_id" field.
 func RequestIDEQ(v int) predicate.RequestExecution {
 	return predicate.RequestExecution(sql.FieldEQ(FieldRequestID, v))
@@ -298,36 +248,6 @@ func ChannelIDIsNil() predicate.RequestExecution {
 // ChannelIDNotNil applies the NotNil predicate on the "channel_id" field.
 func ChannelIDNotNil() predicate.RequestExecution {
 	return predicate.RequestExecution(sql.FieldNotNull(FieldChannelID))
-}
-
-// DataStorageIDEQ applies the EQ predicate on the "data_storage_id" field.
-func DataStorageIDEQ(v int) predicate.RequestExecution {
-	return predicate.RequestExecution(sql.FieldEQ(FieldDataStorageID, v))
-}
-
-// DataStorageIDNEQ applies the NEQ predicate on the "data_storage_id" field.
-func DataStorageIDNEQ(v int) predicate.RequestExecution {
-	return predicate.RequestExecution(sql.FieldNEQ(FieldDataStorageID, v))
-}
-
-// DataStorageIDIn applies the In predicate on the "data_storage_id" field.
-func DataStorageIDIn(vs ...int) predicate.RequestExecution {
-	return predicate.RequestExecution(sql.FieldIn(FieldDataStorageID, vs...))
-}
-
-// DataStorageIDNotIn applies the NotIn predicate on the "data_storage_id" field.
-func DataStorageIDNotIn(vs ...int) predicate.RequestExecution {
-	return predicate.RequestExecution(sql.FieldNotIn(FieldDataStorageID, vs...))
-}
-
-// DataStorageIDIsNil applies the IsNil predicate on the "data_storage_id" field.
-func DataStorageIDIsNil() predicate.RequestExecution {
-	return predicate.RequestExecution(sql.FieldIsNull(FieldDataStorageID))
-}
-
-// DataStorageIDNotNil applies the NotNil predicate on the "data_storage_id" field.
-func DataStorageIDNotNil() predicate.RequestExecution {
-	return predicate.RequestExecution(sql.FieldNotNull(FieldDataStorageID))
 }
 
 // ExternalIDEQ applies the EQ predicate on the "external_id" field.
@@ -908,29 +828,6 @@ func HasChannel() predicate.RequestExecution {
 func HasChannelWith(preds ...predicate.Channel) predicate.RequestExecution {
 	return predicate.RequestExecution(func(s *sql.Selector) {
 		step := newChannelStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
-// HasDataStorage applies the HasEdge predicate on the "data_storage" edge.
-func HasDataStorage() predicate.RequestExecution {
-	return predicate.RequestExecution(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, DataStorageTable, DataStorageColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasDataStorageWith applies the HasEdge predicate on the "data_storage" edge with a given conditions (other predicates).
-func HasDataStorageWith(preds ...predicate.DataStorage) predicate.RequestExecution {
-	return predicate.RequestExecution(func(s *sql.Selector) {
-		step := newDataStorageStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

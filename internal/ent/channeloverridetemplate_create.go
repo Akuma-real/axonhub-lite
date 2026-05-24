@@ -12,7 +12,6 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/looplj/axonhub/internal/ent/channeloverridetemplate"
-	"github.com/looplj/axonhub/internal/ent/user"
 	"github.com/looplj/axonhub/internal/objects"
 )
 
@@ -62,20 +61,6 @@ func (_c *ChannelOverrideTemplateCreate) SetDeletedAt(v int) *ChannelOverrideTem
 func (_c *ChannelOverrideTemplateCreate) SetNillableDeletedAt(v *int) *ChannelOverrideTemplateCreate {
 	if v != nil {
 		_c.SetDeletedAt(*v)
-	}
-	return _c
-}
-
-// SetUserID sets the "user_id" field.
-func (_c *ChannelOverrideTemplateCreate) SetUserID(v int) *ChannelOverrideTemplateCreate {
-	_c.mutation.SetUserID(v)
-	return _c
-}
-
-// SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (_c *ChannelOverrideTemplateCreate) SetNillableUserID(v *int) *ChannelOverrideTemplateCreate {
-	if v != nil {
-		_c.SetUserID(*v)
 	}
 	return _c
 }
@@ -130,11 +115,6 @@ func (_c *ChannelOverrideTemplateCreate) SetHeaderOverrideOperations(v []objects
 func (_c *ChannelOverrideTemplateCreate) SetBodyOverrideOperations(v []objects.OverrideOperation) *ChannelOverrideTemplateCreate {
 	_c.mutation.SetBodyOverrideOperations(v)
 	return _c
-}
-
-// SetUser sets the "user" edge to the User entity.
-func (_c *ChannelOverrideTemplateCreate) SetUser(v *User) *ChannelOverrideTemplateCreate {
-	return _c.SetUserID(v.ID)
 }
 
 // Mutation returns the ChannelOverrideTemplateMutation object of the builder.
@@ -295,23 +275,6 @@ func (_c *ChannelOverrideTemplateCreate) createSpec() (*ChannelOverrideTemplate,
 	if value, ok := _c.mutation.BodyOverrideOperations(); ok {
 		_spec.SetField(channeloverridetemplate.FieldBodyOverrideOperations, field.TypeJSON, value)
 		_node.BodyOverrideOperations = value
-	}
-	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   channeloverridetemplate.UserTable,
-			Columns: []string{channeloverridetemplate.UserColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.UserID = nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }
@@ -498,9 +461,6 @@ func (u *ChannelOverrideTemplateUpsertOne) UpdateNewValues() *ChannelOverrideTem
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
 		if _, exists := u.create.mutation.CreatedAt(); exists {
 			s.SetIgnore(channeloverridetemplate.FieldCreatedAt)
-		}
-		if _, exists := u.create.mutation.UserID(); exists {
-			s.SetIgnore(channeloverridetemplate.FieldUserID)
 		}
 	}))
 	return u
@@ -851,9 +811,6 @@ func (u *ChannelOverrideTemplateUpsertBulk) UpdateNewValues() *ChannelOverrideTe
 		for _, b := range u.create.builders {
 			if _, exists := b.mutation.CreatedAt(); exists {
 				s.SetIgnore(channeloverridetemplate.FieldCreatedAt)
-			}
-			if _, exists := b.mutation.UserID(); exists {
-				s.SetIgnore(channeloverridetemplate.FieldUserID)
 			}
 		}
 	}))

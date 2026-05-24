@@ -14,6 +14,11 @@ import (
 	"github.com/looplj/axonhub/internal/ent"
 )
 
+const (
+	axonHubLiteGitHubRepo = "akuma-real/axonhub-lite"
+	axonHubLiteGitHubURL  = "https://github.com/" + axonHubLiteGitHubRepo
+)
+
 // Version retrieves the system version from system settings.
 // Returns empty string if not set.
 func (s *SystemService) Version(ctx context.Context) (string, error) {
@@ -42,7 +47,7 @@ type VersionCheckResult struct {
 	ReleaseURL     string `json:"release_url"`
 }
 
-// CheckForUpdate checks if there is a newer version available on GitHub.
+// CheckForUpdate checks if there is a newer AxonHub Lite version available on GitHub.
 func (s *SystemService) CheckForUpdate(ctx context.Context) (*VersionCheckResult, error) {
 	currentVersion := build.Version
 
@@ -52,7 +57,7 @@ func (s *SystemService) CheckForUpdate(ctx context.Context) (*VersionCheckResult
 	}
 
 	hasUpdate := s.isNewerVersion(currentVersion, latestVersion)
-	releaseURL := fmt.Sprintf("https://github.com/looplj/axonhub/releases/tag/%s", latestVersion)
+	releaseURL := fmt.Sprintf("%s/releases/tag/%s", axonHubLiteGitHubURL, latestVersion)
 
 	return &VersionCheckResult{
 		CurrentVersion: currentVersion,
@@ -85,11 +90,10 @@ type GitHubRelease struct {
 // This accounts for build and upload time.
 const releaseCooldownDuration = 30 * time.Minute
 
-// FetchLatestGitHubRelease fetches the latest stable release tag from GitHub for the axonhub service.
+// FetchLatestGitHubRelease fetches the latest stable release tag from GitHub for AxonHub Lite.
 // It skips beta, rc, and prerelease versions, and waits for a cooldown period after release.
-// In monorepo mode, it only considers tags matching "vX.Y.Z" (no service prefix).
 func FetchLatestGitHubRelease(ctx context.Context) (string, error) {
-	baseURL := "https://api.github.com/repos/looplj/axonhub/releases"
+	baseURL := fmt.Sprintf("https://api.github.com/repos/%s/releases", axonHubLiteGitHubRepo)
 
 	u, err := url.Parse(baseURL)
 	if err != nil {
@@ -138,7 +142,7 @@ func FetchLatestGitHubRelease(ctx context.Context) (string, error) {
 			continue
 		}
 
-		// Only consider axonhub tags (vX.Y.Z format, skip service-prefixed tags like "axonclaw/v1.0.0")
+		// Only consider AxonHub Lite tags starting with "v".
 		if !isAxonHubTag(release.TagName) {
 			continue
 		}

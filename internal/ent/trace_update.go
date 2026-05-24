@@ -133,14 +133,6 @@ func (_u *TraceUpdate) defaults() error {
 	return nil
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (_u *TraceUpdate) check() error {
-	if _u.mutation.ProjectCleared() && len(_u.mutation.ProjectIDs()) > 0 {
-		return errors.New(`ent: clearing a required unique edge "Trace.project"`)
-	}
-	return nil
-}
-
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
 func (_u *TraceUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *TraceUpdate {
 	_u.modifiers = append(_u.modifiers, modifiers...)
@@ -148,9 +140,6 @@ func (_u *TraceUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *TraceUpd
 }
 
 func (_u *TraceUpdate) sqlSave(ctx context.Context) (_node int, err error) {
-	if err := _u.check(); err != nil {
-		return _node, err
-	}
 	_spec := sqlgraph.NewUpdateSpec(trace.Table, trace.Columns, sqlgraph.NewFieldSpec(trace.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -348,14 +337,6 @@ func (_u *TraceUpdateOne) defaults() error {
 	return nil
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (_u *TraceUpdateOne) check() error {
-	if _u.mutation.ProjectCleared() && len(_u.mutation.ProjectIDs()) > 0 {
-		return errors.New(`ent: clearing a required unique edge "Trace.project"`)
-	}
-	return nil
-}
-
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
 func (_u *TraceUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *TraceUpdateOne {
 	_u.modifiers = append(_u.modifiers, modifiers...)
@@ -363,9 +344,6 @@ func (_u *TraceUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *Trace
 }
 
 func (_u *TraceUpdateOne) sqlSave(ctx context.Context) (_node *Trace, err error) {
-	if err := _u.check(); err != nil {
-		return _node, err
-	}
 	_spec := sqlgraph.NewUpdateSpec(trace.Table, trace.Columns, sqlgraph.NewFieldSpec(trace.FieldID, field.TypeInt))
 	id, ok := _u.mutation.ID()
 	if !ok {

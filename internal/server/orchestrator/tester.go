@@ -33,7 +33,6 @@ type TestChannelOrchestrator struct {
 	requestService              *biz.RequestService
 	systemService               *biz.SystemService
 	usageLogService             *biz.UsageLogService
-	promptProtectionRuleService *biz.PromptProtectionRuleService
 	httpClient                  *httpclient.HttpClient
 	modelCircuitBreaker         *biz.ModelCircuitBreaker
 	modelMapper                 *ModelMapper
@@ -47,20 +46,18 @@ func NewTestChannelOrchestrator(
 	requestService *biz.RequestService,
 	systemService *biz.SystemService,
 	usageLogService *biz.UsageLogService,
-	promptProtectionRuleService *biz.PromptProtectionRuleService,
 	httpClient *httpclient.HttpClient,
 ) *TestChannelOrchestrator {
 	return &TestChannelOrchestrator{
-		channelService:              channelService,
-		requestService:              requestService,
-		systemService:               systemService,
-		usageLogService:             usageLogService,
-		promptProtectionRuleService: promptProtectionRuleService,
-		httpClient:                  httpClient,
-		modelCircuitBreaker:         biz.NewModelCircuitBreaker(),
-		modelMapper:                 NewModelMapper(),
-		loadBalancer:                NewLoadBalancer(systemService, channelService, NewWeightStrategy()),
-		channelLimiterManager:      NewChannelLimiterManager(),
+		channelService:         channelService,
+		requestService:         requestService,
+		systemService:          systemService,
+		usageLogService:        usageLogService,
+		httpClient:             httpClient,
+		modelCircuitBreaker:    biz.NewModelCircuitBreaker(),
+		modelMapper:            NewModelMapper(),
+		loadBalancer:           NewLoadBalancer(systemService, channelService, NewWeightStrategy()),
+		channelLimiterManager: NewChannelLimiterManager(),
 	}
 }
 
@@ -91,8 +88,6 @@ func (processor *TestChannelOrchestrator) TestChannel(
 		channelSelector: NewSpecifiedChannelSelector(processor.channelService, channelID),
 		RequestService:  processor.requestService,
 		ChannelService:  processor.channelService,
-		PromptProvider:  &stubPromptProvider{},
-		PromptProtecter: processor.promptProtectionRuleService,
 		PipelineFactory: pipeline.NewFactory(processor.httpClient),
 		Middlewares: []pipeline.Middleware{
 			stream.EnsureUsage(),
@@ -423,8 +418,6 @@ func (processor *TestChannelOrchestrator) testSingleKey(
 		channelSelector: NewSpecifiedChannelSelector(processor.channelService, channelID),
 		RequestService:  processor.requestService,
 		ChannelService:  processor.channelService,
-		PromptProvider:  &stubPromptProvider{},
-		PromptProtecter: processor.promptProtectionRuleService,
 		PipelineFactory: pipeline.NewFactory(processor.httpClient),
 		Middlewares: []pipeline.Middleware{
 			stream.EnsureUsage(),

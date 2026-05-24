@@ -3,7 +3,6 @@ package authz
 import (
 	"context"
 	"fmt"
-	"slices"
 
 	"github.com/samber/lo"
 
@@ -67,36 +66,10 @@ func RequireScope(ctx context.Context, requiredScope scopes.ScopeSlug) error {
 
 func userHasScope(ctx context.Context, requiredScope scopes.ScopeSlug) bool {
 	user, ok := contexts.GetUser(ctx)
-	if !ok || user == nil {
-		return false
-	}
-
-	if user.IsOwner {
-		return true
-	}
-
-	if slices.Contains(user.Scopes, string(requiredScope)) {
-		return true
-	}
-
-	for _, role := range user.Edges.Roles {
-		if !role.IsSystemRole() {
-			continue
-		}
-
-		if slices.Contains(role.Scopes, string(requiredScope)) {
-			return true
-		}
-	}
-
-	return false
+	return ok && user != nil && user.IsOwner
 }
 
 func apiKeyHasScope(ctx context.Context, requiredScope scopes.ScopeSlug) bool {
 	apiKey, ok := contexts.GetAPIKey(ctx)
-	if !ok || apiKey == nil {
-		return false
-	}
-
-	return slices.Contains(apiKey.Scopes, string(requiredScope))
+	return ok && apiKey != nil
 }

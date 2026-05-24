@@ -1,17 +1,14 @@
 import {
-  IconLayoutDashboard,
-  IconPackages,
-  IconSettings,
-  IconUsers,
-  IconRobot,
-  IconShield,
-  IconKey,
-  IconActivity,
-  IconDatabase,
   IconAB2,
-  IconBaselineDensityMedium,
+  IconActivity,
   IconAi,
-  IconNote,
+  IconBaselineDensityMedium,
+  IconKey,
+  IconLayoutDashboard,
+  IconPlayerPlay,
+  IconRobot,
+  IconSettings,
+  IconUserCircle,
 } from '@tabler/icons-react';
 import { Command } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -58,7 +55,6 @@ export function useSidebarData(): SidebarData {
     return 'User';
   };
 
-  // 原始导航组配置
   const rawNavGroups: NavGroup[] = [
     {
       title: t('sidebar.groups.admin'),
@@ -67,11 +63,6 @@ export function useSidebarData(): SidebarData {
           title: t('sidebar.items.dashboard'),
           url: '/',
           icon: IconLayoutDashboard,
-        } as NavLink,
-        {
-          title: t('sidebar.items.projects'),
-          url: '/projects',
-          icon: IconPackages,
         } as NavLink,
         {
           title: t('sidebar.items.channels'),
@@ -84,80 +75,29 @@ export function useSidebarData(): SidebarData {
           icon: IconRobot,
         } as NavLink,
         {
-          title: t('sidebar.items.promptProtectionRules'),
-          url: '/prompt-protection-rules',
-          icon: IconShield,
-        } as NavLink,
-        {
-          title: t('sidebar.items.dataStorages'),
-          url: '/data-storages',
-          icon: IconDatabase,
-        } as NavLink,
-        {
-          title: t('sidebar.items.users'),
-          url: '/users',
-          icon: IconUsers,
-        } as NavLink,
-        {
-          title: t('sidebar.items.roles'),
-          url: '/roles',
-          icon: IconShield,
-        } as NavLink,
-        // {
-        //   title: 'Permission Demo',
-        //   url: '/permission-demo',
-        //   icon: IconSettings,
-        // } as NavLink,
-      ],
-    },
-    {
-      title: t('sidebar.groups.project'),
-      items: [
-        {
           title: t('sidebar.items.apiKeys'),
-          url: '/project/api-keys',
+          url: '/api-keys',
           icon: IconKey,
         } as NavLink,
         {
-          title: t('sidebar.items.prompts'),
-          url: '/project/prompts',
-          icon: IconNote,
-        } as NavLink,
-        {
           title: t('sidebar.items.requests'),
-          url: '/project/requests',
+          url: '/requests',
           icon: IconActivity,
         } as NavLink,
-        // {
-        //   title: t('sidebar.items.usageLogs'),
-        //   url: '/project/usage-logs',
-        //   icon: IconActivityHeartbeat,
-        // } as NavLink,
         {
           title: t('sidebar.items.traces'),
-          url: '/project/traces',
+          url: '/traces',
           icon: IconAB2,
         } as NavLink,
         {
           title: t('sidebar.items.threads'),
-          url: '/project/threads',
+          url: '/threads',
           icon: IconBaselineDensityMedium,
-        } as NavLink,
-
-        {
-          title: t('sidebar.items.users'),
-          url: '/project/users',
-          icon: IconUsers,
-        } as NavLink,
-        {
-          title: t('sidebar.items.roles'),
-          url: '/project/roles',
-          icon: IconShield,
         } as NavLink,
         {
           title: t('sidebar.items.playground'),
-          url: '/project/playground',
-          icon: IconRobot,
+          url: '/playground',
+          icon: IconPlayerPlay,
         } as NavLink,
       ],
     },
@@ -168,28 +108,16 @@ export function useSidebarData(): SidebarData {
           title: t('sidebar.items.system'),
           url: '/system',
           icon: IconSettings,
-          mobileOnly: true,
         } as NavLink,
-        // {
-        //   title: 'Account',
-        //   url: '/settings/account',
-        //   icon: IconTool,
-        // } as NavLink,
-        // {
-        //   title: 'Appearance',
-        //   url: '/settings/appearance',
-        //   icon: IconPalette,
-        // } as NavLink,
-        // {
-        //   title: 'Notifications',
-        //   url: '/settings/notifications',
-        //   icon: IconNotification,
-        // } as NavLink,
+        {
+          title: t('profile.title'),
+          url: '/settings/profile',
+          icon: IconUserCircle,
+        } as NavLink,
       ],
     },
   ];
 
-  // 使用权限过滤导航组
   const filteredNavGroups = filterNavGroups(rawNavGroups);
 
   return {

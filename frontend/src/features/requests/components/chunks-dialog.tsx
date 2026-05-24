@@ -38,8 +38,8 @@ export function ChunksDialog({ open, onOpenChange, chunks, title, isLive }: Chun
       await navigator.clipboard.writeText(JSON.stringify(chunks, null, 2));
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.error('Failed to copy:', err);
+    } catch {
+      // Clipboard failures are non-fatal.
     }
   };
 
@@ -54,8 +54,8 @@ export function ChunksDialog({ open, onOpenChange, chunks, title, isLive }: Chun
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error('Failed to download:', err);
+    } catch {
+      // Download failures are non-fatal.
     }
   };
 
@@ -116,7 +116,7 @@ export function ChunksDialog({ open, onOpenChange, chunks, title, isLive }: Chun
         setPageInputValue('1');
       }
     }
-  }, [open, chunks.length, isLive, pageSize]);
+  }, [open, chunks.length, isLive, pageSize, totalChunksPages]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

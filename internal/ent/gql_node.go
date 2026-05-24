@@ -15,29 +15,20 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/hashicorp/go-multierror"
 	"github.com/looplj/axonhub/internal/ent/apikey"
-	"github.com/looplj/axonhub/internal/ent/apikeyprofiletemplate"
 	"github.com/looplj/axonhub/internal/ent/channel"
 	"github.com/looplj/axonhub/internal/ent/channelmodelprice"
 	"github.com/looplj/axonhub/internal/ent/channelmodelpriceversion"
 	"github.com/looplj/axonhub/internal/ent/channeloverridetemplate"
 	"github.com/looplj/axonhub/internal/ent/channelprobe"
-	"github.com/looplj/axonhub/internal/ent/datastorage"
 	"github.com/looplj/axonhub/internal/ent/model"
-	"github.com/looplj/axonhub/internal/ent/oidcidentity"
-	"github.com/looplj/axonhub/internal/ent/project"
-	"github.com/looplj/axonhub/internal/ent/prompt"
-	"github.com/looplj/axonhub/internal/ent/promptprotectionrule"
 	"github.com/looplj/axonhub/internal/ent/providerquotastatus"
 	"github.com/looplj/axonhub/internal/ent/request"
 	"github.com/looplj/axonhub/internal/ent/requestexecution"
-	"github.com/looplj/axonhub/internal/ent/role"
 	"github.com/looplj/axonhub/internal/ent/system"
 	"github.com/looplj/axonhub/internal/ent/thread"
 	"github.com/looplj/axonhub/internal/ent/trace"
 	"github.com/looplj/axonhub/internal/ent/usagelog"
 	"github.com/looplj/axonhub/internal/ent/user"
-	"github.com/looplj/axonhub/internal/ent/userproject"
-	"github.com/looplj/axonhub/internal/ent/userrole"
 	"golang.org/x/sync/semaphore"
 )
 
@@ -51,11 +42,6 @@ var apikeyImplementors = []string{"APIKey", "Node"}
 
 // IsNode implements the Node interface check for GQLGen.
 func (*APIKey) IsNode() {}
-
-var apikeyprofiletemplateImplementors = []string{"APIKeyProfileTemplate", "Node"}
-
-// IsNode implements the Node interface check for GQLGen.
-func (*APIKeyProfileTemplate) IsNode() {}
 
 var channelImplementors = []string{"Channel", "Node"}
 
@@ -82,35 +68,10 @@ var channelprobeImplementors = []string{"ChannelProbe", "Node"}
 // IsNode implements the Node interface check for GQLGen.
 func (*ChannelProbe) IsNode() {}
 
-var datastorageImplementors = []string{"DataStorage", "Node"}
-
-// IsNode implements the Node interface check for GQLGen.
-func (*DataStorage) IsNode() {}
-
 var modelImplementors = []string{"Model", "Node"}
 
 // IsNode implements the Node interface check for GQLGen.
 func (*Model) IsNode() {}
-
-var oidcidentityImplementors = []string{"OIDCIdentity", "Node"}
-
-// IsNode implements the Node interface check for GQLGen.
-func (*OIDCIdentity) IsNode() {}
-
-var projectImplementors = []string{"Project", "Node"}
-
-// IsNode implements the Node interface check for GQLGen.
-func (*Project) IsNode() {}
-
-var promptImplementors = []string{"Prompt", "Node"}
-
-// IsNode implements the Node interface check for GQLGen.
-func (*Prompt) IsNode() {}
-
-var promptprotectionruleImplementors = []string{"PromptProtectionRule", "Node"}
-
-// IsNode implements the Node interface check for GQLGen.
-func (*PromptProtectionRule) IsNode() {}
 
 var providerquotastatusImplementors = []string{"ProviderQuotaStatus", "Node"}
 
@@ -126,11 +87,6 @@ var requestexecutionImplementors = []string{"RequestExecution", "Node"}
 
 // IsNode implements the Node interface check for GQLGen.
 func (*RequestExecution) IsNode() {}
-
-var roleImplementors = []string{"Role", "Node"}
-
-// IsNode implements the Node interface check for GQLGen.
-func (*Role) IsNode() {}
 
 var systemImplementors = []string{"System", "Node"}
 
@@ -156,16 +112,6 @@ var userImplementors = []string{"User", "Node"}
 
 // IsNode implements the Node interface check for GQLGen.
 func (*User) IsNode() {}
-
-var userprojectImplementors = []string{"UserProject", "Node"}
-
-// IsNode implements the Node interface check for GQLGen.
-func (*UserProject) IsNode() {}
-
-var userroleImplementors = []string{"UserRole", "Node"}
-
-// IsNode implements the Node interface check for GQLGen.
-func (*UserRole) IsNode() {}
 
 var errNodeInvalidID = &NotFoundError{"node"}
 
@@ -234,15 +180,6 @@ func (c *Client) noder(ctx context.Context, table string, id int) (Noder, error)
 			}
 		}
 		return query.Only(ctx)
-	case apikeyprofiletemplate.Table:
-		query := c.APIKeyProfileTemplate.Query().
-			Where(apikeyprofiletemplate.ID(id))
-		if fc := graphql.GetFieldContext(ctx); fc != nil {
-			if err := query.collectField(ctx, true, graphql.GetOperationContext(ctx), fc.Field, nil, apikeyprofiletemplateImplementors...); err != nil {
-				return nil, err
-			}
-		}
-		return query.Only(ctx)
 	case channel.Table:
 		query := c.Channel.Query().
 			Where(channel.ID(id))
@@ -288,56 +225,11 @@ func (c *Client) noder(ctx context.Context, table string, id int) (Noder, error)
 			}
 		}
 		return query.Only(ctx)
-	case datastorage.Table:
-		query := c.DataStorage.Query().
-			Where(datastorage.ID(id))
-		if fc := graphql.GetFieldContext(ctx); fc != nil {
-			if err := query.collectField(ctx, true, graphql.GetOperationContext(ctx), fc.Field, nil, datastorageImplementors...); err != nil {
-				return nil, err
-			}
-		}
-		return query.Only(ctx)
 	case model.Table:
 		query := c.Model.Query().
 			Where(model.ID(id))
 		if fc := graphql.GetFieldContext(ctx); fc != nil {
 			if err := query.collectField(ctx, true, graphql.GetOperationContext(ctx), fc.Field, nil, modelImplementors...); err != nil {
-				return nil, err
-			}
-		}
-		return query.Only(ctx)
-	case oidcidentity.Table:
-		query := c.OIDCIdentity.Query().
-			Where(oidcidentity.ID(id))
-		if fc := graphql.GetFieldContext(ctx); fc != nil {
-			if err := query.collectField(ctx, true, graphql.GetOperationContext(ctx), fc.Field, nil, oidcidentityImplementors...); err != nil {
-				return nil, err
-			}
-		}
-		return query.Only(ctx)
-	case project.Table:
-		query := c.Project.Query().
-			Where(project.ID(id))
-		if fc := graphql.GetFieldContext(ctx); fc != nil {
-			if err := query.collectField(ctx, true, graphql.GetOperationContext(ctx), fc.Field, nil, projectImplementors...); err != nil {
-				return nil, err
-			}
-		}
-		return query.Only(ctx)
-	case prompt.Table:
-		query := c.Prompt.Query().
-			Where(prompt.ID(id))
-		if fc := graphql.GetFieldContext(ctx); fc != nil {
-			if err := query.collectField(ctx, true, graphql.GetOperationContext(ctx), fc.Field, nil, promptImplementors...); err != nil {
-				return nil, err
-			}
-		}
-		return query.Only(ctx)
-	case promptprotectionrule.Table:
-		query := c.PromptProtectionRule.Query().
-			Where(promptprotectionrule.ID(id))
-		if fc := graphql.GetFieldContext(ctx); fc != nil {
-			if err := query.collectField(ctx, true, graphql.GetOperationContext(ctx), fc.Field, nil, promptprotectionruleImplementors...); err != nil {
 				return nil, err
 			}
 		}
@@ -365,15 +257,6 @@ func (c *Client) noder(ctx context.Context, table string, id int) (Noder, error)
 			Where(requestexecution.ID(id))
 		if fc := graphql.GetFieldContext(ctx); fc != nil {
 			if err := query.collectField(ctx, true, graphql.GetOperationContext(ctx), fc.Field, nil, requestexecutionImplementors...); err != nil {
-				return nil, err
-			}
-		}
-		return query.Only(ctx)
-	case role.Table:
-		query := c.Role.Query().
-			Where(role.ID(id))
-		if fc := graphql.GetFieldContext(ctx); fc != nil {
-			if err := query.collectField(ctx, true, graphql.GetOperationContext(ctx), fc.Field, nil, roleImplementors...); err != nil {
 				return nil, err
 			}
 		}
@@ -419,24 +302,6 @@ func (c *Client) noder(ctx context.Context, table string, id int) (Noder, error)
 			Where(user.ID(id))
 		if fc := graphql.GetFieldContext(ctx); fc != nil {
 			if err := query.collectField(ctx, true, graphql.GetOperationContext(ctx), fc.Field, nil, userImplementors...); err != nil {
-				return nil, err
-			}
-		}
-		return query.Only(ctx)
-	case userproject.Table:
-		query := c.UserProject.Query().
-			Where(userproject.ID(id))
-		if fc := graphql.GetFieldContext(ctx); fc != nil {
-			if err := query.collectField(ctx, true, graphql.GetOperationContext(ctx), fc.Field, nil, userprojectImplementors...); err != nil {
-				return nil, err
-			}
-		}
-		return query.Only(ctx)
-	case userrole.Table:
-		query := c.UserRole.Query().
-			Where(userrole.ID(id))
-		if fc := graphql.GetFieldContext(ctx); fc != nil {
-			if err := query.collectField(ctx, true, graphql.GetOperationContext(ctx), fc.Field, nil, userroleImplementors...); err != nil {
 				return nil, err
 			}
 		}
@@ -530,22 +395,6 @@ func (c *Client) noders(ctx context.Context, table string, ids []int) ([]Noder, 
 				*noder = node
 			}
 		}
-	case apikeyprofiletemplate.Table:
-		query := c.APIKeyProfileTemplate.Query().
-			Where(apikeyprofiletemplate.IDIn(ids...))
-		query, err := query.CollectFields(ctx, apikeyprofiletemplateImplementors...)
-		if err != nil {
-			return nil, err
-		}
-		nodes, err := query.All(ctx)
-		if err != nil {
-			return nil, err
-		}
-		for _, node := range nodes {
-			for _, noder := range idmap[node.ID] {
-				*noder = node
-			}
-		}
 	case channel.Table:
 		query := c.Channel.Query().
 			Where(channel.IDIn(ids...))
@@ -626,90 +475,10 @@ func (c *Client) noders(ctx context.Context, table string, ids []int) ([]Noder, 
 				*noder = node
 			}
 		}
-	case datastorage.Table:
-		query := c.DataStorage.Query().
-			Where(datastorage.IDIn(ids...))
-		query, err := query.CollectFields(ctx, datastorageImplementors...)
-		if err != nil {
-			return nil, err
-		}
-		nodes, err := query.All(ctx)
-		if err != nil {
-			return nil, err
-		}
-		for _, node := range nodes {
-			for _, noder := range idmap[node.ID] {
-				*noder = node
-			}
-		}
 	case model.Table:
 		query := c.Model.Query().
 			Where(model.IDIn(ids...))
 		query, err := query.CollectFields(ctx, modelImplementors...)
-		if err != nil {
-			return nil, err
-		}
-		nodes, err := query.All(ctx)
-		if err != nil {
-			return nil, err
-		}
-		for _, node := range nodes {
-			for _, noder := range idmap[node.ID] {
-				*noder = node
-			}
-		}
-	case oidcidentity.Table:
-		query := c.OIDCIdentity.Query().
-			Where(oidcidentity.IDIn(ids...))
-		query, err := query.CollectFields(ctx, oidcidentityImplementors...)
-		if err != nil {
-			return nil, err
-		}
-		nodes, err := query.All(ctx)
-		if err != nil {
-			return nil, err
-		}
-		for _, node := range nodes {
-			for _, noder := range idmap[node.ID] {
-				*noder = node
-			}
-		}
-	case project.Table:
-		query := c.Project.Query().
-			Where(project.IDIn(ids...))
-		query, err := query.CollectFields(ctx, projectImplementors...)
-		if err != nil {
-			return nil, err
-		}
-		nodes, err := query.All(ctx)
-		if err != nil {
-			return nil, err
-		}
-		for _, node := range nodes {
-			for _, noder := range idmap[node.ID] {
-				*noder = node
-			}
-		}
-	case prompt.Table:
-		query := c.Prompt.Query().
-			Where(prompt.IDIn(ids...))
-		query, err := query.CollectFields(ctx, promptImplementors...)
-		if err != nil {
-			return nil, err
-		}
-		nodes, err := query.All(ctx)
-		if err != nil {
-			return nil, err
-		}
-		for _, node := range nodes {
-			for _, noder := range idmap[node.ID] {
-				*noder = node
-			}
-		}
-	case promptprotectionrule.Table:
-		query := c.PromptProtectionRule.Query().
-			Where(promptprotectionrule.IDIn(ids...))
-		query, err := query.CollectFields(ctx, promptprotectionruleImplementors...)
 		if err != nil {
 			return nil, err
 		}
@@ -758,22 +527,6 @@ func (c *Client) noders(ctx context.Context, table string, ids []int) ([]Noder, 
 		query := c.RequestExecution.Query().
 			Where(requestexecution.IDIn(ids...))
 		query, err := query.CollectFields(ctx, requestexecutionImplementors...)
-		if err != nil {
-			return nil, err
-		}
-		nodes, err := query.All(ctx)
-		if err != nil {
-			return nil, err
-		}
-		for _, node := range nodes {
-			for _, noder := range idmap[node.ID] {
-				*noder = node
-			}
-		}
-	case role.Table:
-		query := c.Role.Query().
-			Where(role.IDIn(ids...))
-		query, err := query.CollectFields(ctx, roleImplementors...)
 		if err != nil {
 			return nil, err
 		}
@@ -854,38 +607,6 @@ func (c *Client) noders(ctx context.Context, table string, ids []int) ([]Noder, 
 		query := c.User.Query().
 			Where(user.IDIn(ids...))
 		query, err := query.CollectFields(ctx, userImplementors...)
-		if err != nil {
-			return nil, err
-		}
-		nodes, err := query.All(ctx)
-		if err != nil {
-			return nil, err
-		}
-		for _, node := range nodes {
-			for _, noder := range idmap[node.ID] {
-				*noder = node
-			}
-		}
-	case userproject.Table:
-		query := c.UserProject.Query().
-			Where(userproject.IDIn(ids...))
-		query, err := query.CollectFields(ctx, userprojectImplementors...)
-		if err != nil {
-			return nil, err
-		}
-		nodes, err := query.All(ctx)
-		if err != nil {
-			return nil, err
-		}
-		for _, node := range nodes {
-			for _, noder := range idmap[node.ID] {
-				*noder = node
-			}
-		}
-	case userrole.Table:
-		query := c.UserRole.Query().
-			Where(userrole.IDIn(ids...))
-		query, err := query.CollectFields(ctx, userroleImplementors...)
 		if err != nil {
 			return nil, err
 		}

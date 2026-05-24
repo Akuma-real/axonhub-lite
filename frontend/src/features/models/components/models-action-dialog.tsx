@@ -81,12 +81,9 @@ export function ModelsActionDialog() {
   const iconOptions = useMemo(() => {
     return (
       Object.entries(toc)
-        // @ts-ignore
-        .filter(([_, value]) => value.group == 'provider' || value.group == 'model')
-        .map(([_, value]) => ({
-          // @ts-ignore
+        .filter(([, value]) => value.group == 'provider' || value.group == 'model')
+        .map(([, value]) => ({
           value: value.id,
-          // @ts-ignore
           label: value.id,
         }))
     );
@@ -267,7 +264,7 @@ export function ModelsActionDialog() {
                   <FormField
                     control={form.control}
                     name='developer'
-                    render={({ field }) => (
+                    render={() => (
                       <FormItem>
                         <FormLabel>{t('models.fields.developer')}</FormLabel>
                         <FormControl>
@@ -290,7 +287,7 @@ export function ModelsActionDialog() {
                   <FormField
                     control={form.control}
                     name='modelID'
-                    render={({ field }) => (
+                    render={() => (
                       <FormItem>
                         <FormLabel>{t('models.fields.modelId')}</FormLabel>
                         <FormControl>

@@ -237,7 +237,7 @@ const AnimatedLineBackground: FC = () => {
       diagnosticsCanvasSizeRef.current = nextCanvasSize;
     }
 
-    particlesRef.current = cloneParticles(diagnosticsInitialParticlesRef.current);
+    particlesRef.current = cloneParticles(diagnosticsInitialParticlesRef.current ?? []);
     renderFrame();
     renderCountRef.current = 0;
   }, [renderFrame, resize, resetFrameTimingState]);

@@ -1,20 +1,36 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { RouteGuard } from '@/components/route-guard';
-import SystemManagement from '@/features/system';
+import SystemManagement, { type SystemTabKey } from '@/features/system';
 
-type SystemTabKey = 'brand' | 'storage' | 'retry' | 'webhook' | 'about' | 'general' | 'proxy' | 'backup';
+const systemTabKeys = [
+  'general',
+  'brand',
+  'storage',
+  'retry',
+  'webhook',
+  'proxy',
+  'quota',
+  'diagnostics',
+  'about',
+] as const satisfies readonly SystemTabKey[];
 
 function ProtectedSystem() {
   const search = Route.useSearch();
 
   return (
     <RouteGuard requiredScopes={['read_system']}>
-      <SystemManagement initialTab={search.tab as SystemTabKey | undefined} />
+      <SystemManagement initialTab={search.tab} />
     </RouteGuard>
   );
 }
 
 export const Route = createFileRoute('/_authenticated/system/')({
   component: ProtectedSystem,
-  validateSearch: (search: { tab?: SystemTabKey }) => search,
+  validateSearch: (search: Record<string, unknown>): { tab?: SystemTabKey } => {
+    if (typeof search.tab === 'string' && systemTabKeys.includes(search.tab as SystemTabKey)) {
+      return { tab: search.tab as SystemTabKey };
+    }
+
+    return {};
+  },
 });

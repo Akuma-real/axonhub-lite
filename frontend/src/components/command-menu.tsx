@@ -108,13 +108,11 @@ export function CommandMenu() {
     return null;
   }
 
-  // Don't render on auth pages (sign-in, sign-up, initialization, etc.)
+  // Don't render on auth pages.
   const currentPath = window.location.pathname;
   if (
     currentPath.startsWith('/sign-in') ||
-    currentPath.startsWith('/sign-up') ||
     currentPath.startsWith('/initialization') ||
-    currentPath.startsWith('/forgot-password') ||
     currentPath.startsWith('/otp')
   ) {
     return null;

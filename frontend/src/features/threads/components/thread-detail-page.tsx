@@ -27,7 +27,7 @@ const THREAD_CURSOR_OPTIONS = {
 } as const;
 
 export default function ThreadDetailPage() {
-  const { threadId } = useParams({ from: '/_authenticated/project/threads/$threadId' as any }) as {
+  const { threadId } = useParams({ from: '/_authenticated/threads/$threadId' as any }) as {
     threadId: string;
   };
   const navigate = useNavigate();
@@ -87,7 +87,7 @@ export default function ThreadDetailPage() {
   };
 
   const handleBack = () => {
-    navigate({ to: '/project/threads' as any, search: getSearchParams() as any });
+    navigate({ to: '/threads' as any, search: getSearchParams() as any });
   };
 
   const handleViewTrace = (traceId: string) => {

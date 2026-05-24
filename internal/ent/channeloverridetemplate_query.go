@@ -14,7 +14,6 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/looplj/axonhub/internal/ent/channeloverridetemplate"
 	"github.com/looplj/axonhub/internal/ent/predicate"
-	"github.com/looplj/axonhub/internal/ent/user"
 )
 
 // ChannelOverrideTemplateQuery is the builder for querying ChannelOverrideTemplate entities.
@@ -24,7 +23,6 @@ type ChannelOverrideTemplateQuery struct {
 	order      []channeloverridetemplate.OrderOption
 	inters     []Interceptor
 	predicates []predicate.ChannelOverrideTemplate
-	withUser   *UserQuery
 	loadTotal  []func(context.Context, []*ChannelOverrideTemplate) error
 	modifiers  []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
@@ -61,28 +59,6 @@ func (_q *ChannelOverrideTemplateQuery) Unique(unique bool) *ChannelOverrideTemp
 func (_q *ChannelOverrideTemplateQuery) Order(o ...channeloverridetemplate.OrderOption) *ChannelOverrideTemplateQuery {
 	_q.order = append(_q.order, o...)
 	return _q
-}
-
-// QueryUser chains the current query on the "user" edge.
-func (_q *ChannelOverrideTemplateQuery) QueryUser() *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := _q.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := _q.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(channeloverridetemplate.Table, channeloverridetemplate.FieldID, selector),
-			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, channeloverridetemplate.UserTable, channeloverridetemplate.UserColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
 }
 
 // First returns the first ChannelOverrideTemplate entity from the query.
@@ -277,23 +253,11 @@ func (_q *ChannelOverrideTemplateQuery) Clone() *ChannelOverrideTemplateQuery {
 		order:      append([]channeloverridetemplate.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
 		predicates: append([]predicate.ChannelOverrideTemplate{}, _q.predicates...),
-		withUser:   _q.withUser.Clone(),
 		// clone intermediate query.
 		sql:       _q.sql.Clone(),
 		path:      _q.path,
 		modifiers: append([]func(*sql.Selector){}, _q.modifiers...),
 	}
-}
-
-// WithUser tells the query-builder to eager-load the nodes that are connected to
-// the "user" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *ChannelOverrideTemplateQuery) WithUser(opts ...func(*UserQuery)) *ChannelOverrideTemplateQuery {
-	query := (&UserClient{config: _q.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	_q.withUser = query
-	return _q
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -378,11 +342,8 @@ func (_q *ChannelOverrideTemplateQuery) prepareQuery(ctx context.Context) error 
 
 func (_q *ChannelOverrideTemplateQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*ChannelOverrideTemplate, error) {
 	var (
-		nodes       = []*ChannelOverrideTemplate{}
-		_spec       = _q.querySpec()
-		loadedTypes = [1]bool{
-			_q.withUser != nil,
-		}
+		nodes = []*ChannelOverrideTemplate{}
+		_spec = _q.querySpec()
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*ChannelOverrideTemplate).scanValues(nil, columns)
@@ -390,7 +351,6 @@ func (_q *ChannelOverrideTemplateQuery) sqlAll(ctx context.Context, hooks ...que
 	_spec.Assign = func(columns []string, values []any) error {
 		node := &ChannelOverrideTemplate{config: _q.config}
 		nodes = append(nodes, node)
-		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	if len(_q.modifiers) > 0 {
@@ -405,48 +365,12 @@ func (_q *ChannelOverrideTemplateQuery) sqlAll(ctx context.Context, hooks ...que
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := _q.withUser; query != nil {
-		if err := _q.loadUser(ctx, query, nodes, nil,
-			func(n *ChannelOverrideTemplate, e *User) { n.Edges.User = e }); err != nil {
-			return nil, err
-		}
-	}
 	for i := range _q.loadTotal {
 		if err := _q.loadTotal[i](ctx, nodes); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
-}
-
-func (_q *ChannelOverrideTemplateQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*ChannelOverrideTemplate, init func(*ChannelOverrideTemplate), assign func(*ChannelOverrideTemplate, *User)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*ChannelOverrideTemplate)
-	for i := range nodes {
-		fk := nodes[i].UserID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(user.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "user_id" returned %v`, n.ID)
-		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
-	}
-	return nil
 }
 
 func (_q *ChannelOverrideTemplateQuery) sqlCount(ctx context.Context) (int, error) {
@@ -476,9 +400,6 @@ func (_q *ChannelOverrideTemplateQuery) querySpec() *sqlgraph.QuerySpec {
 			if fields[i] != channeloverridetemplate.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
-		}
-		if _q.withUser != nil {
-			_spec.Node.AddColumnOnce(channeloverridetemplate.FieldUserID)
 		}
 	}
 	if ps := _q.predicates; len(ps) > 0 {

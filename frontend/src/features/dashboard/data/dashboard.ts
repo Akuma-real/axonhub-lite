@@ -90,13 +90,6 @@ export const hourlyRequestStatsSchema = z.object({
   count: z.number(),
 });
 
-export const topProjectsSchema = z.object({
-  projectId: z.string(),
-  projectName: z.string(),
-  projectDescription: z.string(),
-  requestCount: z.number(),
-});
-
 export const channelSuccessRateSchema = z.object({
   channelId: z.string(),
   channelName: z.string(),
@@ -138,7 +131,6 @@ export type CostByModel = z.infer<typeof costByModelSchema>;
 export type CostByAPIKey = z.infer<typeof costByAPIKeySchema>;
 export type DailyRequestStats = z.infer<typeof dailyRequestStatsSchema>;
 export type HourlyRequestStats = z.infer<typeof hourlyRequestStatsSchema>;
-export type TopProjects = z.infer<typeof topProjectsSchema>;
 export type ChannelSuccessRate = z.infer<typeof channelSuccessRateSchema>;
 export type ModelPerformanceStat = z.infer<typeof modelPerformanceStatSchema>;
 export type ChannelPerformanceStat = z.infer<typeof channelPerformanceStatSchema>;
@@ -291,17 +283,6 @@ const HOURLY_REQUEST_STATS_QUERY = `
     hourlyRequestStats(date: $date) {
       hour
       count
-    }
-  }
-`;
-
-const TOP_PROJECTS_QUERY = `
-  query GetTopProjects {
-    topRequestsProjects {
-      projectId
-      projectName
-      projectDescription
-      requestCount
     }
   }
 `;
@@ -533,17 +514,6 @@ export function useHourlyRequestStats(date?: string) {
     queryFn: async () => {
       const data = await graphqlRequest<{ hourlyRequestStats: HourlyRequestStats[] }>(HOURLY_REQUEST_STATS_QUERY, { date });
       return data.hourlyRequestStats.map((item) => hourlyRequestStatsSchema.parse(item));
-    },
-    refetchInterval: 300000,
-  });
-}
-
-export function useTopProjects() {
-  return useQuery({
-    queryKey: ['topRequestsProjects'],
-    queryFn: async () => {
-      const data = await graphqlRequest<{ topRequestsProjects: TopProjects[] }>(TOP_PROJECTS_QUERY);
-      return data.topRequestsProjects.map((item) => topProjectsSchema.parse(item));
     },
     refetchInterval: 300000,
   });

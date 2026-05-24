@@ -21,7 +21,7 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { JsonViewer } from '@/components/json-tree-view';
 import { useRequests, useRequest } from '@/features/requests/data';
 import { CurlPreviewDialog } from '@/features/requests/components/curl-preview-dialog';
@@ -56,7 +56,7 @@ export function ChannelsTestHistoryDrawer({ open, onOpenChange, channel }: Props
         direction: 'DESC',
       },
     },
-    { scopeToSelectedProject: false, projectId: null, enabled: open }
+    { enabled: open }
   );
 
   const requests = useMemo(() => data?.edges?.map((edge) => edge.node) || [], [data]);
@@ -73,7 +73,6 @@ export function ChannelsTestHistoryDrawer({ open, onOpenChange, channel }: Props
   }, [open, selectedRequestId, requests]);
 
   const { data: request, isLoading: isRequestLoading } = useRequest(selectedRequestId ?? '', {
-    projectId: null,
     enabled: open && !!selectedRequestId,
   });
 

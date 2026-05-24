@@ -216,7 +216,7 @@ response = client.models.generate_content(
 print(response.text)`
       }
     };
-  }, [selectedApiKey?.key, apiKey, maskedApiKey]);
+  }, [selectedApiKey?.key, apiKey, maskedApiKey, currentOrigin]);
 
   useEffect(() => {
     if (!selectedApiKey?.key || Object.keys(codeExamples).length === 0) return;
@@ -291,51 +291,45 @@ print(response.text)`
 
         <div className='flex-1 overflow-hidden flex flex-col'>
           <label className='text-sm font-medium'>{t('apikeys.dialogs.view.usageExamples')}</label>
-          {selectedApiKey?.type === 'user' ? (
-            <Tabs defaultValue='claudeCode' className='mt-2 flex-1 flex flex-col min-h-0'>
-              <TabsList className='grid w-full grid-cols-5 shrink-0'>
-                <TabsTrigger value='claudeCode'>{t('apikeys.dialogs.view.tabs.claudeCode')}</TabsTrigger>
-                <TabsTrigger value='codex'>{t('apikeys.dialogs.view.tabs.codex')}</TabsTrigger>
-                <TabsTrigger value='anthropicSDK'>{t('apikeys.dialogs.view.tabs.anthropicSDK')}</TabsTrigger>
-                <TabsTrigger value='openAISDK'>{t('apikeys.dialogs.view.tabs.openAISDK')}</TabsTrigger>
-                <TabsTrigger value='geminiSDK'>{t('apikeys.dialogs.view.tabs.geminiSDK')}</TabsTrigger>
-              </TabsList>
-              <TabsContent value='anthropicSDK' className='mt-3 min-h-0 flex-1 overflow-y-auto'>
-                <MaskedCodeBlock displayCode={codeExamples?.anthropicSDK?.display || ''} realCode={codeExamples?.anthropicSDK?.real || ''} language='python' className='overflow-visible' preRenderedHtml={preRenderedCode.anthropicSDK}>
-                  <CopyBaseUrlButton baseUrl={codeExamples?.anthropicSDK?.baseUrl || ''} />
-                  <MaskedCodeBlockCopyButton />
-                </MaskedCodeBlock>
-              </TabsContent>
-              <TabsContent value='openAISDK' className='mt-3 min-h-0 flex-1 overflow-y-auto'>
-                <MaskedCodeBlock displayCode={codeExamples?.openAISDK?.display || ''} realCode={codeExamples?.openAISDK?.real || ''} language='python' className='overflow-visible' preRenderedHtml={preRenderedCode.openAISDK}>
-                  <CopyBaseUrlButton baseUrl={codeExamples?.openAISDK?.baseUrl || ''} />
-                  <MaskedCodeBlockCopyButton />
-                </MaskedCodeBlock>
-              </TabsContent>
-              <TabsContent value='codex' className='mt-3 min-h-0 flex-1 overflow-y-auto'>
-                <MaskedCodeBlock displayCode={codeExamples?.codex?.display || ''} realCode={codeExamples?.codex?.real || ''} language='bash' className='overflow-visible' preRenderedHtml={preRenderedCode.codex}>
-                  <CopyBaseUrlButton baseUrl={codeExamples?.codex?.baseUrl || ''} />
-                  <MaskedCodeBlockCopyButton />
-                </MaskedCodeBlock>
-              </TabsContent>
-              <TabsContent value='claudeCode' className='mt-3 min-h-0 flex-1 overflow-y-auto'>
-                <MaskedCodeBlock displayCode={codeExamples?.claudeCode?.display || ''} realCode={codeExamples?.claudeCode?.real || ''} language='bash' className='overflow-visible' preRenderedHtml={preRenderedCode.claudeCode}>
-                  <CopyBaseUrlButton baseUrl={codeExamples?.claudeCode?.baseUrl || ''} />
-                  <MaskedCodeBlockCopyButton />
-                </MaskedCodeBlock>
-              </TabsContent>
-              <TabsContent value='geminiSDK' className='mt-3 min-h-0 flex-1 overflow-y-auto'>
-                <MaskedCodeBlock displayCode={codeExamples?.geminiSDK?.display || ''} realCode={codeExamples?.geminiSDK?.real || ''} language='python' className='overflow-visible' preRenderedHtml={preRenderedCode.geminiSDK}>
-                  <CopyBaseUrlButton baseUrl={codeExamples?.geminiSDK?.baseUrl || ''} />
-                  <MaskedCodeBlockCopyButton />
-                </MaskedCodeBlock>
-              </TabsContent>
-            </Tabs>
-          ) : (
-            <div className='mt-2 flex-1 flex items-center justify-center text-muted-foreground text-sm'>
-              {t('apikeys.dialogs.view.noExamples')}
-            </div>
-          )}
+          <Tabs defaultValue='claudeCode' className='mt-2 flex-1 flex flex-col min-h-0'>
+            <TabsList className='grid w-full grid-cols-5 shrink-0'>
+              <TabsTrigger value='claudeCode'>{t('apikeys.dialogs.view.tabs.claudeCode')}</TabsTrigger>
+              <TabsTrigger value='codex'>{t('apikeys.dialogs.view.tabs.codex')}</TabsTrigger>
+              <TabsTrigger value='anthropicSDK'>{t('apikeys.dialogs.view.tabs.anthropicSDK')}</TabsTrigger>
+              <TabsTrigger value='openAISDK'>{t('apikeys.dialogs.view.tabs.openAISDK')}</TabsTrigger>
+              <TabsTrigger value='geminiSDK'>{t('apikeys.dialogs.view.tabs.geminiSDK')}</TabsTrigger>
+            </TabsList>
+            <TabsContent value='anthropicSDK' className='mt-3 min-h-0 flex-1 overflow-y-auto'>
+              <MaskedCodeBlock displayCode={codeExamples?.anthropicSDK?.display || ''} realCode={codeExamples?.anthropicSDK?.real || ''} language='python' className='overflow-visible' preRenderedHtml={preRenderedCode.anthropicSDK}>
+                <CopyBaseUrlButton baseUrl={codeExamples?.anthropicSDK?.baseUrl || ''} />
+                <MaskedCodeBlockCopyButton />
+              </MaskedCodeBlock>
+            </TabsContent>
+            <TabsContent value='openAISDK' className='mt-3 min-h-0 flex-1 overflow-y-auto'>
+              <MaskedCodeBlock displayCode={codeExamples?.openAISDK?.display || ''} realCode={codeExamples?.openAISDK?.real || ''} language='python' className='overflow-visible' preRenderedHtml={preRenderedCode.openAISDK}>
+                <CopyBaseUrlButton baseUrl={codeExamples?.openAISDK?.baseUrl || ''} />
+                <MaskedCodeBlockCopyButton />
+              </MaskedCodeBlock>
+            </TabsContent>
+            <TabsContent value='codex' className='mt-3 min-h-0 flex-1 overflow-y-auto'>
+              <MaskedCodeBlock displayCode={codeExamples?.codex?.display || ''} realCode={codeExamples?.codex?.real || ''} language='bash' className='overflow-visible' preRenderedHtml={preRenderedCode.codex}>
+                <CopyBaseUrlButton baseUrl={codeExamples?.codex?.baseUrl || ''} />
+                <MaskedCodeBlockCopyButton />
+              </MaskedCodeBlock>
+            </TabsContent>
+            <TabsContent value='claudeCode' className='mt-3 min-h-0 flex-1 overflow-y-auto'>
+              <MaskedCodeBlock displayCode={codeExamples?.claudeCode?.display || ''} realCode={codeExamples?.claudeCode?.real || ''} language='bash' className='overflow-visible' preRenderedHtml={preRenderedCode.claudeCode}>
+                <CopyBaseUrlButton baseUrl={codeExamples?.claudeCode?.baseUrl || ''} />
+                <MaskedCodeBlockCopyButton />
+              </MaskedCodeBlock>
+            </TabsContent>
+            <TabsContent value='geminiSDK' className='mt-3 min-h-0 flex-1 overflow-y-auto'>
+              <MaskedCodeBlock displayCode={codeExamples?.geminiSDK?.display || ''} realCode={codeExamples?.geminiSDK?.real || ''} language='python' className='overflow-visible' preRenderedHtml={preRenderedCode.geminiSDK}>
+                <CopyBaseUrlButton baseUrl={codeExamples?.geminiSDK?.baseUrl || ''} />
+                <MaskedCodeBlockCopyButton />
+              </MaskedCodeBlock>
+            </TabsContent>
+          </Tabs>
         </div>
       </DialogContent>
     </Dialog>

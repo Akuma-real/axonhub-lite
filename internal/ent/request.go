@@ -12,8 +12,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/looplj/axonhub/internal/ent/apikey"
 	"github.com/looplj/axonhub/internal/ent/channel"
-	"github.com/looplj/axonhub/internal/ent/datastorage"
-	"github.com/looplj/axonhub/internal/ent/project"
 	"github.com/looplj/axonhub/internal/ent/request"
 	"github.com/looplj/axonhub/internal/ent/trace"
 	"github.com/looplj/axonhub/internal/objects"
@@ -28,14 +26,10 @@ type Request struct {
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
-	// API Key ID of the request, null for the request from the Admin.
+	// API Key ID of the request, null for admin-originated requests.
 	APIKeyID int `json:"api_key_id,omitempty"`
-	// Project ID, default to 1 for backward compatibility
-	ProjectID int `json:"project_id,omitempty"`
 	// Trace ID that this request belongs to
 	TraceID int `json:"trace_id,omitempty"`
-	// Data Storage ID that this request belongs to
-	DataStorageID int `json:"data_storage_id,omitempty"`
 	// Source holds the value of the "source" field.
 	Source request.Source `json:"source,omitempty"`
 	// ModelID holds the value of the "model_id" field.
@@ -68,14 +62,6 @@ type Request struct {
 	MetricsFirstTokenLatencyMs *int64 `json:"metrics_first_token_latency_ms,omitempty"`
 	// Reasoning/thinking duration in milliseconds
 	MetricsReasoningDurationMs *int64 `json:"metrics_reasoning_duration_ms,omitempty"`
-	// whether the generated content has been saved to external storage
-	ContentSaved bool `json:"content_saved,omitempty"`
-	// data storage id used to save the content file
-	ContentStorageID *int `json:"content_storage_id,omitempty"`
-	// storage key/path of the saved content file
-	ContentStorageKey *string `json:"content_storage_key,omitempty"`
-	// when the content file was saved
-	ContentSavedAt *time.Time `json:"content_saved_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the RequestQuery when eager-loading is set.
 	Edges        RequestEdges `json:"edges"`
@@ -86,12 +72,8 @@ type Request struct {
 type RequestEdges struct {
 	// APIKey holds the value of the api_key edge.
 	APIKey *APIKey `json:"api_key,omitempty"`
-	// Project holds the value of the project edge.
-	Project *Project `json:"project,omitempty"`
 	// Trace holds the value of the trace edge.
 	Trace *Trace `json:"trace,omitempty"`
-	// DataStorage holds the value of the data_storage edge.
-	DataStorage *DataStorage `json:"data_storage,omitempty"`
 	// Executions holds the value of the executions edge.
 	Executions []*RequestExecution `json:"executions,omitempty"`
 	// Channel holds the value of the channel edge.
@@ -100,9 +82,9 @@ type RequestEdges struct {
 	UsageLogs []*UsageLog `json:"usage_logs,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [7]bool
+	loadedTypes [5]bool
 	// totalCount holds the count of the edges above.
-	totalCount [7]map[string]int
+	totalCount [5]map[string]int
 
 	namedExecutions map[string][]*RequestExecution
 	namedUsageLogs  map[string][]*UsageLog
@@ -119,43 +101,21 @@ func (e RequestEdges) APIKeyOrErr() (*APIKey, error) {
 	return nil, &NotLoadedError{edge: "api_key"}
 }
 
-// ProjectOrErr returns the Project value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e RequestEdges) ProjectOrErr() (*Project, error) {
-	if e.Project != nil {
-		return e.Project, nil
-	} else if e.loadedTypes[1] {
-		return nil, &NotFoundError{label: project.Label}
-	}
-	return nil, &NotLoadedError{edge: "project"}
-}
-
 // TraceOrErr returns the Trace value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e RequestEdges) TraceOrErr() (*Trace, error) {
 	if e.Trace != nil {
 		return e.Trace, nil
-	} else if e.loadedTypes[2] {
+	} else if e.loadedTypes[1] {
 		return nil, &NotFoundError{label: trace.Label}
 	}
 	return nil, &NotLoadedError{edge: "trace"}
 }
 
-// DataStorageOrErr returns the DataStorage value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e RequestEdges) DataStorageOrErr() (*DataStorage, error) {
-	if e.DataStorage != nil {
-		return e.DataStorage, nil
-	} else if e.loadedTypes[3] {
-		return nil, &NotFoundError{label: datastorage.Label}
-	}
-	return nil, &NotLoadedError{edge: "data_storage"}
-}
-
 // ExecutionsOrErr returns the Executions value or an error if the edge
 // was not loaded in eager-loading.
 func (e RequestEdges) ExecutionsOrErr() ([]*RequestExecution, error) {
-	if e.loadedTypes[4] {
+	if e.loadedTypes[2] {
 		return e.Executions, nil
 	}
 	return nil, &NotLoadedError{edge: "executions"}
@@ -166,7 +126,7 @@ func (e RequestEdges) ExecutionsOrErr() ([]*RequestExecution, error) {
 func (e RequestEdges) ChannelOrErr() (*Channel, error) {
 	if e.Channel != nil {
 		return e.Channel, nil
-	} else if e.loadedTypes[5] {
+	} else if e.loadedTypes[3] {
 		return nil, &NotFoundError{label: channel.Label}
 	}
 	return nil, &NotLoadedError{edge: "channel"}
@@ -175,7 +135,7 @@ func (e RequestEdges) ChannelOrErr() (*Channel, error) {
 // UsageLogsOrErr returns the UsageLogs value or an error if the edge
 // was not loaded in eager-loading.
 func (e RequestEdges) UsageLogsOrErr() ([]*UsageLog, error) {
-	if e.loadedTypes[6] {
+	if e.loadedTypes[4] {
 		return e.UsageLogs, nil
 	}
 	return nil, &NotLoadedError{edge: "usage_logs"}
@@ -188,13 +148,13 @@ func (*Request) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case request.FieldRequestHeaders, request.FieldRequestBody, request.FieldResponseBody, request.FieldResponseChunks:
 			values[i] = new([]byte)
-		case request.FieldStream, request.FieldContentSaved:
+		case request.FieldStream:
 			values[i] = new(sql.NullBool)
-		case request.FieldID, request.FieldAPIKeyID, request.FieldProjectID, request.FieldTraceID, request.FieldDataStorageID, request.FieldChannelID, request.FieldMetricsLatencyMs, request.FieldMetricsFirstTokenLatencyMs, request.FieldMetricsReasoningDurationMs, request.FieldContentStorageID:
+		case request.FieldID, request.FieldAPIKeyID, request.FieldTraceID, request.FieldChannelID, request.FieldMetricsLatencyMs, request.FieldMetricsFirstTokenLatencyMs, request.FieldMetricsReasoningDurationMs:
 			values[i] = new(sql.NullInt64)
-		case request.FieldSource, request.FieldModelID, request.FieldReasoningEffort, request.FieldFormat, request.FieldExternalID, request.FieldStatus, request.FieldClientIP, request.FieldContentStorageKey:
+		case request.FieldSource, request.FieldModelID, request.FieldReasoningEffort, request.FieldFormat, request.FieldExternalID, request.FieldStatus, request.FieldClientIP:
 			values[i] = new(sql.NullString)
-		case request.FieldCreatedAt, request.FieldUpdatedAt, request.FieldContentSavedAt:
+		case request.FieldCreatedAt, request.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -235,23 +195,11 @@ func (_m *Request) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.APIKeyID = int(value.Int64)
 			}
-		case request.FieldProjectID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field project_id", values[i])
-			} else if value.Valid {
-				_m.ProjectID = int(value.Int64)
-			}
 		case request.FieldTraceID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field trace_id", values[i])
 			} else if value.Valid {
 				_m.TraceID = int(value.Int64)
-			}
-		case request.FieldDataStorageID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field data_storage_id", values[i])
-			} else if value.Valid {
-				_m.DataStorageID = int(value.Int64)
 			}
 		case request.FieldSource:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -360,33 +308,6 @@ func (_m *Request) assignValues(columns []string, values []any) error {
 				_m.MetricsReasoningDurationMs = new(int64)
 				*_m.MetricsReasoningDurationMs = value.Int64
 			}
-		case request.FieldContentSaved:
-			if value, ok := values[i].(*sql.NullBool); !ok {
-				return fmt.Errorf("unexpected type %T for field content_saved", values[i])
-			} else if value.Valid {
-				_m.ContentSaved = value.Bool
-			}
-		case request.FieldContentStorageID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field content_storage_id", values[i])
-			} else if value.Valid {
-				_m.ContentStorageID = new(int)
-				*_m.ContentStorageID = int(value.Int64)
-			}
-		case request.FieldContentStorageKey:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field content_storage_key", values[i])
-			} else if value.Valid {
-				_m.ContentStorageKey = new(string)
-				*_m.ContentStorageKey = value.String
-			}
-		case request.FieldContentSavedAt:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field content_saved_at", values[i])
-			} else if value.Valid {
-				_m.ContentSavedAt = new(time.Time)
-				*_m.ContentSavedAt = value.Time
-			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -405,19 +326,9 @@ func (_m *Request) QueryAPIKey() *APIKeyQuery {
 	return NewRequestClient(_m.config).QueryAPIKey(_m)
 }
 
-// QueryProject queries the "project" edge of the Request entity.
-func (_m *Request) QueryProject() *ProjectQuery {
-	return NewRequestClient(_m.config).QueryProject(_m)
-}
-
 // QueryTrace queries the "trace" edge of the Request entity.
 func (_m *Request) QueryTrace() *TraceQuery {
 	return NewRequestClient(_m.config).QueryTrace(_m)
-}
-
-// QueryDataStorage queries the "data_storage" edge of the Request entity.
-func (_m *Request) QueryDataStorage() *DataStorageQuery {
-	return NewRequestClient(_m.config).QueryDataStorage(_m)
 }
 
 // QueryExecutions queries the "executions" edge of the Request entity.
@@ -467,14 +378,8 @@ func (_m *Request) String() string {
 	builder.WriteString("api_key_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.APIKeyID))
 	builder.WriteString(", ")
-	builder.WriteString("project_id=")
-	builder.WriteString(fmt.Sprintf("%v", _m.ProjectID))
-	builder.WriteString(", ")
 	builder.WriteString("trace_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.TraceID))
-	builder.WriteString(", ")
-	builder.WriteString("data_storage_id=")
-	builder.WriteString(fmt.Sprintf("%v", _m.DataStorageID))
 	builder.WriteString(", ")
 	builder.WriteString("source=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Source))
@@ -528,24 +433,6 @@ func (_m *Request) String() string {
 	if v := _m.MetricsReasoningDurationMs; v != nil {
 		builder.WriteString("metrics_reasoning_duration_ms=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
-	builder.WriteString(", ")
-	builder.WriteString("content_saved=")
-	builder.WriteString(fmt.Sprintf("%v", _m.ContentSaved))
-	builder.WriteString(", ")
-	if v := _m.ContentStorageID; v != nil {
-		builder.WriteString("content_storage_id=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
-	builder.WriteString(", ")
-	if v := _m.ContentStorageKey; v != nil {
-		builder.WriteString("content_storage_key=")
-		builder.WriteString(*v)
-	}
-	builder.WriteString(", ")
-	if v := _m.ContentSavedAt; v != nil {
-		builder.WriteString("content_saved_at=")
-		builder.WriteString(v.Format(time.ANSIC))
 	}
 	builder.WriteByte(')')
 	return builder.String()

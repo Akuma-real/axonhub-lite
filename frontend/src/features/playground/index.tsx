@@ -6,7 +6,6 @@ import { MessageSquare, RefreshCcw, Copy } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/stores/authStore';
-import { useSelectedProjectId } from '@/stores/projectStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -70,7 +69,6 @@ export default function Playground() {
   }, [modelSource]);
 
   const { accessToken } = useAuthStore((state) => state.auth);
-  const selectedProjectId = useSelectedProjectId();
 
   // 获取 channels 数据
   const { data: channelsData, isLoading: channelsLoading } = useQueryChannels({
@@ -102,7 +100,6 @@ export default function Playground() {
       headers: () => {
         const headers: Record<string, string> = {
           Authorization: 'Bearer ' + accessToken,
-          'X-Project-ID': selectedProjectId || '',
         };
         if (modelSourceRef.current === 'channel' && selectedChannelRef.current) {
           headers['X-Channel-ID'] = selectedChannelRef.current;
@@ -194,7 +191,7 @@ export default function Playground() {
         setInput('');
       }
     },
-    [sendMessage, selectedChannel, isLoading]
+    [sendMessage, isLoading]
   );
 
   const handleClear = useCallback(() => {

@@ -10,7 +10,6 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/schema/field"
 	"github.com/looplj/axonhub/internal/ent/apikey"
 	"github.com/looplj/axonhub/internal/ent/predicate"
@@ -87,20 +86,6 @@ func (_u *APIKeyUpdate) SetNillableName(v *string) *APIKeyUpdate {
 	return _u
 }
 
-// SetType sets the "type" field.
-func (_u *APIKeyUpdate) SetType(v apikey.Type) *APIKeyUpdate {
-	_u.mutation.SetType(v)
-	return _u
-}
-
-// SetNillableType sets the "type" field if the given value is not nil.
-func (_u *APIKeyUpdate) SetNillableType(v *apikey.Type) *APIKeyUpdate {
-	if v != nil {
-		_u.SetType(*v)
-	}
-	return _u
-}
-
 // SetStatus sets the "status" field.
 func (_u *APIKeyUpdate) SetStatus(v apikey.Status) *APIKeyUpdate {
 	_u.mutation.SetStatus(v)
@@ -112,24 +97,6 @@ func (_u *APIKeyUpdate) SetNillableStatus(v *apikey.Status) *APIKeyUpdate {
 	if v != nil {
 		_u.SetStatus(*v)
 	}
-	return _u
-}
-
-// SetScopes sets the "scopes" field.
-func (_u *APIKeyUpdate) SetScopes(v []string) *APIKeyUpdate {
-	_u.mutation.SetScopes(v)
-	return _u
-}
-
-// AppendScopes appends value to the "scopes" field.
-func (_u *APIKeyUpdate) AppendScopes(v []string) *APIKeyUpdate {
-	_u.mutation.AppendScopes(v)
-	return _u
-}
-
-// ClearScopes clears the value of the "scopes" field.
-func (_u *APIKeyUpdate) ClearScopes() *APIKeyUpdate {
-	_u.mutation.ClearScopes()
 	return _u
 }
 
@@ -230,18 +197,10 @@ func (_u *APIKeyUpdate) defaults() error {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *APIKeyUpdate) check() error {
-	if v, ok := _u.mutation.GetType(); ok {
-		if err := apikey.TypeValidator(v); err != nil {
-			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "APIKey.type": %w`, err)}
-		}
-	}
 	if v, ok := _u.mutation.Status(); ok {
 		if err := apikey.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "APIKey.status": %w`, err)}
 		}
-	}
-	if _u.mutation.ProjectCleared() && len(_u.mutation.ProjectIDs()) > 0 {
-		return errors.New(`ent: clearing a required unique edge "APIKey.project"`)
 	}
 	return nil
 }
@@ -279,22 +238,8 @@ func (_u *APIKeyUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(apikey.FieldName, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.GetType(); ok {
-		_spec.SetField(apikey.FieldType, field.TypeEnum, value)
-	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(apikey.FieldStatus, field.TypeEnum, value)
-	}
-	if value, ok := _u.mutation.Scopes(); ok {
-		_spec.SetField(apikey.FieldScopes, field.TypeJSON, value)
-	}
-	if value, ok := _u.mutation.AppendedScopes(); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, apikey.FieldScopes, value)
-		})
-	}
-	if _u.mutation.ScopesCleared() {
-		_spec.ClearField(apikey.FieldScopes, field.TypeJSON)
 	}
 	if value, ok := _u.mutation.Profiles(); ok {
 		_spec.SetField(apikey.FieldProfiles, field.TypeJSON, value)
@@ -424,20 +369,6 @@ func (_u *APIKeyUpdateOne) SetNillableName(v *string) *APIKeyUpdateOne {
 	return _u
 }
 
-// SetType sets the "type" field.
-func (_u *APIKeyUpdateOne) SetType(v apikey.Type) *APIKeyUpdateOne {
-	_u.mutation.SetType(v)
-	return _u
-}
-
-// SetNillableType sets the "type" field if the given value is not nil.
-func (_u *APIKeyUpdateOne) SetNillableType(v *apikey.Type) *APIKeyUpdateOne {
-	if v != nil {
-		_u.SetType(*v)
-	}
-	return _u
-}
-
 // SetStatus sets the "status" field.
 func (_u *APIKeyUpdateOne) SetStatus(v apikey.Status) *APIKeyUpdateOne {
 	_u.mutation.SetStatus(v)
@@ -449,24 +380,6 @@ func (_u *APIKeyUpdateOne) SetNillableStatus(v *apikey.Status) *APIKeyUpdateOne 
 	if v != nil {
 		_u.SetStatus(*v)
 	}
-	return _u
-}
-
-// SetScopes sets the "scopes" field.
-func (_u *APIKeyUpdateOne) SetScopes(v []string) *APIKeyUpdateOne {
-	_u.mutation.SetScopes(v)
-	return _u
-}
-
-// AppendScopes appends value to the "scopes" field.
-func (_u *APIKeyUpdateOne) AppendScopes(v []string) *APIKeyUpdateOne {
-	_u.mutation.AppendScopes(v)
-	return _u
-}
-
-// ClearScopes clears the value of the "scopes" field.
-func (_u *APIKeyUpdateOne) ClearScopes() *APIKeyUpdateOne {
-	_u.mutation.ClearScopes()
 	return _u
 }
 
@@ -580,18 +493,10 @@ func (_u *APIKeyUpdateOne) defaults() error {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *APIKeyUpdateOne) check() error {
-	if v, ok := _u.mutation.GetType(); ok {
-		if err := apikey.TypeValidator(v); err != nil {
-			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "APIKey.type": %w`, err)}
-		}
-	}
 	if v, ok := _u.mutation.Status(); ok {
 		if err := apikey.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "APIKey.status": %w`, err)}
 		}
-	}
-	if _u.mutation.ProjectCleared() && len(_u.mutation.ProjectIDs()) > 0 {
-		return errors.New(`ent: clearing a required unique edge "APIKey.project"`)
 	}
 	return nil
 }
@@ -646,22 +551,8 @@ func (_u *APIKeyUpdateOne) sqlSave(ctx context.Context) (_node *APIKey, err erro
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(apikey.FieldName, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.GetType(); ok {
-		_spec.SetField(apikey.FieldType, field.TypeEnum, value)
-	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(apikey.FieldStatus, field.TypeEnum, value)
-	}
-	if value, ok := _u.mutation.Scopes(); ok {
-		_spec.SetField(apikey.FieldScopes, field.TypeJSON, value)
-	}
-	if value, ok := _u.mutation.AppendedScopes(); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, apikey.FieldScopes, value)
-		})
-	}
-	if _u.mutation.ScopesCleared() {
-		_spec.ClearField(apikey.FieldScopes, field.TypeJSON)
 	}
 	if value, ok := _u.mutation.Profiles(); ok {
 		_spec.SetField(apikey.FieldProfiles, field.TypeJSON, value)

@@ -12,7 +12,6 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/looplj/axonhub/internal/ent/channel"
-	"github.com/looplj/axonhub/internal/ent/datastorage"
 	"github.com/looplj/axonhub/internal/ent/request"
 	"github.com/looplj/axonhub/internal/ent/requestexecution"
 	"github.com/looplj/axonhub/internal/objects"
@@ -54,20 +53,6 @@ func (_c *RequestExecutionCreate) SetNillableUpdatedAt(v *time.Time) *RequestExe
 	return _c
 }
 
-// SetProjectID sets the "project_id" field.
-func (_c *RequestExecutionCreate) SetProjectID(v int) *RequestExecutionCreate {
-	_c.mutation.SetProjectID(v)
-	return _c
-}
-
-// SetNillableProjectID sets the "project_id" field if the given value is not nil.
-func (_c *RequestExecutionCreate) SetNillableProjectID(v *int) *RequestExecutionCreate {
-	if v != nil {
-		_c.SetProjectID(*v)
-	}
-	return _c
-}
-
 // SetRequestID sets the "request_id" field.
 func (_c *RequestExecutionCreate) SetRequestID(v int) *RequestExecutionCreate {
 	_c.mutation.SetRequestID(v)
@@ -84,20 +69,6 @@ func (_c *RequestExecutionCreate) SetChannelID(v int) *RequestExecutionCreate {
 func (_c *RequestExecutionCreate) SetNillableChannelID(v *int) *RequestExecutionCreate {
 	if v != nil {
 		_c.SetChannelID(*v)
-	}
-	return _c
-}
-
-// SetDataStorageID sets the "data_storage_id" field.
-func (_c *RequestExecutionCreate) SetDataStorageID(v int) *RequestExecutionCreate {
-	_c.mutation.SetDataStorageID(v)
-	return _c
-}
-
-// SetNillableDataStorageID sets the "data_storage_id" field if the given value is not nil.
-func (_c *RequestExecutionCreate) SetNillableDataStorageID(v *int) *RequestExecutionCreate {
-	if v != nil {
-		_c.SetDataStorageID(*v)
 	}
 	return _c
 }
@@ -260,11 +231,6 @@ func (_c *RequestExecutionCreate) SetChannel(v *Channel) *RequestExecutionCreate
 	return _c.SetChannelID(v.ID)
 }
 
-// SetDataStorage sets the "data_storage" edge to the DataStorage entity.
-func (_c *RequestExecutionCreate) SetDataStorage(v *DataStorage) *RequestExecutionCreate {
-	return _c.SetDataStorageID(v.ID)
-}
-
 // Mutation returns the RequestExecutionMutation object of the builder.
 func (_c *RequestExecutionCreate) Mutation() *RequestExecutionMutation {
 	return _c.mutation
@@ -308,10 +274,6 @@ func (_c *RequestExecutionCreate) defaults() {
 		v := requestexecution.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
 	}
-	if _, ok := _c.mutation.ProjectID(); !ok {
-		v := requestexecution.DefaultProjectID
-		_c.mutation.SetProjectID(v)
-	}
 	if _, ok := _c.mutation.Format(); !ok {
 		v := requestexecution.DefaultFormat
 		_c.mutation.SetFormat(v)
@@ -324,9 +286,6 @@ func (_c *RequestExecutionCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *RequestExecutionCreate) check() error {
-	if _, ok := _c.mutation.ProjectID(); !ok {
-		return &ValidationError{Name: "project_id", err: errors.New(`ent: missing required field "RequestExecution.project_id"`)}
-	}
 	if _, ok := _c.mutation.RequestID(); !ok {
 		return &ValidationError{Name: "request_id", err: errors.New(`ent: missing required field "RequestExecution.request_id"`)}
 	}
@@ -392,10 +351,6 @@ func (_c *RequestExecutionCreate) createSpec() (*RequestExecution, *sqlgraph.Cre
 	if value, ok := _c.mutation.UpdatedAt(); ok {
 		_spec.SetField(requestexecution.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
-	}
-	if value, ok := _c.mutation.ProjectID(); ok {
-		_spec.SetField(requestexecution.FieldProjectID, field.TypeInt, value)
-		_node.ProjectID = value
 	}
 	if value, ok := _c.mutation.ExternalID(); ok {
 		_spec.SetField(requestexecution.FieldExternalID, field.TypeString, value)
@@ -485,23 +440,6 @@ func (_c *RequestExecutionCreate) createSpec() (*RequestExecution, *sqlgraph.Cre
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.ChannelID = nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.DataStorageIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   requestexecution.DataStorageTable,
-			Columns: []string{requestexecution.DataStorageColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(datastorage.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.DataStorageID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
@@ -780,17 +718,11 @@ func (u *RequestExecutionUpsertOne) UpdateNewValues() *RequestExecutionUpsertOne
 		if _, exists := u.create.mutation.CreatedAt(); exists {
 			s.SetIgnore(requestexecution.FieldCreatedAt)
 		}
-		if _, exists := u.create.mutation.ProjectID(); exists {
-			s.SetIgnore(requestexecution.FieldProjectID)
-		}
 		if _, exists := u.create.mutation.RequestID(); exists {
 			s.SetIgnore(requestexecution.FieldRequestID)
 		}
 		if _, exists := u.create.mutation.ChannelID(); exists {
 			s.SetIgnore(requestexecution.FieldChannelID)
-		}
-		if _, exists := u.create.mutation.DataStorageID(); exists {
-			s.SetIgnore(requestexecution.FieldDataStorageID)
 		}
 		if _, exists := u.create.mutation.ModelID(); exists {
 			s.SetIgnore(requestexecution.FieldModelID)
@@ -1259,17 +1191,11 @@ func (u *RequestExecutionUpsertBulk) UpdateNewValues() *RequestExecutionUpsertBu
 			if _, exists := b.mutation.CreatedAt(); exists {
 				s.SetIgnore(requestexecution.FieldCreatedAt)
 			}
-			if _, exists := b.mutation.ProjectID(); exists {
-				s.SetIgnore(requestexecution.FieldProjectID)
-			}
 			if _, exists := b.mutation.RequestID(); exists {
 				s.SetIgnore(requestexecution.FieldRequestID)
 			}
 			if _, exists := b.mutation.ChannelID(); exists {
 				s.SetIgnore(requestexecution.FieldChannelID)
-			}
-			if _, exists := b.mutation.DataStorageID(); exists {
-				s.SetIgnore(requestexecution.FieldDataStorageID)
 			}
 			if _, exists := b.mutation.ModelID(); exists {
 				s.SetIgnore(requestexecution.FieldModelID)
