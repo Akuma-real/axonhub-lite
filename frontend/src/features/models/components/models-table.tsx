@@ -121,8 +121,9 @@ export function ModelsTable({
     manualFiltering: true,
   });
 
-  // Group rows by developer
-  const groupedRows = useMemo(() => {
+  // Group rows by developer. This must be recalculated on every render because
+  // the table instance is stable while its row model changes as async data loads.
+  const groupedRows = (() => {
     const rows = table.getRowModel().rows;
     const groups = new Map<string, typeof rows>();
     rows.forEach((row) => {
@@ -131,7 +132,7 @@ export function ModelsTable({
       groups.get(developer)!.push(row);
     });
     return new Map([...groups.entries()].sort(([a], [b]) => a.localeCompare(b)));
-  }, [table]);
+  })();
 
   const allGroupsCollapsed = groupedRows.size > 0 && collapsedGroups.size === groupedRows.size;
   const developerRuleCounts = useMemo(() => {
@@ -162,7 +163,7 @@ export function ModelsTable({
     }
   }, [allGroupsCollapsed, groupedRows]);
 
-  const filteredSelectedRows = useMemo(() => table.getFilteredSelectedRowModel().rows, [table]);
+  const filteredSelectedRows = table.getFilteredSelectedRowModel().rows;
 
   const selectedCount = filteredSelectedRows.length;
 
