@@ -47,6 +47,7 @@ func Handler() gin.HandlerFunc {
 		}
 
 		if isStaticAssetPath(path) {
+			setNoCacheHeaders(c)
 			static.Serve("/", staticFS)(c)
 			return
 		}
@@ -68,10 +69,14 @@ func serveAPINotFound(c *gin.Context, path string) {
 
 func serveSPAIndex(c *gin.Context) {
 	// SPA routes should always reload the latest index.html.
+	setNoCacheHeaders(c)
+	c.FileFromFS("/", staticFS)
+}
+
+func setNoCacheHeaders(c *gin.Context) {
 	c.Header("Cache-Control", "no-cache, no-store, must-revalidate")
 	c.Header("Pragma", "no-cache")
 	c.Header("Expires", "0")
-	c.FileFromFS("/", staticFS)
 }
 
 func isAPIPath(path string) bool {

@@ -20,6 +20,8 @@ func useTestStaticFS(t *testing.T) {
 
 	tempDir := t.TempDir()
 	require.NoError(t, os.WriteFile(tempDir+"/index.html", []byte("<html><body>test</body></html>"), 0o644))
+	require.NoError(t, os.Mkdir(tempDir+"/assets", 0o755))
+	require.NoError(t, os.WriteFile(tempDir+"/assets/app.js", []byte("console.log('test')"), 0o644))
 
 	originalStaticFS := staticFS
 	staticFS = ginstatic.LocalFile(tempDir, false)
@@ -70,6 +72,24 @@ func TestHandler_ServesSPAIndexForFrontendRoutes(t *testing.T) {
 
 	require.Equal(t, http.StatusOK, recorder.Code)
 	require.Contains(t, recorder.Header().Get("Content-Type"), "text/html")
+	require.Equal(t, "no-cache, no-store, must-revalidate", recorder.Header().Get("Cache-Control"))
+}
+
+func TestHandler_ServesStaticAssetsWithoutCache(t *testing.T) {
+	t.Helper()
+	gin.SetMode(gin.TestMode)
+	useTestStaticFS(t)
+
+	router := gin.New()
+	router.NoRoute(Handler())
+
+	recorder := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/assets/app.js", nil)
+
+	router.ServeHTTP(recorder, req)
+
+	require.Equal(t, http.StatusOK, recorder.Code)
+	require.Contains(t, recorder.Header().Get("Content-Type"), "text/javascript")
 	require.Equal(t, "no-cache, no-store, must-revalidate", recorder.Header().Get("Cache-Control"))
 }
 
