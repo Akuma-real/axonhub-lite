@@ -297,3 +297,67 @@ func TestIsPreReleaseTag(t *testing.T) {
 		})
 	}
 }
+
+func TestIsUpdateCandidateForCurrentVersion(t *testing.T) {
+	tests := []struct {
+		name    string
+		current string
+		tag     string
+		want    bool
+	}{
+		{
+			name:    "same lite line",
+			current: "v0.9.38-lite.3",
+			tag:     "v0.9.38-lite.4",
+			want:    true,
+		},
+		{
+			name:    "different lite base",
+			current: "v0.9.38-lite.3",
+			tag:     "v0.9.39-lite.1",
+			want:    false,
+		},
+		{
+			name:    "upstream tag ignored for lite current",
+			current: "v0.9.38-lite.3",
+			tag:     "v0.9.43",
+			want:    false,
+		},
+		{
+			name:    "lite tag ignored for upstream current",
+			current: "v0.9.43",
+			tag:     "v0.9.38-lite.4",
+			want:    false,
+		},
+		{
+			name:    "upstream tag accepted for upstream current",
+			current: "v0.9.42",
+			tag:     "v0.9.43",
+			want:    true,
+		},
+		{
+			name:    "prefixed service tag ignored",
+			current: "v0.9.38-lite.3",
+			tag:     "axonclaw/v1.0.0",
+			want:    false,
+		},
+		{
+			name:    "prerelease tag ignored",
+			current: "v0.9.38-lite.3",
+			tag:     "v0.9.38-lite.4-beta",
+			want:    false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := isUpdateCandidateForCurrentVersion(tt.current, tt.tag)
+			require.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func TestLiteReleaseBase(t *testing.T) {
+	require.Equal(t, "v0.9.38-lite", liteReleaseBase("v0.9.38-lite.3"))
+	require.Equal(t, "", liteReleaseBase("v0.9.38"))
+}

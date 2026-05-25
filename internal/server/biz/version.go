@@ -51,9 +51,9 @@ type VersionCheckResult struct {
 func (s *SystemService) CheckForUpdate(ctx context.Context) (*VersionCheckResult, error) {
 	currentVersion := build.Version
 
-	latestVersion, err := s.fetchLatestGitHubRelease(ctx)
+	latestVersion, err := s.fetchLatestGitHubVersion(ctx, currentVersion)
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch latest release: %w", err)
+		return nil, fmt.Errorf("failed to fetch latest version: %w", err)
 	}
 
 	hasUpdate := s.isNewerVersion(currentVersion, latestVersion)
@@ -67,10 +67,10 @@ func (s *SystemService) CheckForUpdate(ctx context.Context) (*VersionCheckResult
 	}, nil
 }
 
-// fetchLatestGitHubRelease fetches the latest stable release tag from GitHub.
+// fetchLatestGitHubVersion fetches the latest stable version from GitHub.
 // It skips beta and rc versions.
-func (s *SystemService) fetchLatestGitHubRelease(ctx context.Context) (string, error) {
-	return FetchLatestGitHubRelease(ctx)
+func (s *SystemService) fetchLatestGitHubVersion(ctx context.Context, currentVersion string) (string, error) {
+	return FetchLatestGitHubVersion(ctx, currentVersion)
 }
 
 // isNewerVersion compares two semantic versions and returns true if latest is newer than current.
@@ -86,13 +86,38 @@ type GitHubRelease struct {
 	PublishedAt time.Time `json:"published_at"`
 }
 
+// GitHubTag represents a GitHub tag.
+type GitHubTag struct {
+	Name string `json:"name"`
+}
+
 // releaseCooldownDuration is the time to wait after a release is published before considering it available.
 // This accounts for build and upload time.
 const releaseCooldownDuration = 30 * time.Minute
 
+// FetchLatestGitHubVersion fetches the latest stable version tag from GitHub for AxonHub Lite.
+// It prefers public releases, then falls back to tags because lite builds are published as draft releases.
+func FetchLatestGitHubVersion(ctx context.Context, currentVersion string) (string, error) {
+	latestVersion, err := FetchLatestGitHubRelease(ctx, currentVersion)
+	if err == nil {
+		return latestVersion, nil
+	}
+
+	latestVersion, tagErr := FetchLatestGitHubTag(ctx, currentVersion)
+	if tagErr == nil {
+		return latestVersion, nil
+	}
+
+	if currentVersion != "" {
+		return currentVersion, nil
+	}
+
+	return "", fmt.Errorf("failed to fetch latest release: %w; failed to fetch latest tag: %w", err, tagErr)
+}
+
 // FetchLatestGitHubRelease fetches the latest stable release tag from GitHub for AxonHub Lite.
 // It skips beta, rc, and prerelease versions, and waits for a cooldown period after release.
-func FetchLatestGitHubRelease(ctx context.Context) (string, error) {
+func FetchLatestGitHubRelease(ctx context.Context, currentVersion string) (string, error) {
 	baseURL := fmt.Sprintf("https://api.github.com/repos/%s/releases", axonHubLiteGitHubRepo)
 
 	u, err := url.Parse(baseURL)
@@ -143,7 +168,7 @@ func FetchLatestGitHubRelease(ctx context.Context) (string, error) {
 		}
 
 		// Only consider AxonHub Lite tags starting with "v".
-		if !isAxonHubTag(release.TagName) {
+		if !isUpdateCandidateForCurrentVersion(currentVersion, release.TagName) {
 			continue
 		}
 
@@ -162,11 +187,98 @@ func FetchLatestGitHubRelease(ctx context.Context) (string, error) {
 	return "", fmt.Errorf("no stable release found")
 }
 
+// FetchLatestGitHubTag fetches the latest stable version tag from GitHub.
+func FetchLatestGitHubTag(ctx context.Context, currentVersion string) (string, error) {
+	baseURL := fmt.Sprintf("https://api.github.com/repos/%s/tags", axonHubLiteGitHubRepo)
+
+	u, err := url.Parse(baseURL)
+	if err != nil {
+		return "", fmt.Errorf("failed to parse URL: %w", err)
+	}
+
+	q := u.Query()
+	q.Set("per_page", "30")
+	q.Set("page", "1")
+	u.RawQuery = q.Encode()
+	apiURL := u.String()
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, apiURL, nil)
+	if err != nil {
+		return "", fmt.Errorf("failed to create request: %w", err)
+	}
+
+	req.Header.Set("Accept", "application/vnd.github.v3+json")
+	req.Header.Set("User-Agent", "AxonHub-Version-Checker")
+
+	client := &http.Client{Timeout: 10 * time.Second}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", fmt.Errorf("failed to fetch tags: %w", err)
+	}
+
+	defer func() {
+		_ = resp.Body.Close()
+	}()
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("GitHub API returned status %d", resp.StatusCode)
+	}
+
+	var tags []GitHubTag
+	if err := json.NewDecoder(resp.Body).Decode(&tags); err != nil {
+		return "", fmt.Errorf("failed to decode tags: %w", err)
+	}
+
+	var latestVersion string
+	for _, tag := range tags {
+		if !isUpdateCandidateForCurrentVersion(currentVersion, tag.Name) {
+			continue
+		}
+
+		if latestVersion == "" || IsNewerVersion(latestVersion, tag.Name) {
+			latestVersion = tag.Name
+		}
+	}
+
+	if latestVersion == "" {
+		return "", fmt.Errorf("no stable tag found")
+	}
+
+	return latestVersion, nil
+}
+
 // isAxonHubTag returns true if the tag is an axonhub version tag (vX.Y.Z format).
 // Tags with a service prefix (e.g., "axonclaw/v1.0.0") are not axonhub tags.
 func isAxonHubTag(tag string) bool {
 	// axonhub tags start with "v", other services use "service/vX.Y.Z" format
 	return strings.HasPrefix(tag, "v")
+}
+
+func isUpdateCandidateForCurrentVersion(currentVersion, candidate string) bool {
+	if !isAxonHubTag(candidate) {
+		return false
+	}
+
+	if isPreReleaseTag(candidate) {
+		return false
+	}
+
+	currentLiteBase := liteReleaseBase(currentVersion)
+	if currentLiteBase != "" {
+		return strings.HasPrefix(candidate, currentLiteBase+".")
+	}
+
+	return liteReleaseBase(candidate) == ""
+}
+
+func liteReleaseBase(version string) string {
+	index := strings.LastIndex(version, "-lite.")
+	if index == -1 {
+		return ""
+	}
+
+	return version[:index+len("-lite")]
 }
 
 // isPreReleaseTag checks if a version tag contains beta, rc, alpha, or similar prerelease indicators.
