@@ -56,8 +56,8 @@ This architecture ensures:
 ### Clone the Project
 
 ```bash
-git clone https://github.com/looplj/axonhub.git
-cd axonhub
+git clone https://github.com/AkumaRealLabs/axonhub-lite.git
+cd axonhub-lite
 ```
 
 ### Start Backend

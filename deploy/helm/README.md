@@ -31,8 +31,8 @@ The following table lists the configurable parameters of the AxonHub chart and t
 | Parameter | Description | Default |
 |-----------|-------------|---------|
 | `axonhub.replicaCount` | Number of AxonHub replicas | `1` |
-| `axonhub.image.repository` | AxonHub image repository | `looplj/axonhub` |
-| `axonhub.image.tag` | AxonHub image tag | `latest` |
+| `axonhub.image.repository` | AxonHub image repository | `ghcr.io/akumareallabs/axonhub-lite` |
+| `axonhub.image.tag` | AxonHub image tag | `0.9.38` |
 | `axonhub.image.pullPolicy` | Image pull policy | `IfNotPresent` |
 | `axonhub.dbPassword` | Database password | `axonhub_password` |
 | `axonhub.service.type` | Kubernetes service type | `ClusterIP` |

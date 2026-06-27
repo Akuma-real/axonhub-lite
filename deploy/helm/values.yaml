@@ -11,9 +11,9 @@ axonhub:
   replicaCount: 1
   
   image:
-    repository: looplj/axonhub
+    repository: ghcr.io/akumareallabs/axonhub-lite
     pullPolicy: IfNotPresent
-    tag: "latest"
+    tag: "0.9.38"
   
   # Environment variables for AxonHub
   env:

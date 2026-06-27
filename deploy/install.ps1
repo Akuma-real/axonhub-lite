@@ -11,7 +11,7 @@ function Write-Success([string]$m){ Write-Host "[SUCCESS] $m" -ForegroundColor G
 function Write-Warn([string]$m){ Write-Host "[WARNING] $m" -ForegroundColor Yellow }
 function Write-Err([string]$m){ Write-Host "[ERROR] $m" -ForegroundColor Red }
 
-$Repo = 'looplj/axonhub'
+$Repo = 'AkumaRealLabs/axonhub-lite'
 $Api = "https://api.github.com/repos/$Repo"
 
 $IncludeBeta = $false
@@ -118,7 +118,7 @@ function Get-AssetUrl([string]$version,[string]$platform){
   } catch {}
   # Fallback by pattern
   $clean = $version.TrimStart('v')
-  $file = "axonhub_${clean}_${platform}.zip"
+  $file = "axonhub-lite_${clean}_${platform}.zip"
   $candidate = "https://github.com/$Repo/releases/download/$version/$file"
   try {
     $head = Invoke-WebRequest -Uri $candidate -Method Head -ErrorAction Stop

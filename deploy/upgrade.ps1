@@ -12,7 +12,7 @@ function Write-Warn([string]$m){ Write-Host "[WARNING] $m" -ForegroundColor Yell
 function Write-Err([string]$m){ Write-Host "[ERROR] $m" -ForegroundColor Red }
 
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
-$Repo = 'looplj/axonhub'
+$Repo = 'AkumaRealLabs/axonhub-lite'
 $Api = "https://api.github.com/repos/$Repo"
 
 $IncludeBeta = $false
@@ -123,7 +123,7 @@ function Get-AssetUrl([string]$version,[string]$platform){
     if($asset){ return $asset.browser_download_url }
   } catch {}
   $clean = $version.TrimStart('v')
-  $file = "axonhub_${clean}_${platform}.zip"
+  $file = "axonhub-lite_${clean}_${platform}.zip"
   $candidate = "https://github.com/$Repo/releases/download/$version/$file"
   try {
     $null = Invoke-WebRequest -Uri $candidate -Method Head -ErrorAction Stop

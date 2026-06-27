@@ -16,8 +16,8 @@ This guide will help you get started with AxonHub quickly. In just a few minutes
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/looplj/axonhub.git
-   cd axonhub
+   git clone https://github.com/AkumaRealLabs/axonhub-lite.git
+   cd axonhub-lite
    ```
 
 2. **Configure environment variables**
@@ -38,13 +38,14 @@ This guide will help you get started with AxonHub quickly. In just a few minutes
 ### Method 2: Binary Download
 
 1. **Download the latest release**
-   - Visit [GitHub Releases](https://github.com/looplj/axonhub/releases)
+   - Visit [GitHub Releases](https://github.com/AkumaRealLabs/axonhub-lite/releases)
    - Download the appropriate binary for your OS
 
 2. **Extract and run**
    ```bash
-   unzip axonhub_*.zip
-   cd axonhub_*
+   mkdir -p axonhub-lite
+   unzip axonhub-lite_*.zip -d axonhub-lite
+   cd axonhub-lite
    chmod +x axonhub
    ./axonhub
    ```
@@ -389,7 +390,7 @@ log:
 
 ### Getting Help
 
-- Check the [GitHub Issues](https://github.com/looplj/axonhub/issues)
+- Check the [GitHub Issues](https://github.com/AkumaRealLabs/axonhub-lite/issues)
 - Review the [Architecture Documentation](../development/erd.md)
 - Join the community discussions
 

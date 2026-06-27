@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Skeleton } from '@/components/ui/skeleton';
 import { useSystemVersion, useCheckForUpdate } from '../data/system';
 
-const AXONHUB_LITE_REPO_URL = 'https://github.com/akuma-real/axonhub-lite';
+const AXONHUB_LITE_REPO_URL = 'https://github.com/AkumaRealLabs/axonhub-lite';
 
 export function AboutSettings() {
   const { t } = useTranslation();

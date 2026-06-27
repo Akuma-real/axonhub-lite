@@ -12,8 +12,8 @@ axonhub:
   replicaCount: 2
   
   image:
-    repository: looplj/axonhub
-    tag: "latest"  # Consider using specific version in production
+    repository: ghcr.io/akumareallabs/axonhub-lite
+    tag: "0.9.38"  # Consider using specific version in production
     pullPolicy: IfNotPresent
   
   # Environment variables - customize the database connection string for your environment

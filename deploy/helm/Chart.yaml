@@ -1,12 +1,12 @@
 apiVersion: v2
 name: axonhub
 version: 0.1.0
-appVersion: "latest"
+appVersion: "0.9.38"
 description: A Helm chart for deploying AxonHub on Kubernetes
 type: application
-home: https://github.com/looplj/axonhub
+home: https://github.com/AkumaRealLabs/axonhub-lite
 sources:
-  - https://github.com/looplj/axonhub
+  - https://github.com/AkumaRealLabs/axonhub-lite
 maintainers:
   - name: AxonHub Team
     email: team@axonhub.ai

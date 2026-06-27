@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	axonHubLiteGitHubRepo = "akuma-real/axonhub-lite"
+	axonHubLiteGitHubRepo = "AkumaRealLabs/axonhub-lite"
 	axonHubLiteGitHubURL  = "https://github.com/" + axonHubLiteGitHubRepo
 )
 
@@ -251,34 +251,28 @@ func FetchLatestGitHubTag(ctx context.Context, currentVersion string) (string, e
 // isAxonHubTag returns true if the tag is an axonhub version tag (vX.Y.Z format).
 // Tags with a service prefix (e.g., "axonclaw/v1.0.0") are not axonhub tags.
 func isAxonHubTag(tag string) bool {
-	// axonhub tags start with "v", other services use "service/vX.Y.Z" format
-	return strings.HasPrefix(tag, "v")
+	if !strings.HasPrefix(tag, "v") {
+		return false
+	}
+
+	_, err := semver.NewVersion(tag)
+	return err == nil
 }
 
-func isUpdateCandidateForCurrentVersion(currentVersion, candidate string) bool {
+func isUpdateCandidateForCurrentVersion(_ string, candidate string) bool {
 	if !isAxonHubTag(candidate) {
 		return false
 	}
 
-	if isPreReleaseTag(candidate) {
+	if isPreReleaseTag(candidate) || isLiteReleaseTag(candidate) {
 		return false
 	}
 
-	currentLiteBase := liteReleaseBase(currentVersion)
-	if currentLiteBase != "" {
-		return strings.HasPrefix(candidate, currentLiteBase+".")
-	}
-
-	return liteReleaseBase(candidate) == ""
+	return true
 }
 
-func liteReleaseBase(version string) string {
-	index := strings.LastIndex(version, "-lite.")
-	if index == -1 {
-		return ""
-	}
-
-	return version[:index+len("-lite")]
+func isLiteReleaseTag(tag string) bool {
+	return strings.Contains(strings.ToLower(tag), "-lite")
 }
 
 // isPreReleaseTag checks if a version tag contains beta, rc, alpha, or similar prerelease indicators.

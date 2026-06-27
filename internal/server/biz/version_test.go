@@ -183,6 +183,11 @@ func TestIsAxonHubTag(t *testing.T) {
 			want: true,
 		},
 		{
+			name: "invalid v-prefixed tag",
+			tag:  "version1",
+			want: false,
+		},
+		{
 			name: "axonclaw prefixed tag",
 			tag:  "axonclaw/v1.0.0",
 			want: false,
@@ -306,25 +311,19 @@ func TestIsUpdateCandidateForCurrentVersion(t *testing.T) {
 		want    bool
 	}{
 		{
-			name:    "same lite line",
+			name:    "lite tag ignored for old lite current",
 			current: "v0.9.38-lite.3",
 			tag:     "v0.9.38-lite.4",
+			want:    false,
+		},
+		{
+			name:    "plain tag accepted for old lite current",
+			current: "v0.9.38-lite.3",
+			tag:     "v0.9.43",
 			want:    true,
 		},
 		{
-			name:    "different lite base",
-			current: "v0.9.38-lite.3",
-			tag:     "v0.9.39-lite.1",
-			want:    false,
-		},
-		{
-			name:    "upstream tag ignored for lite current",
-			current: "v0.9.38-lite.3",
-			tag:     "v0.9.43",
-			want:    false,
-		},
-		{
-			name:    "lite tag ignored for upstream current",
+			name:    "lite tag ignored for plain current",
 			current: "v0.9.43",
 			tag:     "v0.9.38-lite.4",
 			want:    false,
@@ -357,7 +356,8 @@ func TestIsUpdateCandidateForCurrentVersion(t *testing.T) {
 	}
 }
 
-func TestLiteReleaseBase(t *testing.T) {
-	require.Equal(t, "v0.9.38-lite", liteReleaseBase("v0.9.38-lite.3"))
-	require.Equal(t, "", liteReleaseBase("v0.9.38"))
+func TestIsLiteReleaseTag(t *testing.T) {
+	require.True(t, isLiteReleaseTag("v0.9.38-lite.3"))
+	require.True(t, isLiteReleaseTag("v0.9.38-LITE.3"))
+	require.False(t, isLiteReleaseTag("v0.9.38"))
 }

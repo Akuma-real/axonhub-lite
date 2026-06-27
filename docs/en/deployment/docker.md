@@ -9,8 +9,8 @@ This guide covers deploying AxonHub using Docker and Docker Compose. Docker prov
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/looplj/axonhub.git
-cd axonhub
+git clone https://github.com/AkumaRealLabs/axonhub-lite.git
+cd axonhub-lite
 ```
 
 ### 2. Configure Environment
@@ -65,7 +65,7 @@ version: '3.8'
 
 services:
   axonhub:
-    image: looplj/axonhub:latest
+    image: ghcr.io/akumareallabs/axonhub-lite:0.9.38
     ports:
       - "8090:8090"
     volumes:
@@ -88,7 +88,7 @@ version: '3.8'
 
 services:
   axonhub:
-    image: looplj/axonhub:latest
+    image: ghcr.io/akumareallabs/axonhub-lite:0.9.38
     ports:
       - "8090:8090"
     volumes:
@@ -257,7 +257,7 @@ axonhub:
 ```yaml
 services:
   axonhub:
-    image: looplj/axonhub:latest
+    image: ghcr.io/akumareallabs/axonhub-lite:0.9.38
     deploy:
       replicas: 3
     networks:

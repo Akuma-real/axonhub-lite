@@ -16,8 +16,8 @@
 
 1. **克隆仓库**
    ```bash
-   git clone https://github.com/looplj/axonhub.git
-   cd axonhub
+   git clone https://github.com/AkumaRealLabs/axonhub-lite.git
+   cd axonhub-lite
    ```
 
 2. **配置环境变量**
@@ -38,13 +38,14 @@
 ### 方法 2：二进制下载
 
 1. **下载最新版本**
-   - 访问 [GitHub Releases](https://github.com/looplj/axonhub/releases)
+   - 访问 [GitHub Releases](https://github.com/AkumaRealLabs/axonhub-lite/releases)
    - 下载适合您操作系统的二进制文件
 
 2. **解压并运行**
    ```bash
-   unzip axonhub_*.zip
-   cd axonhub_*
+   mkdir -p axonhub-lite
+   unzip axonhub-lite_*.zip -d axonhub-lite
+   cd axonhub-lite
    chmod +x axonhub
    ./axonhub
    ```
@@ -389,7 +390,7 @@ log:
 
 ### 获取帮助
 
-- 查看 [GitHub Issues](https://github.com/looplj/axonhub/issues)
+- 查看 [GitHub Issues](https://github.com/AkumaRealLabs/axonhub-lite/issues)
 - 查看 [架构文档](../development/erd.md)
 - 加入社区讨论
 

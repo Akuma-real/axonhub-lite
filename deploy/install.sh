@@ -27,7 +27,7 @@ LOG_DIR="${BASE_DIR}"
 SERVICE_USER="axonhub"
 
 # GitHub repository
-REPO="looplj/axonhub"
+REPO="AkumaRealLabs/axonhub-lite"
 GITHUB_API="https://api.github.com/repos/${REPO}"
 
 # CLI options (default: exclude beta/rc)
@@ -283,7 +283,7 @@ get_asset_download_url() {
         local clean_version="$version"
         clean_version="${clean_version##*:}"
         clean_version="${clean_version#v}"
-        local filename="axonhub_${clean_version}_${platform}.zip"
+        local filename="axonhub-lite_${clean_version}_${platform}.zip"
         local candidate="https://github.com/${REPO}/releases/download/${version}/${filename}"
         debug "Trying candidate URL: $candidate"
         if curl -fsI "$candidate" >/dev/null 2>&1; then
